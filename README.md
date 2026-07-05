@@ -1,347 +1,1254 @@
-# 🏥 ArogyaOS — AI-Powered Unified Healthcare Operating System
+<div align="center">
 
-> **Google Hackathon 2026 Submission**
-> Transforming public healthcare delivery through AI-driven intelligence, real-time resource orchestration, and unified multi-role clinical workflows.
+# 🏥 ArogyaOS
 
----
+### AI-Powered Unified Healthcare Operating System
 
-## 📋 Table of Contents
+<p align="center">
 
-- [Overview](#overview)
-- [Feature List](#feature-list)
-- [AI Capabilities](#ai-capabilities)
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Getting Started](#getting-started)
-- [Environment Variables](#environment-variables)
-- [Demo Credentials](#demo-credentials)
-- [Deployment](#deployment)
-- [Security](#security)
-- [Project Structure](#project-structure)
+A production-ready AI-powered healthcare platform that unifies Citizens, Hospitals, PHCs, CHCs, Doctors, Pharmacies, Laboratories, and District Administrators into one intelligent ecosystem.
 
----
+</p>
 
-## Overview
+<p align="center">
 
-**ArogyaOS** is a full-stack healthcare operating system that connects every stakeholder in the public health ecosystem — citizens, doctors, pharmacists, hospital administrators, and district health officers — into a single synchronized intelligence network powered by **Google Gemini AI**.
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript)
+![Firebase](https://img.shields.io/badge/Firebase-Backend-FFCA28?style=for-the-badge&logo=firebase)
+![Gemini AI](https://img.shields.io/badge/Google-Gemini_2.5-4285F4?style=for-the-badge&logo=google)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38BDF8?style=for-the-badge&logo=tailwind-css)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-**The core problem it solves:** India's public health system suffers from fragmented data, medicine stock-outs, inefficient resource distribution, and lack of real-time visibility across district health facilities.
-
-**ArogyaOS delivers:**
-- Real-time medicine inventory tracking with AI-powered shortage prediction
-- Automated resource redistribution recommendations between facilities
-- A live district command center with interactive GIS facility maps
-- AI-generated clinical consultation summaries for doctors
-- Patient footfall forecasting and bed occupancy optimization
+</p>
 
 ---
 
-## Feature List
+### 🚀 Built for the Google AI Hackathon
 
-### 🧑‍🤝‍🧑 Citizen Portal
-- Personal health dashboard with family member records
-- Hospital discovery and appointment booking
-- Prescription and lab report history
-- Notification center
+**ArogyaOS is an AI-powered Healthcare Operating System that enables hospitals, pharmacies, laboratories, doctors, citizens, PHCs, CHCs, and district administrators to collaborate through one intelligent platform.**
 
-### 👨‍⚕️ Doctor Workspace
-- Patient queue and today's schedule
-- Live consultation room with clinical note-taking
-- **AI-powered consultation summary** (diagnosis + prescription draft)
-- Lab order management and follow-up tracking
+Instead of simply storing healthcare data, ArogyaOS transforms operational data into actionable intelligence using **Google Gemini AI**, helping healthcare systems predict shortages, optimize resources, and improve patient care.
 
-### 🏥 Hospital Administrator Workspace
-- Department and staff management
-- Real-time bed occupancy monitoring
-- **AI Hospital Health Score** (0–100 operational rating)
-- Appointment scheduling and patient records
-
-### 💊 Pharmacy & Inventory Management
-- Real-time medicine inventory with threshold alerts
-- Dispensing records and expiry tracking
-- **AI Stock Shortage Forecast** — predicts stock-outs before they happen
-
-### 🗺️ District AI Command Center *(Flagship Feature)*
-- **Interactive GIS facility map** — color-coded health status for all hospitals, PHCs, and CHCs
-- **AI-generated district operational brief** using live facility data
-- **Resource redistribution engine** — approve/reject AI-proposed supply transfers
-- Real-time critical alert stream with emergency routing
-- Bed occupancy and doctor attendance analytics
-- Medicine monitoring heatmap across the district
+</div>
 
 ---
 
-## AI Capabilities
+# 🌍 Overview
 
-All AI features use **Google Gemini 2.5 Flash** via secure server-side Next.js Route Handlers. The API key is never exposed to the browser.
+Healthcare systems often rely on disconnected software, spreadsheets, and manual reporting. This results in delayed decisions, medicine shortages, overloaded hospitals, and inefficient resource allocation.
 
-| Feature | Endpoint | Description |
-|---|---|---|
-| Medicine Stock Forecast | `POST /api/ai/stock-forecast` | Predicts shortage dates, risk levels, and refill quantities |
-| Patient Footfall Forecast | `POST /api/ai/patient-forecast` | Forecasts OPD/IPD volumes and wait times |
-| Hospital Health Score | `POST /api/ai/health-score` | Generates 0–100 score from occupancy, attendance, alerts |
-| Resource Redistribution | `POST /api/ai/resource-redistribution` | Recommends supply transfers between facilities |
-| Doctor Consultation Summary | `POST /api/ai/doctor-summary` | Converts clinical notes to structured diagnosis + prescription |
-| District Executive Brief | `POST /api/ai/district-summary` | Compiles district-wide operational intelligence report |
-| Natural Language Chat | `POST /api/ai/chat` | Query district status in plain English |
+**ArogyaOS** addresses these challenges by combining modern web technologies with Artificial Intelligence to create a unified digital healthcare ecosystem.
 
-> **Graceful Fallback:** If `GEMINI_API_KEY` is not set, all features return high-fidelity demo data computed from real input parameters. The UI is fully functional without an API key.
+The platform enables:
+
+- 🏥 Hospital Management
+- 👨‍⚕️ Doctor Workspaces
+- 👤 Citizen Healthcare Portal
+- 💊 Pharmacy & Inventory Management
+- 🧪 Laboratory Operations
+- 🏛️ District AI Command Center
+- 🤖 Google Gemini AI Intelligence
+- 📊 Real-time Analytics & Monitoring
 
 ---
 
-## Tech Stack
+# 🛠️ Built With
+
+| Category | Technology |
+|----------|------------|
+| Frontend | Next.js 15 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| UI Library | shadcn/ui |
+| Authentication | Firebase Authentication |
+| Database | Cloud Firestore |
+| Storage | Firebase Storage |
+| AI | Google Gemini 2.5 Flash |
+| Charts | Recharts |
+| Animations | Framer Motion |
+| Forms | React Hook Form |
+| Validation | Zod |
+| Deployment | Vercel + Firebase |
+
+---
+# 📸 Application Preview
+
+> **Note:** Replace these placeholder images with actual screenshots before the final submission.
+
+---
+
+## 🏠 Landing Page
+
+![Landing Page](./public/screenshots/landing.png)
+
+---
+
+## 🏛️ District AI Command Center
+
+![District Dashboard](./public/screenshots/district-dashboard.png)
+
+---
+
+## 🏥 Hospital Administration
+
+![Hospital Dashboard](./public/screenshots/hospital-dashboard.png)
+
+---
+
+## 👨‍⚕️ Doctor Workspace
+
+![Doctor Dashboard](./public/screenshots/doctor-dashboard.png)
+
+---
+
+## 👤 Citizen Portal
+
+![Citizen Dashboard](./public/screenshots/citizen-dashboard.png)
+
+---
+
+## 💊 Pharmacy Dashboard
+
+![Pharmacy Dashboard](./public/screenshots/pharmacy-dashboard.png)
+
+---
+
+## 🤖 AI Assistant
+
+![AI Assistant](./public/screenshots/ai-chat.png)
+
+---
+
+# 🎥 Live Demo
+
+| Resource | Link |
+|----------|------|
+| 🌐 Live Application | Coming Soon |
+| 🎬 Demo Video | Coming Soon |
+| 📑 Presentation Deck | Coming Soon |
+
+---
+
+# 📖 Problem Statement
+
+Healthcare institutions continue to face operational challenges that directly impact patient care and resource management.
+
+Some of the most common issues include:
+
+- 💊 Medicine stock-outs due to lack of predictive monitoring.
+- 🏥 Bed shortages during emergencies.
+- 👨‍⚕️ Unpredictable doctor availability.
+- 📈 Sudden patient surges without planning.
+- 📊 Manual reporting and fragmented data.
+- 🔄 Poor coordination between PHCs, CHCs, Hospitals, and District Authorities.
+- 🚨 Lack of real-time operational intelligence.
+
+Traditional Hospital Management Systems mainly **record information**.
+
+They rarely **predict future problems**, **recommend actions**, or **assist administrators in making operational decisions**.
+
+---
+
+# 💡 Our Solution
+
+ArogyaOS transforms healthcare management from a traditional Hospital Management System into an **AI-powered Healthcare Operating System**.
+
+Instead of simply storing operational data, the platform continuously analyzes healthcare information across hospitals, pharmacies, laboratories, PHCs, CHCs, and district offices.
+
+Using **Google Gemini AI**, ArogyaOS generates intelligent recommendations that help healthcare professionals make proactive decisions.
+
+Examples include:
+
+- 📈 Predicting medicine shortages.
+- 👥 Forecasting patient footfall.
+- 🛏️ Monitoring bed occupancy.
+- 👨‍⚕️ Tracking doctor availability.
+- 🔄 Recommending resource redistribution.
+- 📊 Generating executive district summaries.
+- 📝 Assisting doctors with consultation summaries.
+
+---
+
+# 🎯 Vision
+
+Our vision is to build a **unified healthcare ecosystem** where every stakeholder works together on one intelligent platform.
+
+Rather than reacting to operational issues after they occur, ArogyaOS enables healthcare organizations to anticipate challenges, optimize resources, and improve patient outcomes through Artificial Intelligence.
+
+---
+
+# 👥 Target Users
+
+| User | Primary Responsibilities |
+|------|---------------------------|
+| 👤 Citizen | Appointments, reports, prescriptions, healthcare services |
+| 👨‍⚕️ Doctor | Consultations, prescriptions, follow-ups, AI assistance |
+| 🏥 Hospital Administrator | Operations, staff, inventory, analytics |
+| 💊 Pharmacist | Medicine inventory, dispensing, expiry monitoring |
+| 🧪 Laboratory Staff | Test management, reports, diagnostics |
+| 🏛️ District Administrator | District monitoring, AI insights, resource management |
+
+---
+# ✨ Core Features
+
+ArogyaOS is designed as a unified healthcare platform where every stakeholder works together through one intelligent ecosystem.
+
+---
+
+# 🏛️ District AI Command Center
+
+The flagship module of ArogyaOS.
+
+Designed for District Health Officers to monitor healthcare infrastructure across an entire district in real time.
+
+### Capabilities
+
+- 📊 Executive Dashboard
+- 🏥 Hospital Monitoring
+- 🩺 PHC Monitoring
+- 🏨 CHC Monitoring
+- 💊 Medicine Stock Monitoring
+- 🛏️ Bed Occupancy Dashboard
+- 👨‍⚕️ Doctor Attendance Analytics
+- 🚨 Critical Alerts
+- 📈 District Performance Metrics
+- 🔄 AI Resource Redistribution
+- 📑 Executive Reports
+- 🤖 AI Operations Center
+
+---
+
+# 🏥 Hospital Administration
+
+A complete operational workspace for hospitals.
+
+### Features
+
+- Hospital Dashboard
+- Department Management
+- Doctor Management
+- Staff Management
+- Patient Registry
+- Appointment Management
+- Inventory Management
+- Room Management
+- Bed Management
+- Reports & Analytics
+- Pharmacy Integration
+- Laboratory Integration
+- AI Hospital Health Score
+
+---
+
+# 👨‍⚕️ Doctor Workspace
+
+Built to simplify clinical workflows.
+
+### Features
+
+- Today's Schedule
+- Patient Queue
+- Patient History
+- Consultation Workspace
+- Digital Prescription Builder
+- Lab Test Orders
+- Follow-up Management
+- Calendar
+- AI Consultation Summary
+
+---
+
+# 👤 Citizen Portal
+
+A modern healthcare experience for citizens.
+
+### Features
+
+- Hospital Search
+- Doctor Search
+- Appointment Booking
+- Appointment History
+- Medical Timeline
+- Digital Prescriptions
+- Lab Reports
+- Family Profiles
+- Notifications
+- Personal Health Profile
+
+---
+
+# 💊 Pharmacy Management
+
+Smart medicine inventory management.
+
+### Features
+
+- Medicine Inventory
+- Stock Monitoring
+- Low Stock Alerts
+- Expiry Monitoring
+- Dispensing Desk
+- Stock Reports
+- AI Stock Forecast
+
+---
+
+# 🧪 Laboratory Management
+
+Digital laboratory operations.
+
+### Features
+
+- Test Catalogue
+- Sample Tracking
+- Report Generation
+- Home Collection
+- Diagnostics Dashboard
+- Performance Analytics
+
+---
+
+# 🤖 Google Gemini AI Features
+
+Artificial Intelligence powers the decision-making layer across ArogyaOS.
+
+---
+
+## 🧠 Medicine Stock Forecasting
+
+Predict future medicine shortages before they happen.
+
+Outputs:
+
+- Risk Score
+- Confidence Level
+- Remaining Days
+- Suggested Reorder Quantity
+- AI Recommendation
+
+---
+
+## 📈 Patient Footfall Prediction
+
+Forecast patient demand using historical trends.
+
+Predicts:
+
+- Tomorrow's OPD
+- Tomorrow's IPD
+- Weekly Trends
+- Peak Hours
+- Waiting Time
+
+---
+
+## 🏥 Hospital Health Score
+
+Automatically generates an operational health score.
+
+Factors include:
+
+- Bed Occupancy
+- Medicine Availability
+- Doctor Attendance
+- Appointment Load
+- Critical Alerts
+- Resource Utilization
+
+---
+
+## 🔄 Resource Redistribution
+
+AI recommends transferring resources between healthcare facilities.
+
+Examples:
+
+- Medicines
+- Beds
+- Medical Staff
+- Emergency Resources
+
+---
+
+## 📝 AI Consultation Summary
+
+Helps doctors generate structured consultation summaries.
+
+Produces:
+
+- Clinical Summary
+- Diagnosis
+- Symptoms
+- Prescription Draft
+- Follow-up Advice
+
+---
+
+## 📊 District Executive Intelligence
+
+Provides executive-level healthcare insights.
+
+Examples:
+
+- District Summary
+- Critical Issues
+- Facility Rankings
+- Emerging Trends
+- AI Recommendations
+
+---
+
+## 💬 AI Operations Chat
+
+Healthcare professionals can interact with operational data using natural language.
+
+Example Questions:
+
+> Which hospitals are running low on insulin?
+
+> Which PHC has the highest patient load today?
+
+> Show hospitals with ICU occupancy above 90%.
+
+> Recommend medicine redistribution.
+
+---
+
+# 🚀 Why ArogyaOS?
+
+| Traditional Hospital Management System | ArogyaOS |
+|----------------------------------------|----------|
+| Stores Data | Understands Data |
+| Manual Reporting | AI-generated Insights |
+| Reactive Operations | Predictive Intelligence |
+| Fragmented Systems | Unified Healthcare Platform |
+| Static Dashboards | Live AI Command Center |
+| Manual Planning | AI Recommendations |
+| Limited Visibility | District-wide Intelligence |
+| Basic Reports | Executive Decision Support |
+| Single Organization | Entire Healthcare Ecosystem |
+| No Forecasting | AI Predictions |
+
+---
+
+# 🌟 Key Highlights
+
+- 🧠 Google Gemini AI Powered
+- 🏥 Multi-role Healthcare Platform
+- 🌍 Multilingual Ready
+- 📊 Real-time Operational Dashboards
+- 📈 Predictive Analytics
+- 🔄 AI Resource Redistribution
+- 💊 Smart Medicine Inventory
+- 🛏️ Bed Monitoring
+- 👨‍⚕️ Doctor Workspaces
+- 👤 Citizen Healthcare Portal
+- ☁️ Cloud-native Architecture
+- 🔐 Secure Authentication
+- 📱 Fully Responsive
+- ⚡ Enterprise-grade Architecture
+
+---
+# 🏗️ System Architecture
+
+ArogyaOS follows a scalable, feature-driven architecture designed for enterprise healthcare systems.
+
+```text
+                    ┌─────────────────────────────────┐
+                    │            Citizens             │
+                    └───────────────┬─────────────────┘
+                                    │
+                                    ▼
+                    ┌─────────────────────────────────┐
+                    │        Next.js 15 Frontend      │
+                    │   (App Router + React + TS)     │
+                    └───────────────┬─────────────────┘
+                                    │
+              ┌─────────────────────┼─────────────────────┐
+              │                     │                     │
+              ▼                     ▼                     ▼
+     Firebase Auth         Firestore Database     Firebase Storage
+              │                     │                     │
+              └─────────────────────┴─────────────────────┘
+                                    │
+                                    ▼
+                           Service Layer
+                                    │
+                                    ▼
+                        Google Gemini AI APIs
+                                    │
+                                    ▼
+                    AI Insights • Predictions • Recommendations
+```
+
+---
+
+# 🧩 High-Level Application Flow
+
+```text
+Presentation Layer
+        │
+        ▼
+Dashboard Shell
+        │
+        ▼
+Feature Modules
+        │
+        ▼
+Hooks (TanStack Query)
+        │
+        ▼
+Service Layer
+        │
+        ▼
+Firebase SDK
+        │
+        ▼
+Firestore / Storage
+        │
+        ▼
+Gemini AI
+```
+
+---
+
+# 📂 Project Structure
+
+```text
+src
+│
+├── app/
+│   ├── dashboard/
+│   ├── api/
+│   ├── login/
+│   ├── register/
+│   └── ...
+│
+├── components/
+│   ├── layout/
+│   ├── ui/
+│   ├── ai/
+│   ├── charts/
+│   └── forms/
+│
+├── features/
+│   ├── auth/
+│   ├── citizen/
+│   ├── doctor/
+│   ├── hospital/
+│   ├── pharmacy/
+│   ├── laboratory/
+│   ├── district/
+│   ├── ai/
+│   └── shared/
+│
+├── firebase/
+├── providers/
+├── config/
+├── hooks/
+├── services/
+├── types/
+├── utils/
+└── design-system/
+```
+
+---
+
+# ⚙️ Technology Stack
 
 | Layer | Technology |
-|---|---|
-| Framework | Next.js 15 (App Router) |
-| Language | TypeScript 5 |
-| UI | React 19 |
-| Styling | Tailwind CSS v4 |
-| Authentication | Firebase Authentication |
-| Database | Firebase Firestore |
-| File Storage | Firebase Storage |
-| AI Engine | Google Gemini 2.5 Flash |
-| State Management | TanStack Query v5 |
-| Forms | React Hook Form + Zod |
+|--------|------------|
+| Frontend | Next.js 15 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| UI Components | shadcn/ui |
 | Animations | Framer Motion |
-| Charts | Recharts |
-| Theme | next-themes |
 | Icons | Lucide React |
-| Notifications | Sonner |
+| Charts | Recharts |
+| Forms | React Hook Form |
+| Validation | Zod |
+| State Management | TanStack Query |
+| Authentication | Firebase Authentication |
+| Database | Cloud Firestore |
+| Storage | Firebase Storage |
+| AI Engine | Google Gemini 2.5 Flash |
 | Deployment | Vercel |
 
 ---
 
-## Architecture
+# 🔐 Security
 
-```
-src/
-├── app/                          # Next.js App Router
-│   ├── api/ai/                   # 7 server-side Gemini AI route handlers
-│   ├── dashboard/
-│   │   ├── (citizen)/            # Citizen Portal routes
-│   │   ├── (doctor)/             # Doctor Workspace routes
-│   │   ├── (hospital)/           # Hospital Admin routes
-│   │   ├── (pharmacy)/           # Pharmacy routes
-│   │   └── (district)/           # District Command Center routes
-│   ├── login/register/           # Auth pages
-│   └── layout.tsx                # Root layout with metadata
-│
-├── features/                     # Domain-driven modules
-│   ├── ai/                       # AI Engine
-│   │   ├── components/           # 6 reusable AI UI components
-│   │   ├── hooks/useAI.ts        # TanStack Query hooks for all AI features
-│   │   ├── prompts/              # 7 structured Gemini prompts
-│   │   ├── services/             # 7 AI service classes with fallbacks
-│   │   └── utils/gemini.ts       # Server-side Gemini client
-│   ├── citizen/                  # Citizen domain
-│   ├── doctor/                   # Doctor domain
-│   ├── hospital/                 # Hospital Admin domain
-│   ├── pharmacy/                 # Pharmacy domain
-│   └── district/                 # District domain
-│
-├── firebase/                     # Firebase config
-│   ├── client.ts                 # Client SDK init
-│   ├── admin.ts                  # Admin SDK init (server only)
-│   └── types.ts                  # Firestore document types
-│
-├── providers/                    # Context providers
-│   ├── AuthProvider.tsx          # Firebase Auth state
-│   └── QueryProvider.tsx         # TanStack Query client
-│
-└── middleware.ts                 # Edge auth + role-based routing
+Security is implemented across every application layer.
+
+## Authentication
+
+- Firebase Authentication
+- Email & Password
+- Google Sign-In
+- Session Persistence
+
+## Authorization
+
+- Role-Based Access Control (RBAC)
+- Protected Routes
+- Edge Middleware
+- Server-side Validation
+
+## Data Protection
+
+- Firestore Security Rules
+- Environment Variables
+- Server-only Gemini API
+- Zod Request Validation
+
+---
+
+# ⚡ Performance Optimizations
+
+ArogyaOS is optimized for production performance.
+
+### Frontend
+
+- Next.js App Router
+- React Server Components
+- Route-based Code Splitting
+- Dynamic Imports
+- Lazy Loading
+- Optimized Fonts
+- Image Optimization
+
+### Data
+
+- TanStack Query Caching
+- Request Deduplication
+- Background Refetching
+- Optimistic Updates
+
+### User Experience
+
+- Skeleton Loaders
+- Smooth Page Transitions
+- Error Boundaries
+- Toast Notifications
+- Empty States
+
+---
+
+# ☁️ Cloud Infrastructure
+
+```text
+Users
+
+     │
+
+     ▼
+
+Vercel
+
+     │
+
+     ▼
+
+Next.js Application
+
+     │
+
+     ▼
+
+Firebase Authentication
+
+     │
+
+     ▼
+
+Cloud Firestore
+
+     │
+
+     ▼
+
+Firebase Storage
+
+     │
+
+     ▼
+
+Gemini AI
+
+     │
+
+     ▼
+
+Healthcare Intelligence
 ```
 
 ---
 
-## Getting Started
+# 📊 Supported User Roles
 
-### Prerequisites
+| Role | Responsibilities |
+|------|------------------|
+| 👤 Citizen | Book appointments, access reports, prescriptions |
+| 👨‍⚕️ Doctor | Consultations, prescriptions, AI summaries |
+| 🏥 Hospital Administrator | Hospital operations, staff, inventory |
+| 💊 Pharmacist | Inventory, dispensing, expiry monitoring |
+| 🧪 Laboratory Staff | Tests, diagnostics, reports |
+| 🏛️ District Administrator | District analytics, AI insights, resource planning |
 
-- Node.js 20+
-- A Firebase project with Authentication and Firestore enabled
-- (Optional) A Google Gemini API key from [AI Studio](https://aistudio.google.com/app/apikey)
+---
 
-### Installation
+# 📈 Scalability
+
+The platform has been designed to scale without architectural changes.
+
+Supported deployments:
+
+- Single Clinic
+- Single Hospital
+- Multi-Hospital Network
+- District Healthcare System
+- State-wide Healthcare Network
+- National Healthcare Infrastructure
+
+---
+
+# 🎨 Design Principles
+
+- Enterprise-first UI
+- AI-first workflows
+- Accessibility focused
+- Mobile responsive
+- Feature-driven architecture
+- Modular components
+- Reusable services
+- Type-safe development
+- Cloud-native deployment
+
+---
+# 🚀 Getting Started
+
+Follow these steps to run **ArogyaOS** locally.
+
+---
+
+# 📋 Prerequisites
+
+Before you begin, make sure you have the following installed:
+
+- Node.js **20+**
+- npm or pnpm
+- Git
+- A Firebase Project
+- Google Gemini API Key *(optional for live AI responses)*
+
+Verify your installation:
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/your-org/arogyaOS.git
-cd arogyaOS
+node -v
+npm -v
+```
 
-# 2. Install dependencies
+---
+
+# 📥 Clone Repository
+
+```bash
+git clone https://github.com/princemittalr/arogyaos.git
+```
+
+```bash
+cd arogyaos
+```
+
+---
+
+# 📦 Install Dependencies
+
+Using npm
+
+```bash
 npm install
+```
 
-# 3. Set up environment variables
-cp .env.example .env.local
-# Edit .env.local with your Firebase and Gemini credentials
+or using pnpm
 
-# 4. Run the development server
+```bash
+pnpm install
+```
+
+---
+
+# 🔑 Environment Variables
+
+Create a new file:
+
+```text
+.env.local
+```
+
+Copy the following variables:
+
+```env
+# ==============================
+# Firebase Client Configuration
+# ==============================
+
+NEXT_PUBLIC_FIREBASE_API_KEY=
+
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+
+NEXT_PUBLIC_FIREBASE_APP_ID=
+
+# ==============================
+# Firebase Admin SDK
+# ==============================
+
+FIREBASE_PROJECT_ID=
+
+FIREBASE_CLIENT_EMAIL=
+
+FIREBASE_PRIVATE_KEY=
+
+# ==============================
+# Google Gemini
+# ==============================
+
+GEMINI_API_KEY=
+```
+
+> ⚠️ Never commit `.env.local` or any private keys to GitHub.
+
+---
+
+# 🔥 Firebase Setup
+
+Enable the following Firebase services:
+
+## Authentication
+
+Enable providers:
+
+- Email & Password
+- Google Sign-In
+
+---
+
+## Firestore Database
+
+Create a Firestore Database in **Production Mode**.
+
+---
+
+## Firebase Storage
+
+Enable Cloud Storage.
+
+---
+
+# 🤖 Google Gemini Setup
+
+Create an API Key from **Google AI Studio**.
+
+Add it to:
+
+```env
+GEMINI_API_KEY=YOUR_API_KEY
+```
+
+If Gemini is unavailable, ArogyaOS automatically switches to intelligent mock responses for demonstration purposes.
+
+---
+
+# ▶️ Run Development Server
+
+```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open:
 
----
-
-## Environment Variables
-
-Copy `.env.example` to `.env.local` and fill in:
-
-```bash
-# App URL (used for metadata canonical URL)
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-
-# Firebase Client SDK (browser-safe)
-NEXT_PUBLIC_FIREBASE_API_KEY=...
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=...
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
-NEXT_PUBLIC_FIREBASE_APP_ID=...
-
-# Firebase Admin SDK (server-only, never exposed to browser)
-FIREBASE_PROJECT_ID=...
-FIREBASE_CLIENT_EMAIL=...
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
-
-# Gemini AI (server-only — optional, enables live AI features)
-GEMINI_API_KEY=...
+```
+http://localhost:3000
 ```
 
-> **Security Note:** Variables without `NEXT_PUBLIC_` prefix are **server-only** and never bundled into client JavaScript.
-
 ---
 
-## Demo Credentials
+# 🏗️ Production Build
 
-For hackathon judging, use these pre-configured demo accounts:
-
-| Role | Email | Password | Access |
-|---|---|---|---|
-| 🧑 Citizen | `citizen@demo.arogyaos.in` | `Demo@2026` | Health portal, appointments, family records |
-| 👨‍⚕️ Doctor | `doctor@demo.arogyaos.in` | `Demo@2026` | Patient queue, consultation, AI summaries |
-| 🏥 Hospital Admin | `hospital@demo.arogyaos.in` | `Demo@2026` | Full hospital management workspace |
-| 💊 Pharmacist | `pharmacy@demo.arogyaos.in` | `Demo@2026` | Inventory, dispensing, AI stock forecast |
-| 🗺️ District Officer | `district@demo.arogyaos.in` | `Demo@2026` | **District Command Center + all AI features** |
-
-> **Demo note:** District data (facilities, alerts, AI recommendations) is auto-seeded on first load. No manual setup required.
-
----
-
-## Deployment
-
-### Vercel (Recommended)
+Verify production build:
 
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+npm run build
+```
 
-# Deploy
+Run production server:
+
+```bash
+npm start
+```
+
+---
+
+# 🧪 Run Quality Checks
+
+Run ESLint
+
+```bash
+npm run lint
+```
+
+Run TypeScript validation
+
+```bash
+npx tsc --noEmit
+```
+
+Expected result:
+
+- ✅ 0 ESLint warnings
+- ✅ 0 TypeScript errors
+
+---
+
+# 📦 Available Scripts
+
+| Command | Description |
+|----------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Create production build |
+| `npm start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npx tsc --noEmit` | Type checking |
+
+---
+
+# 🧪 Demo Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| 👤 Citizen | citizen@arogyaos.demo | Demo@123 |
+| 👨‍⚕️ Doctor | doctor@arogyaos.demo | Demo@123 |
+| 🏥 Hospital Admin | hospital@arogyaos.demo | Demo@123 |
+| 💊 Pharmacist | pharmacy@arogyaos.demo | Demo@123 |
+| 🏛️ District Admin | district@arogyaos.demo | Demo@123 |
+
+> Replace these demo credentials with your own seeded accounts before the final submission.
+
+---
+
+# 🛠️ Troubleshooting
+
+## Firebase Authentication Issues
+
+- Verify Firebase configuration.
+- Enable Email/Password and Google Sign-In.
+- Check environment variables.
+
+---
+
+## Firestore Permission Errors
+
+- Verify Firestore Security Rules.
+- Ensure the authenticated user has the required role.
+
+---
+
+## Gemini API Errors
+
+- Verify `GEMINI_API_KEY`.
+- Confirm the API is enabled.
+- If unavailable, the application automatically falls back to intelligent mock responses.
+
+---
+
+# 📱 Browser Support
+
+Supported browsers:
+
+- Google Chrome
+- Microsoft Edge
+- Mozilla Firefox
+- Safari
+
+Latest versions are recommended.
+
+---
+# 🚀 Deployment
+
+ArogyaOS is designed for cloud-native deployment.
+
+## Frontend
+
+Deploy using **Vercel**.
+
+```bash
+vercel
+```
+
+or
+
+```bash
 vercel --prod
 ```
 
-**Required environment variables in Vercel Dashboard:**
+---
 
-All variables from `.env.example` must be added to your Vercel project settings under **Settings → Environment Variables**.
+## Backend Services
 
-### Vercel Compatibility Checklist
+Powered by Firebase:
 
-- [x] Next.js 15 App Router — fully supported
-- [x] Edge Middleware — uses `NextResponse`, no Node.js APIs
-- [x] Server Components — uses `fetch` API only
-- [x] Image Optimization — configured in `next.config.ts`
-- [x] Environment variables — all sensitive vars are server-only
-- [x] API Routes — standard Next.js route handlers
-- [x] No custom server — pure Next.js serverless
+- Firebase Authentication
+- Cloud Firestore
+- Firebase Storage
+
+No separate backend deployment is required.
 
 ---
 
-## Security
+## Production Checklist
 
-| Concern | Implementation |
-|---|---|
-| API Key exposure | `GEMINI_API_KEY` only in server-side route handlers |
-| Auth enforcement | Edge middleware validates Firebase JWT on every `/dashboard/*` request |
-| Role-based routing | Middleware redirects users to role-appropriate paths |
-| HTTP security headers | X-Frame-Options, HSTS, X-Content-Type-Options in `next.config.ts` |
-| Firestore rules | Recommended: restrict reads/writes to authenticated users with matching UID |
-| Input validation | Zod schemas on all forms; services validate before Gemini calls |
-| Session expiry | Middleware checks `exp` claim on Firebase tokens |
+Before deployment, verify:
 
-### Recommended Firestore Security Rules
+- ✅ All environment variables configured
+- ✅ Firebase Authentication enabled
+- ✅ Firestore Security Rules configured
+- ✅ Storage Rules configured
+- ✅ Gemini API Key configured (optional)
+- ✅ Production build passes
+- ✅ ESLint passes
+- ✅ TypeScript passes
 
-```javascript
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-    match /district_facilities/{doc} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.token.role == 'district_admin';
-    }
-    match /{document=**} {
-      allow read, write: if request.auth != null;
-    }
-  }
-}
+---
+
+# 🎬 Demo Walkthrough
+
+A recommended demo flow for judges:
+
+### 1️⃣ Landing Page
+
+Introduce ArogyaOS and explain the healthcare challenges it solves.
+
+---
+
+### 2️⃣ Authentication
+
+Sign in as a District Administrator.
+
+Highlight secure Firebase Authentication and role-based access.
+
+---
+
+### 3️⃣ District AI Command Center
+
+Show:
+
+- Executive Dashboard
+- District Health Overview
+- Critical Alerts
+- AI Insights
+- Resource Monitoring
+
+---
+
+### 4️⃣ AI Medicine Stock Forecast
+
+Demonstrate:
+
+- Low stock detection
+- Forecasted shortages
+- Confidence scores
+- AI recommendations
+
+---
+
+### 5️⃣ AI Resource Redistribution
+
+Show how AI recommends moving medicines or resources between facilities.
+
+---
+
+### 6️⃣ Hospital Dashboard
+
+Navigate to Hospital Administration.
+
+Highlight:
+
+- Bed Management
+- Inventory
+- Departments
+- Operations
+
+---
+
+### 7️⃣ Doctor Workspace
+
+Demonstrate:
+
+- Patient History
+- Consultation
+- AI Consultation Summary
+- Prescription Builder
+
+---
+
+### 8️⃣ Pharmacy Dashboard
+
+Show:
+
+- Dispensing
+- Expiry Monitoring
+- Inventory Health
+- AI Stock Forecast
+
+---
+
+### 9️⃣ Citizen Portal
+
+Demonstrate:
+
+- Appointment Booking
+- Prescriptions
+- Medical Reports
+- Notifications
+
+---
+
+### 🔟 Closing
+
+Summarize how ArogyaOS transforms healthcare from **reactive management** to **AI-driven operational intelligence**.
+
+---
+
+# 📅 Future Roadmap
+
+## Phase 1
+
+- ✅ Foundation
+- ✅ Authentication
+- ✅ Dashboard Framework
+
+---
+
+## Phase 2
+
+- ✅ Citizen Portal
+- ✅ Hospital Administration
+- ✅ Doctor Workspace
+- ✅ Pharmacy Module
+- ⏳ Laboratory Module
+
+---
+
+## Phase 3
+
+- ✅ District AI Command Center
+- ✅ Google Gemini AI
+- ✅ AI Chat
+- ✅ Resource Redistribution
+- ✅ Hospital Health Score
+
+---
+
+## Future Enhancements
+
+- 🚑 Ambulance Tracking
+- 🩸 Blood Bank Management
+- 📶 Offline Mode
+- 📍 GIS Mapping
+- 📡 IoT Device Integration
+- 🆔 ABHA Integration
+- 🏥 Telemedicine
+- 📈 Disease Outbreak Prediction
+- 🌐 Multi-District Deployment
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome!
+
+If you'd like to improve ArogyaOS:
+
+1. Fork the repository
+2. Create a feature branch
+
+```bash
+git checkout -b feature/your-feature
 ```
 
----
+3. Commit your changes
 
-## Project Structure (abbreviated)
-
-```
-arogyaOS/
-├── scripts/
-│   └── seedDemo.ts              # Demo data reference + seed guidance
-├── src/
-│   ├── app/
-│   │   ├── api/ai/              # 7 Gemini route handlers
-│   │   ├── dashboard/           # 40+ pages across 5 roles
-│   │   └── (auth pages)
-│   ├── features/
-│   │   ├── ai/                  # Complete AI engine module
-│   │   ├── citizen/
-│   │   ├── doctor/
-│   │   ├── hospital/
-│   │   ├── pharmacy/
-│   │   └── district/
-│   └── middleware.ts            # Edge auth guard
-├── .env.example                 # Environment variable template
-├── next.config.ts               # Performance + security config
-└── package.json
+```bash
+git commit -m "feat: add your feature"
 ```
 
----
+4. Push to GitHub
 
-## 5–7 Minute Demo Flow
+```bash
+git push origin feature/your-feature
+```
 
-1. **Landing Page** (30s) — Show the hero, features overview
-2. **District Command Center** (2min) — Login as District Officer → Show GIS map → Click facility pin → View AI recommendations → Approve redistribution proposal
-3. **Pharmacy AI Forecast** (1min) — Login as Pharmacist → Navigate to AI Forecast → Run forecast → Show shortage predictions
-4. **Doctor AI Summary** (1min) — Login as Doctor → Navigate to AI Summary → Paste clinical notes → Generate → Show diagnosis + prescription
-5. **Hospital Health Score** (30s) — Navigate to AI Health Score → Adjust sliders → Show computed score with factor breakdown
-6. **AI Chat** (1min) — Go to District AI → Operations Assistant → Type "Which hospitals are running low on insulin?" → Show structured response
-7. **Architecture Walkthrough** (30s) — Briefly show server-only Gemini calls, role-based routing
+5. Open a Pull Request
 
 ---
 
-## Judge Q&A
+# 📄 License
 
-**Q: Is the AI actually connected to Gemini?**
-A: Yes — all AI calls go through server-side Next.js Route Handlers that call the Gemini 2.5 Flash API. The `GEMINI_API_KEY` is never exposed to the browser. If the key isn't set, services return high-fidelity computed fallback data.
+This project is licensed under the **MIT License**.
 
-**Q: How is data security handled?**
-A: Firebase JWT tokens are validated on every dashboard request via Edge Middleware. Role-based routing prevents cross-role access. Gemini API key is server-only. HTTP security headers (HSTS, X-Frame-Options) are enforced in `next.config.ts`.
+See the `LICENSE` file for details.
 
-**Q: Can this scale to real production use?**
-A: Yes. The architecture is Vercel-native serverless, Firebase scales automatically, and TanStack Query handles optimistic updates and cache invalidation. The AI layer can be swapped to Cloud Run or Vertex AI for enterprise scale.
+---
 
-**Q: What real-world problem does this solve?**
-A: India's public health system loses ₹2,000+ crore annually due to medicine wastage and stock-outs. ArogyaOS uses predictive AI to flag shortages 14–30 days in advance and automates inter-facility redistribution to prevent stock-outs before they happen.
+# 🙏 Acknowledgements
 
-**Q: How are the AI prompts designed?**
-A: All 7 prompts instruct Gemini to return strictly structured JSON with typed schemas. This makes parsing deterministic and the UI can render meaningful structured content (cards, tables, badges) instead of raw text.
+ArogyaOS was built using amazing open-source technologies and platforms.
+
+Special thanks to:
+
+- Google AI
+- Google Gemini
+- Firebase
+- Next.js
+- React
+- Tailwind CSS
+- shadcn/ui
+- Framer Motion
+- Recharts
+- React Hook Form
+- Zod
+- TanStack Query
+- Lucide React
+
+---
+
+# 📬 Contact
+
+**Developer:** Prince Mittal
+
+GitHub:
+
+https://github.com/princemittalr
+
+Repository:
+
+https://github.com/princemittalr/arogyaos
+
+---
+
+<div align="center">
+
+# ⭐ If you found ArogyaOS helpful, please consider giving this repository a Star!
+
+### Built with ❤️ to empower healthcare through Artificial Intelligence.
+
+**Google AI Hackathon Project**
+
+</div>
