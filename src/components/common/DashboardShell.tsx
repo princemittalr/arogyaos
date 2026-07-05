@@ -14,6 +14,14 @@ import { toast } from 'sonner';
 import { cn } from '@/utils/cn';
 import { UserRole } from '@/config/roles';
 
+interface Notification {
+  id: string;
+  title: string;
+  desc: string;
+  time: string;
+  unread: boolean;
+}
+
 interface DashboardShellProps {
   children: React.ReactNode;
 }
@@ -26,6 +34,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const { theme, setTheme } = useTheme();
   const { logout } = useAuthActions();
   
+  // Theme hydration guard
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
   // Responsive States
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -41,12 +53,31 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const [cmdSearch, setCmdSearch] = useState('');
   const [cmdSelectedIndex, setCmdSelectedIndex] = useState(0);
 
+  // Stateful notifications (allows Clear All / Mark Read to work)
+  const [notifications, setNotifications] = useState<Notification[]>([
+    { id: '1', title: 'Low Stock Alert', desc: 'Paracetamol stock is below 15% at Main Pharmacy.', time: '2h ago', unread: true },
+    { id: '2', title: 'Schedule Updated', desc: 'Dr. Sharma updated OPD consultation availability.', time: '4h ago', unread: true },
+    { id: '3', title: 'System Sync', desc: 'Role permissions check successfully synced.', time: '1d ago', unread: false },
+  ]);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  const handleClearAll = () => {
+    setNotifications([]);
+    toast.success('All notifications cleared.');
+  };
+
+  const handleMarkRead = (id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
+  };
+
   // Refs for clicking outside
   const notificationsRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
   const role = user?.role || 'citizen';
   const navItems = getNavigationForRole(role);
+
 
   // Check viewport width
   useEffect(() => {
@@ -125,12 +156,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
   const currentRoleStyle = roleBadgeStyles[role] || 'bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-400';
 
-  // Notifications placeholder data
-  const mockNotifications = [
-    { id: '1', title: 'Low Stock Alert', desc: 'Paracetamol stock is below 15% at Main Pharmacy.', time: '2 hours ago', unread: true },
-    { id: '2', title: 'Schedule Updated', desc: 'Dr. Sharma updated weekly OPD consultation availability.', time: '4 hours ago', unread: true },
-    { id: '3', title: 'System Security Sync', desc: 'Role permissions check successfully synced at the Edge.', time: '1 day ago', unread: false },
-  ];
+
 
   // Command Palette Items
   const commandItems = [
@@ -397,11 +423,15 @@ export function DashboardShell({ children }: DashboardShellProps) {
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
                 className={cn(
                   'relative rounded-xl p-2.5 transition text-slate-500 hover:text-slate-700 dark:hover:text-slate-300',
-                  notificationsOpen ? 'bg-slate-100 dark:bg-slate-850' : 'hover:bg-slate-50 dark:hover:bg-slate-900'
+                  notificationsOpen ? 'bg-slate-100 dark:bg-slate-800' : 'hover:bg-slate-50 dark:hover:bg-slate-900'
                 )}
               >
                 <icons.Bell className="h-5 w-5" />
-                <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500 animate-pulse" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
 
               <AnimatePresence>
@@ -413,45 +443,58 @@ export function DashboardShell({ children }: DashboardShellProps) {
                     transition={{ duration: 0.15 }}
                     className="absolute right-0 z-30 mt-2 w-80 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xl dark:border-slate-800 dark:bg-slate-900"
                   >
-                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-2.5">
-                      <h4 className="font-bold text-sm text-slate-900 dark:text-slate-50">Notifications</h4>
+                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
+                      <h4 className="font-bold text-sm text-slate-900 dark:text-slate-50">
+                        Notifications {unreadCount > 0 && <span className="ml-1.5 rounded-full bg-blue-100 dark:bg-blue-900/40 px-1.5 text-[9px] text-blue-600 dark:text-blue-400">{unreadCount} new</span>}
+                      </h4>
                       <button
-                        onClick={() => toast.info('All notifications marked as read')}
+                        onClick={handleClearAll}
                         className="text-[10px] font-bold text-blue-600 hover:underline dark:text-blue-400"
                       >
                         Clear All
                       </button>
                     </div>
                     <div className="mt-2.5 space-y-2 max-h-60 overflow-y-auto">
-                      {mockNotifications.map((notif) => (
-                        <div
-                          key={notif.id}
-                          className={cn(
-                            'rounded-xl p-2.5 text-xs transition border border-transparent',
-                            notif.unread
-                              ? 'bg-blue-50/30 border-blue-100/30 dark:bg-blue-900/10'
-                              : 'hover:bg-slate-50 dark:hover:bg-slate-850'
-                          )}
-                        >
-                          <div className="flex items-center justify-between font-bold text-slate-900 dark:text-slate-200">
-                            <span>{notif.title}</span>
-                            <span className="text-[9px] font-medium text-slate-400">{notif.time}</span>
+                      {notifications.length === 0 ? (
+                        <p className="py-6 text-center text-xs text-slate-400">All caught up!</p>
+                      ) : (
+                        notifications.map((notif) => (
+                          <div
+                            key={notif.id}
+                            onClick={() => handleMarkRead(notif.id)}
+                            className={cn(
+                              'rounded-xl p-2.5 text-xs transition border border-transparent cursor-pointer',
+                              notif.unread
+                                ? 'bg-blue-50/40 border-blue-100/40 dark:bg-blue-900/10 hover:bg-blue-50/60'
+                                : 'hover:bg-slate-50 dark:hover:bg-slate-800 opacity-70'
+                            )}
+                          >
+                            <div className="flex items-center justify-between font-bold text-slate-900 dark:text-slate-200">
+                              <span className="flex items-center gap-1.5">
+                                {notif.unread && <span className="h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />}
+                                {notif.title}
+                              </span>
+                              <span className="text-[9px] font-medium text-slate-400">{notif.time}</span>
+                            </div>
+                            <p className="mt-1 text-slate-500 dark:text-slate-400 leading-normal">{notif.desc}</p>
                           </div>
-                          <p className="mt-1 text-slate-500 dark:text-slate-400 leading-normal">{notif.desc}</p>
-                        </div>
-                      ))}
+                        ))
+                      )}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
 
-            {/* Theme Toggle Trigger */}
+            {/* Theme Toggle Trigger - mounted guard prevents hydration mismatch */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              aria-label="Toggle theme"
               className="rounded-xl p-2.5 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition"
             >
-              {theme === 'dark' ? (
+              {!mounted ? (
+                <icons.Moon className="h-5 w-5" />
+              ) : theme === 'dark' ? (
                 <icons.Sun className="h-5 w-5 text-yellow-500" />
               ) : (
                 <icons.Moon className="h-5 w-5" />

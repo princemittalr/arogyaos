@@ -8,25 +8,25 @@ if (typeof window !== 'undefined') {
   throw new Error('Firebase Admin SDK cannot be imported on the client side.');
 }
 
-const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY;
-const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
-const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+const projectId = process.env.FIREBASE_PROJECT_ID;
 
 const app =
   getApps().length === 0
     ? privateKey && clientEmail && projectId
       ? initializeApp({
-          credential: cert({
-            projectId,
-            clientEmail,
-            privateKey: privateKey.replace(/\\n/g, '\n'),
-          }),
-          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        })
+        credential: cert({
+          projectId,
+          clientEmail,
+          privateKey: privateKey.replace(/\\n/g, '\n'),
+        }),
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      })
       : initializeApp({
-          projectId: projectId || 'arogyaos-mock-project',
-          storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-        })
+        projectId: projectId || 'arogyaos-mock-project',
+        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+      })
     : getApp();
 
 export const adminAuth = getAuth(app);

@@ -12,7 +12,7 @@ export const ROUTES = {
       HOME: '/dashboard/citizen',
       APPOINTMENTS: '/dashboard/citizen/appointments',
       PRESCRIPTIONS: '/dashboard/citizen/prescriptions',
-      PROFILES: '/dashboard/citizen/profiles',
+      FAMILY: '/dashboard/citizen/family',
     },
     DOCTOR: {
       HOME: '/dashboard/doctor',
