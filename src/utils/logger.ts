@@ -51,6 +51,34 @@ export const logger = {
     this._log('error', message, options);
   },
 
+  apiFailure(endpoint: string, status: number, errorMsg: string, data?: unknown) {
+    this._log('error', `API Failure on ${endpoint} | Status: ${status} | Error: ${errorMsg}`, {
+      tag: 'api',
+      data,
+    });
+  },
+
+  aiFailure(prompt: string, errorMsg: string, data?: unknown) {
+    this._log('error', `AI Service Failure | Prompt: "${prompt}" | Error: ${errorMsg}`, {
+      tag: 'ai',
+      data,
+    });
+  },
+
+  authFailure(email: string, errorMsg: string, data?: unknown) {
+    this._log('warn', `Authentication Failure for ${email} | Error: ${errorMsg}`, {
+      tag: 'auth',
+      data,
+    });
+  },
+
+  performance(metric: string, durationMs: number, data?: unknown) {
+    this._log('info', `Performance Metric: ${metric} took ${durationMs.toFixed(2)}ms`, {
+      tag: 'performance',
+      data: { ...(typeof data === 'object' && data !== null ? data : {}), durationMs },
+    });
+  },
+
   _log(level: LogLevel, message: string, options?: LogOptions) {
     const timestamp = new Date().toISOString();
     const tagStr = options?.tag ? `[${options.tag.toUpperCase()}]` : '';
