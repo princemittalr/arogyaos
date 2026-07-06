@@ -66,31 +66,41 @@ export function DataTable<T extends Record<string, any>>({ // eslint-disable-lin
   return (
     <div className={cn('w-full border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-white dark:bg-slate-900', className)}>
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse text-sm">
+        <table className="w-full text-left border-collapse text-sm" aria-label={t("common.data_table", "Data Table")}>
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {columns.map((col) =>
-              <th
-                key={col.key}
-                onClick={() => col.sortable && handleSort(col.key)}
-                className={cn(
-                  'px-6 py-4 select-none',
-                  col.sortable ? 'cursor-pointer hover:text-slate-700 dark:hover:text-slate-200' : ''
-                )}>
-                
-                  <div className="flex items-center gap-1.5">
-                    {col.header}
-                    {col.sortable && sortKey === col.key &&
-                  <ChevronDownIcon
-                    className={cn(
-                      'h-3.5 w-3.5 transition-transform duration-200',
-                      sortOrder === 'desc' ? 'rotate-180' : ''
-                    )} />
-
-                  }
-                  </div>
-                </th>
-              )}
+              {columns.map((col) => {
+                const isSorted = sortKey === col.key;
+                const ariaSortVal = isSorted ? (sortOrder === 'asc' ? 'ascending' : 'descending') : undefined;
+                return (
+                  <th
+                    key={col.key}
+                    scope="col"
+                    aria-sort={col.sortable ? (ariaSortVal || 'none') : undefined}
+                    className="px-6 py-4 select-none"
+                  >
+                    {col.sortable ? (
+                      <button
+                        type="button"
+                        onClick={() => handleSort(col.key)}
+                        className="flex items-center gap-1.5 font-semibold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-250 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded"
+                        aria-label={`${t("common.sort_by", "Sort by")} ${col.header}, ${isSorted ? (sortOrder === 'asc' ? t("common.sorted_ascending", "sorted ascending") : t("common.sorted_descending", "sorted descending")) : t("common.unsorted", "unsorted")}`}
+                      >
+                        {col.header}
+                        <ChevronDownIcon
+                          className={cn(
+                            'h-3.5 w-3.5 transition-transform duration-200',
+                            isSorted && sortOrder === 'desc' ? 'rotate-180' : '',
+                            isSorted ? 'opacity-100' : 'opacity-40'
+                          )}
+                        />
+                      </button>
+                    ) : (
+                      <span>{col.header}</span>
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
@@ -128,12 +138,13 @@ export function DataTable<T extends Record<string, any>>({ // eslint-disable-lin
       </div>
 
       {pagination &&
-      <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 px-6 py-4 bg-slate-50 dark:bg-slate-950/40">
+      <nav aria-label={t("common.pagination", "Pagination Navigation")} className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 px-6 py-4 bg-slate-50 dark:bg-slate-950/40">
           <span className="text-xs text-slate-500 dark:text-slate-400">{t("common.page")}
           {pagination.currentPage}{t("common.of")}{pagination.totalPages}
           </span>
           <div className="flex items-center gap-2">
             <button
+            type="button"
             disabled={pagination.currentPage <= 1 || loading}
             onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
             className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 disabled:opacity-50 transition">{t("common.previous")}
@@ -141,6 +152,7 @@ export function DataTable<T extends Record<string, any>>({ // eslint-disable-lin
 
           </button>
             <button
+            type="button"
             disabled={pagination.currentPage >= pagination.totalPages || loading}
             onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
             className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 disabled:opacity-50 transition">{t("common.next")}
@@ -148,7 +160,7 @@ export function DataTable<T extends Record<string, any>>({ // eslint-disable-lin
 
           </button>
           </div>
-        </div>
+        </nav>
       }
     </div>);
 

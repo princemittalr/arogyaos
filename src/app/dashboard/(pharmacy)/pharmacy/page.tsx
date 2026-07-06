@@ -129,7 +129,10 @@ export default function PharmacyDashboardPage() {const { t } = useLanguage();
               </div>
               <TrendingUp className="h-4 w-4 text-slate-400" />
             </div>
-            <div className="h-52">
+            <div className="h-52" role="img" aria-label={t("pharmacy.stock_vs_dispensing_trend")}>
+              <div className="sr-only">
+                {t("pharmacy.chart_description", "Chart showing stock vs dispensing trend. Data: Jan - Stock 2400, Dispensed 400; Feb - Stock 1398, Dispensed 3000; Mar - Stock 9800, Dispensed 2000; Apr - Stock 3908, Dispensed 2780; May - Stock 4800, Dispensed 1890; Jun - Stock 3800, Dispensed 2390; Jul - Stock 4300, Dispensed 3490.")}
+              </div>
               <StockTrendChart data={TREND_DATA} stockLabel={t("pharmacy.stock_level")} dispensedLabel={t("pharmacy.dispensed")} />
             </div>
             <div className="flex items-center gap-4 mt-3">

@@ -112,7 +112,10 @@ export default function DistrictDoctorAttendancePage() {const { t } = useLanguag
 
           </h3>
 
-          <div className="h-60">
+          <div className="h-60" role="img" aria-label={t("district.clinical_duty_presence_timeline")}>
+            <div className="sr-only">
+              {t("district.attendance_chart_description", "Chart showing weekly doctor attendance. Data: Monday - 88%, Tuesday - 92%, Wednesday - 85%, Thursday - 94%, Friday - 89%, Saturday - 76%, Sunday - 65%.")}
+            </div>
             <AttendanceTrendChart data={mockAttendanceTrends} />
           </div>
         </div>

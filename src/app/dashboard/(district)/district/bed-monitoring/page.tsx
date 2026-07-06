@@ -143,7 +143,10 @@ export default function DistrictBedMonitoringPage() {const { t } = useLanguage()
 
           </h3>
 
-          <div className="h-60">
+          <div className="h-60" role="img" aria-label={t("district.district_bed_occupancy_timeline")}>
+            <div className="sr-only">
+              {t("district.bed_occupancy_chart_description", "Chart showing district bed occupancy timeline. Data: Jan - 65%, Feb - 70%, Mar - 72%, Apr - 68%, May - 74%, Jun - 80%, Jul - 85%.")}
+            </div>
             <BedOccupancyChart data={mockOccupancyTrend} />
           </div>
         </div>

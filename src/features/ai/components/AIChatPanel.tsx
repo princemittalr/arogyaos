@@ -98,7 +98,13 @@ export function AIChatPanel() {const { t } = useLanguage();
       </div>
 
       {/* Messages area */}
-      <div className="flex-1 p-4 overflow-y-auto space-y-4 text-xs font-semibold">
+      <div 
+        className="flex-1 p-4 overflow-y-auto space-y-4 text-xs font-semibold"
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions"
+        aria-label={t("common.chat_history", "Chat History")}
+      >
         {messages.map((msg, index) => {
           const isUser = msg.role === 'user';
           return (
@@ -129,10 +135,11 @@ export function AIChatPanel() {const { t } = useLanguage();
                         className="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-150 dark:border-slate-850 flex items-center justify-between gap-3 text-[10px]">
                         
                           <div className="flex items-center gap-1.5">
-                            {insight.severity === 'critical' && <ShieldAlert className="h-4 w-4 text-red-500" />}
-                            {insight.severity === 'warning' && <AlertTriangle className="h-4 w-4 text-amber-500" />}
-                            {insight.severity === 'success' && <CheckCircle className="h-4 w-4 text-emerald-500" />}
-                            {insight.severity === 'info' && <Info className="h-4 w-4 text-blue-500" />}
+                            <span className="sr-only">[{insight.severity}] </span>
+                            {insight.severity === 'critical' && <ShieldAlert className="h-4 w-4 text-red-500" aria-hidden="true" />}
+                            {insight.severity === 'warning' && <AlertTriangle className="h-4 w-4 text-amber-500" aria-hidden="true" />}
+                            {insight.severity === 'success' && <CheckCircle className="h-4 w-4 text-emerald-500" aria-hidden="true" />}
+                            {insight.severity === 'info' && <Info className="h-4 w-4 text-blue-500" aria-hidden="true" />}
                             <span className="font-bold text-slate-900 dark:text-slate-50">{insight.title}</span>
                           </div>
                           <span className="font-extrabold text-slate-500">{insight.metricValue}</span>
@@ -149,6 +156,7 @@ export function AIChatPanel() {const { t } = useLanguage();
         {isLoading &&
         <div className="flex justify-start">
             <div className="bg-slate-50 dark:bg-slate-950 rounded-2xl p-3.5 rounded-bl-none border border-slate-100 dark:border-slate-850 flex items-center gap-1 text-slate-400">
+              <span className="sr-only">{t("common.ai_is_typing", "AI is typing...")}</span>
               <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '0ms' }} />
               <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '150ms' }} />
               <span className="h-1.5 w-1.5 rounded-full bg-slate-400 animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -164,14 +172,16 @@ export function AIChatPanel() {const { t } = useLanguage();
           placeholder={t("common.ask_about_capacities_shortages_or_summaries")}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
+          aria-label={t("common.message_assistant", "Message Assistant")}
           className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-900 dark:text-slate-50 focus:outline-none" />
         
         <button
           type="submit"
           disabled={isLoading}
+          aria-label={t("common.send_message", "Send message")}
           className="rounded-xl bg-blue-600 hover:bg-blue-750 text-white p-2.5 transition flex items-center justify-center shrink-0">
           
-          <Send className="h-4 w-4" />
+          <Send className="h-4 w-4" aria-hidden="true" />
         </button>
       </form>
     </div>);

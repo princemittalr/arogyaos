@@ -284,9 +284,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
             {/* Search */}
             <button
               onClick={() => setCommandPaletteOpen(true)}
+              aria-label={t('common.search_workspace', 'Search Workspace')}
               className="hidden sm:flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-500 hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 transition mr-2">
               
-              <icons.Search className="h-3.5 w-3.5" />
+              <icons.Search className="h-3.5 w-3.5" aria-hidden="true" />
               <span>{t('common.search', 'Search...')}</span>
               <kbd className="hidden md:inline-flex rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-1 font-mono text-[10px] text-slate-400">{t("common.k")}</kbd>
             </button>
@@ -295,6 +296,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
             <select
               value={currentLanguage.code}
               onChange={(e) => setLanguage(e.target.value)}
+              aria-label={t("common.select_language", "Select Language")}
               className="rounded-lg border border-slate-200 bg-transparent px-2 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
               
               <option value="en">{t("common.en")}</option>
@@ -310,9 +312,11 @@ export function DashboardShell({ children }: DashboardShellProps) {
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
                 className="relative rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                aria-label="Notifications">
+                aria-label={t("nav.notifications", "Notifications")}
+                aria-expanded={notificationsOpen}
+                aria-haspopup="true">
                 
-                <icons.Bell className="h-4.5 w-4.5" />
+                <icons.Bell className="h-4.5 w-4.5" aria-hidden="true" />
                 {unreadCount > 0 &&
                 <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center">
                     {unreadCount}
@@ -327,6 +331,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 4 }}
                   transition={{ duration: 0.12 }}
+                  role="dialog"
+                  aria-label={t('nav.notifications', 'Notifications')}
                   className="absolute right-0 mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
                   
                     <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800">
@@ -370,22 +376,25 @@ export function DashboardShell({ children }: DashboardShellProps) {
             {/* Theme toggle */}
             <button
               onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-              aria-label="Toggle theme"
+              aria-label={t("common.toggle_theme", "Toggle Theme")}
               className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
               
-              {!mounted ? <div className="h-4.5 w-4.5" /> : resolvedTheme === 'dark' ? <icons.Sun className="h-4.5 w-4.5 text-amber-400" /> : <icons.Moon className="h-4.5 w-4.5 text-slate-500" />}
+              {!mounted ? <div className="h-4.5 w-4.5" /> : resolvedTheme === 'dark' ? <icons.Sun className="h-4.5 w-4.5 text-amber-400" aria-hidden="true" /> : <icons.Moon className="h-4.5 w-4.5 text-slate-500" aria-hidden="true" />}
             </button>
 
             {/* Profile */}
             <div className="relative ml-1" ref={profileRef}>
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
+                aria-label={t('common.profile_menu', 'Profile Menu')}
+                aria-expanded={profileOpen}
+                aria-haspopup="true"
                 className="flex items-center gap-2 rounded-lg p-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                 
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-[11px] font-bold uppercase">
                   {user?.fullName?.slice(0, 2) || 'US'}
                 </div>
-                <icons.ChevronDown className="h-3 w-3 text-slate-400 hidden sm:block" />
+                <icons.ChevronDown className="h-3 w-3 text-slate-400 hidden sm:block" aria-hidden="true" />
               </button>
 
               <AnimatePresence>

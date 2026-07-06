@@ -72,10 +72,11 @@ export function RegisterForm() {const { t } = useLanguage();
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Full Name */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.full_name")}
+            <label htmlFor="fullName" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.full_name")}
 
             </label>
             <input
+              id="fullName"
               type="text"
               disabled={isLoading}
               placeholder={t("auth.eg_rahul_sharma")}
@@ -91,10 +92,11 @@ export function RegisterForm() {const { t } = useLanguage();
 
           {/* Email */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.email_address")}
+            <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.email_address")}
 
             </label>
             <input
+              id="email"
               type="email"
               disabled={isLoading}
               placeholder={t("auth.eg_rahularogyain")}
@@ -110,10 +112,11 @@ export function RegisterForm() {const { t } = useLanguage();
 
           {/* Role selection */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.healthcare_role")}
+            <label htmlFor="role" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.healthcare_role")}
 
             </label>
             <select
+              id="role"
               disabled={isLoading}
               className={`${componentStyles.input.base} ${errors.role ? 'border-red-500 focus:ring-red-500/20' : ''}`}
               {...register('role')}>
@@ -132,10 +135,11 @@ export function RegisterForm() {const { t } = useLanguage();
 
           {/* Password */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.password")}
+            <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.password")}
 
             </label>
             <input
+              id="password"
               type="password"
               disabled={isLoading}
               placeholder="••••••••"
@@ -151,10 +155,11 @@ export function RegisterForm() {const { t } = useLanguage();
 
           {/* Confirm Password */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.confirm_password")}
+            <label htmlFor="confirmPassword" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.confirm_password")}
 
             </label>
             <input
+              id="confirmPassword"
               type="password"
               disabled={isLoading}
               placeholder="••••••••"

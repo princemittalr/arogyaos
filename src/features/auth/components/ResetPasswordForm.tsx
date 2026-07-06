@@ -131,10 +131,11 @@ export function ResetPasswordForm() {const { t } = useLanguage();
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* New Password */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.new_password")}
+            <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.new_password")}
 
             </label>
             <input
+              id="password"
               type="password"
               disabled={loading}
               placeholder="••••••••"
@@ -150,10 +151,11 @@ export function ResetPasswordForm() {const { t } = useLanguage();
 
           {/* Confirm New Password */}
           <div className="space-y-1">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.confirm_new_password")}
+            <label htmlFor="confirmPassword" className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">{t("auth.confirm_new_password")}
 
             </label>
             <input
+              id="confirmPassword"
               type="password"
               disabled={loading}
               placeholder="••••••••"
