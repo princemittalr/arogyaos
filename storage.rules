@@ -63,6 +63,16 @@ service firebase.storage {
       allow delete: if isOwnerByUid(uid) || isSuperAdmin();
     }
 
+    // ── Health Vault Secure Buckets ──────────────────────────────────────────
+    // path: health-vault/buckets/{ownerId}/{year}/{month}/{fileId}
+    match /health-vault/buckets/{ownerId}/{year}/{month}/{fileId} {
+      allow read: if isOwnerByUid(ownerId) || isClinicalStaff() || isSuperAdmin();
+      allow write: if (isOwnerByUid(ownerId) || isClinicalStaff() || isSuperAdmin())
+        && request.resource.size < 50 * 1024 * 1024  // 50 MB max limit
+        && request.resource.contentType.matches('application/pdf|image/(jpeg|png|webp)|text/plain');
+      allow delete: if false; // Immutability constraint: no manual deletions of active reports
+    }
+
     // ── Deny everything else ─────────────────────────────────────────────
     match /{allPaths=**} {
       allow read, write: if false;

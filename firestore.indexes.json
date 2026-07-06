@@ -1,0 +1,57 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "health_vault_timeline_index",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "patientId", "order": "ASCENDING" },
+        { "fieldPath": "recordType", "order": "ASCENDING" },
+        { "fieldPath": "encounterDate", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "health_vault_timeline_index",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "patientId", "order": "ASCENDING" },
+        { "fieldPath": "metadata.status", "order": "ASCENDING" },
+        { "fieldPath": "encounterDate", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "health_vault_timeline_index",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "patientId", "order": "ASCENDING" },
+        { "fieldPath": "metadata.source", "order": "ASCENDING" },
+        { "fieldPath": "encounterDate", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "health_vault_timeline_index",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "patientId", "order": "ASCENDING" },
+        { "fieldPath": "metadata.status", "order": "ARRAY_CONFIG_UNSPECIFIED" },
+        { "fieldPath": "encounterDate", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vault_document_mappings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "folderId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "vault_document_mappings",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "ownerId", "order": "ASCENDING" },
+        { "fieldPath": "recordId", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

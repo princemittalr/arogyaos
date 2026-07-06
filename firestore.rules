@@ -126,16 +126,171 @@ service cloud.firestore {
     }
 
     // ── prescriptions collection ─────────────────────────────────────────────
-    match /prescriptions/{prescriptionId} {
-      allow read: if isSignedIn()
-        && (resource.data.patientId == request.auth.uid
-            || resource.data.doctorId == request.auth.uid
-            || isClinicalStaff()
-            || isPharmacist()
-            || isSuperAdmin());
-      // Only doctors can create/update prescriptions
-      allow create, update: if isDoctor() || isSuperAdmin();
+    // Replaced by Health Vault clinical collection rules below
+
+    // ── Health Vault: Index & Clinical Collections ───────────────────────────
+    
+    function isRecordOwner(ownerId) {
+      return isSignedIn() && request.auth.uid == ownerId;
+    }
+
+    match /health_vault_timeline_index/{indexId} {
+      allow read: if isSignedIn() && (
+        isRecordOwner(resource.data.patientId)
+        || isClinicalStaff()
+        || isPharmacist()
+        || isSuperAdmin()
+      );
+      // Timeline is written during record ingestion
+      allow create: if isSignedIn() && (
+        isRecordOwner(request.resource.data.patientId)
+        || isHealthcareStaff()
+        || isSuperAdmin()
+      );
+      allow update: if isSignedIn() && (
+        isRecordOwner(resource.data.patientId)
+        || isHealthcareStaff()
+        || isSuperAdmin()
+      );
       allow delete: if false;
+    }
+
+    // Generic helper for clinical collections checking
+    function canAccessClinicalRecord(ownerId) {
+      return isSignedIn() && (
+        isRecordOwner(ownerId)
+        || isClinicalStaff()
+        || isSuperAdmin()
+      );
+    }
+
+    function canWriteClinicalRecord(ownerId) {
+      return isSignedIn() && (
+        isRecordOwner(ownerId)
+        || isHealthcareStaff()
+        || isSuperAdmin()
+      );
+    }
+
+    match /prescriptions/{prescriptionId} {
+      allow read: if isSignedIn() && (
+        isRecordOwner(resource.data.ownerId)
+        || isClinicalStaff()
+        || isPharmacist()
+        || isSuperAdmin()
+      );
+      allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+      allow update: if canWriteClinicalRecord(resource.data.ownerId);
+      allow delete: if false;
+
+      // Versions sub-collection: read-only, no updates or deletes
+      match /versions/{versionNumber} {
+        allow read: if isSignedIn() && (
+          isRecordOwner(resource.data.ownerId)
+          || isClinicalStaff()
+          || isPharmacist()
+          || isSuperAdmin()
+        );
+        allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+        allow update, delete: if false;
+      }
+    }
+
+    match /lab_reports/{reportId} {
+      allow read: if canAccessClinicalRecord(resource.data.ownerId);
+      allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+      allow update: if canWriteClinicalRecord(resource.data.ownerId);
+      allow delete: if false;
+
+      match /versions/{versionNumber} {
+        allow read: if canAccessClinicalRecord(resource.data.ownerId);
+        allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+        allow update, delete: if false;
+      }
+    }
+
+    match /radiology_reports/{reportId} {
+      allow read: if canAccessClinicalRecord(resource.data.ownerId);
+      allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+      allow update: if canWriteClinicalRecord(resource.data.ownerId);
+      allow delete: if false;
+
+      match /versions/{versionNumber} {
+        allow read: if canAccessClinicalRecord(resource.data.ownerId);
+        allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+        allow update, delete: if false;
+      }
+    }
+
+    match /vaccinations/{vaccinationId} {
+      allow read: if canAccessClinicalRecord(resource.data.ownerId);
+      allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+      allow update: if canWriteClinicalRecord(resource.data.ownerId);
+      allow delete: if false;
+
+      match /versions/{versionNumber} {
+        allow read: if canAccessClinicalRecord(resource.data.ownerId);
+        allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+        allow update, delete: if false;
+      }
+    }
+
+    match /discharge_summaries/{summaryId} {
+      allow read: if canAccessClinicalRecord(resource.data.ownerId);
+      allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+      allow update: if canWriteClinicalRecord(resource.data.ownerId);
+      allow delete: if false;
+
+      match /versions/{versionNumber} {
+        allow read: if canAccessClinicalRecord(resource.data.ownerId);
+        allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+        allow update, delete: if false;
+      }
+    }
+
+    match /medical_certificates/{certificateId} {
+      allow read: if canAccessClinicalRecord(resource.data.ownerId);
+      allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+      allow update: if canWriteClinicalRecord(resource.data.ownerId);
+      allow delete: if false;
+
+      match /versions/{versionNumber} {
+        allow read: if canAccessClinicalRecord(resource.data.ownerId);
+        allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+        allow update, delete: if false;
+      }
+    }
+
+    match /consultations/{consultationId} {
+      allow read: if canAccessClinicalRecord(resource.data.ownerId);
+      allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+      allow update: if canWriteClinicalRecord(resource.data.ownerId);
+      allow delete: if false;
+
+      match /versions/{versionNumber} {
+        allow read: if canAccessClinicalRecord(resource.data.ownerId);
+        allow create: if canWriteClinicalRecord(request.resource.data.ownerId);
+        allow update, delete: if false;
+      }
+    }
+
+    // ── Medical Document Management ──────────────────────────────────────────
+    match /vault_folders/{folderId} {
+      allow read, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && request.resource.data.ownerId == request.auth.uid;
+    }
+
+    match /vault_tags/{tagId} {
+      allow read, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && request.resource.data.ownerId == request.auth.uid;
+    }
+
+    match /vault_document_mappings/{mappingId} {
+      allow read, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.ownerId == request.auth.uid && request.resource.data.ownerId == request.auth.uid;
     }
 
     // ── inventory collection ─────────────────────────────────────────────────
@@ -174,6 +329,14 @@ service cloud.firestore {
       allow create, update: if isSignedIn()
         && request.resource.data.userId == request.auth.uid;
       allow delete: if false;
+    }
+
+    // ── audit_trail collection ───────────────────────────────────────────────
+    // Immutable ledger: create allowed (append-only), read restricted to admins, no updates, no deletes.
+    match /audit_trail/{logId} {
+      allow read: if isSuperAdmin() || isDistrictAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
     }
 
     // ── Deny everything else ─────────────────────────────────────────────────
