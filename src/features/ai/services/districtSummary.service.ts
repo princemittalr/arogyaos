@@ -1,5 +1,6 @@
-import { callGemini } from '../utils/gemini';
+import { executeAiPipeline } from '../utils/gemini';
 import { districtSummaryPrompt } from '../prompts/districtSummary';
+import { districtSummaryResultSchema } from '../types/validation';
 
 export interface DistrictSummaryInput {
   hospitalsCount: number;
@@ -18,17 +19,17 @@ export interface DistrictSummaryResult {
     priorityScore: number;
     attentionReason: string;
   }>;
+  mode?: 'live' | 'demo' | 'fallback';
 }
 
 export class DistrictSummaryService {
   static async getSummary(input: DistrictSummaryInput): Promise<DistrictSummaryResult> {
-    try {
-      const responseText = await callGemini(districtSummaryPrompt, JSON.stringify(input));
-      return JSON.parse(responseText) as DistrictSummaryResult;
-    } catch (error) {
-      console.warn('DistrictSummaryService falling back to mock due to:', error);
-      return {
-        operationalSummary: `District is operating stably overall across its ${input.hospitalsCount} hospitals, ${input.phcsCount} PHCs, and ${input.chcsCount} CHCs. Attendance levels are standard, but capacity warnings require attention.`,
+    const pipelineResult = await executeAiPipeline({
+      systemPrompt: districtSummaryPrompt,
+      input,
+      schema: districtSummaryResultSchema,
+      mockFallback: (inp) => ({
+        operationalSummary: `District is operating stably overall across its ${inp.hospitalsCount} hospitals, ${inp.phcsCount} PHCs, and ${inp.chcsCount} CHCs. Attendance levels are standard, but capacity warnings require attention.`,
         criticalIssues: [
           'ICU capacity has reached 100% occupancy at West Block CHC.',
           'Metro PHC Center reports complete depletion of Oral Rehydration Salts (ORS).',
@@ -49,7 +50,14 @@ export class DistrictSummaryService {
             attentionReason: 'Depleted ORS stock reserves.',
           },
         ],
-      };
-    }
+      }),
+      endpointName: 'district-summary',
+    });
+
+    return {
+      ...pipelineResult.data,
+      mode: pipelineResult.mode,
+    };
   }
 }
+export default DistrictSummaryService;

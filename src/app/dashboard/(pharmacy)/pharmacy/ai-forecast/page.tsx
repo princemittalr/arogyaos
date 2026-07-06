@@ -109,11 +109,20 @@ export default function PharmacyAIForecastPage() {const { t } = useLanguage();
       {/* AI Forecast Results */}
       {!isLoading && forecasts && forecasts.length > 0 &&
       <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-blue-500" />
-            <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-slate-50">{t("pharmacy.ai_shortage_predictions")}
-
-          </h3>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-blue-500" />
+              <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-slate-50">{t("pharmacy.ai_shortage_predictions")}</h3>
+            </div>
+            {forecasts.mode && (
+              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
+                forecasts.mode === 'live' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400' :
+                forecasts.mode === 'demo' ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400' :
+                'bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400'
+              }`}>
+                {forecasts.mode === 'live' ? 'Live AI' : forecasts.mode === 'demo' ? 'Demo Mode' : 'AI Fallback'}
+              </span>
+            )}
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -10,6 +10,7 @@ interface Message {
     metricValue: string;
     severity: 'critical' | 'warning' | 'info' | 'success';
   }>;
+  mode?: 'live' | 'demo' | 'fallback';
 }
 
 export function AIChatPanel() {const { t } = useLanguage();
@@ -63,7 +64,8 @@ export function AIChatPanel() {const { t } = useLanguage();
       {
         role: 'assistant',
         text: data.responseText,
-        insights: data.structuredInsights
+        insights: data.structuredInsights,
+        mode: data.mode
       }]
       );
     } catch {
@@ -107,6 +109,15 @@ export function AIChatPanel() {const { t } = useLanguage();
               'bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 rounded-bl-none border border-slate-100 dark:border-slate-850'}`
               }>
                 <p className="leading-relaxed">{msg.text}</p>
+                {!isUser && msg.mode && (
+                  <div className="text-[8px] font-bold text-slate-400 mt-1 flex items-center gap-1.5 select-none">
+                    <span className={`h-1.5 w-1.5 rounded-full ${
+                      msg.mode === 'live' ? 'bg-emerald-500' :
+                      msg.mode === 'demo' ? 'bg-blue-500' : 'bg-amber-500'
+                    }`} />
+                    {msg.mode === 'live' ? 'Live AI' : msg.mode === 'demo' ? 'Demo Mode' : 'AI Fallback'}
+                  </div>
+                )}
 
                 {/* Structured Insights rendering */}
                 {msg.insights && msg.insights.length > 0 &&

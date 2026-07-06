@@ -136,6 +136,15 @@ export default function HospitalAIHealthScorePage() {const { t } = useLanguage()
                   <div className="text-center">
                     <p className="font-extrabold text-sm text-slate-900 dark:text-slate-50 capitalize">{result.operationalStatus}{t("hospital.status")}</p>
                     <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{t("hospital.ai_computed_operational_health_assessment")}</p>
+                    {result.mode && (
+                      <span className={`inline-block text-[9px] font-black uppercase px-2 py-0.5 rounded mt-2.5 ${
+                        result.mode === 'live' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400' :
+                        result.mode === 'demo' ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400' :
+                        'bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400'
+                      }`}>
+                        {result.mode === 'live' ? 'Live AI' : result.mode === 'demo' ? 'Demo Mode' : 'AI Fallback'}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

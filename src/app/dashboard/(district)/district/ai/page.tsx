@@ -129,11 +129,20 @@ export default function AIIntelligencePage() {const { t } = useLanguage();
       <div className="grid gap-6 lg:grid-cols-3">
           {/* District AI Summary Panel */}
           <div className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 space-y-5">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-4.5 w-4.5 text-blue-500" />
-              <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-slate-50">{t("district.gemini_district_operational_brief")}
-
-            </h3>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4.5 w-4.5 text-blue-500" />
+                <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-slate-50">{t("district.gemini_district_operational_brief")}</h3>
+              </div>
+              {!summaryLoading && districtSummary?.mode && (
+                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded ${
+                  districtSummary.mode === 'live' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400' :
+                  districtSummary.mode === 'demo' ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400' :
+                  'bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400'
+                }`}>
+                  {districtSummary.mode === 'live' ? 'Live AI' : districtSummary.mode === 'demo' ? 'Demo Mode' : 'AI Fallback'}
+                </span>
+              )}
             </div>
 
             {summaryLoading ?
@@ -212,7 +221,7 @@ export default function AIIntelligencePage() {const { t } = useLanguage();
             <div key={i} className="h-16 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
             )}
               </div> :
-          districtSummary?.facilityPriorityRanking?.length > 0 ?
+          (districtSummary && districtSummary.facilityPriorityRanking && districtSummary.facilityPriorityRanking.length > 0) ?
           <div className="space-y-3">
                 {districtSummary.facilityPriorityRanking.map(
               (fac: {facilityName: string;priorityScore: number;attentionReason: string;}, idx: number) =>

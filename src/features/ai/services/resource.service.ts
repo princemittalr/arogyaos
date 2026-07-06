@@ -1,5 +1,6 @@
-import { callGemini } from '../utils/gemini';
+import { executeAiPipeline } from '../utils/gemini';
 import { resourceRedistributionPrompt } from '../prompts/resourceRedistribution';
+import { resourceRedistributionResultArraySchema } from '../types/validation';
 
 export interface ResourceRedistributionInput {
   facilities: Array<{
@@ -22,14 +23,12 @@ export interface ResourceRedistributionResult {
 }
 
 export class ResourceRedistributionService {
-  static async getRecommendations(input: ResourceRedistributionInput): Promise<ResourceRedistributionResult[]> {
-    try {
-      const responseText = await callGemini(resourceRedistributionPrompt, JSON.stringify(input));
-      const parsed = JSON.parse(responseText);
-      return parsed.recommendations || parsed;
-    } catch (error) {
-      console.warn('ResourceRedistributionService falling back to mock due to:', error);
-      return [
+  static async getRecommendations(input: ResourceRedistributionInput): Promise<{ recommendations: ResourceRedistributionResult[]; mode: 'live' | 'demo' | 'fallback' }> {
+    const pipelineResult = await executeAiPipeline({
+      systemPrompt: resourceRedistributionPrompt,
+      input,
+      schema: resourceRedistributionResultArraySchema,
+      mockFallback: (): ResourceRedistributionResult[] => [
         {
           sourceHospitalName: 'Apex Super Specialty Hospital',
           targetHospitalName: 'West Block CHC',
@@ -49,8 +48,15 @@ export class ResourceRedistributionService {
           expectedImpact: 'Maintains health worker screening security protocols during localized outbreak run.',
           priority: 'medium',
           reason: 'Metro PHC Center PPE kits are below recommended safety stock limits of 50 units.',
-        }
-      ];
-    }
+        },
+      ],
+      endpointName: 'resource-redistribution',
+    });
+
+    return {
+      recommendations: pipelineResult.data,
+      mode: pipelineResult.mode,
+    };
   }
 }
+export default ResourceRedistributionService;

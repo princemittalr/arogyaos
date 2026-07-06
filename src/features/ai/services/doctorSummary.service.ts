@@ -1,5 +1,6 @@
-import { callGemini } from '../utils/gemini';
+import { executeAiPipeline } from '../utils/gemini';
 import { doctorSummaryPrompt } from '../prompts/doctorSummary';
+import { doctorSummaryResultSchema } from '../types/validation';
 
 export interface DoctorSummaryInput {
   clinicalNotes: string;
@@ -16,16 +17,16 @@ export interface DoctorSummaryResult {
     duration: string;
   }>;
   followUpAdvice: string;
+  mode?: 'live' | 'demo' | 'fallback';
 }
 
 export class DoctorSummaryService {
   static async getSummary(input: DoctorSummaryInput): Promise<DoctorSummaryResult> {
-    try {
-      const responseText = await callGemini(doctorSummaryPrompt, JSON.stringify(input));
-      return JSON.parse(responseText) as DoctorSummaryResult;
-    } catch (error) {
-      console.warn('DoctorSummaryService falling back to mock due to:', error);
-      return {
+    const pipelineResult = await executeAiPipeline({
+      systemPrompt: doctorSummaryPrompt,
+      input,
+      schema: doctorSummaryResultSchema,
+      mockFallback: () => ({
         summary: 'Patient presents with symptoms of upper respiratory tract infection. Congested throat, minor wheezing, lungs clear.',
         diagnosis: 'Acute Rhinopharyngitis (Common Cold)',
         symptomsList: ['Throat congestion', 'Runny nose', 'Mild fatigue'],
@@ -34,7 +35,14 @@ export class DoctorSummaryService {
           { medicineName: 'Amoxicillin 500mg', dosage: '1 capsule thrice a day', duration: '5 days' },
         ],
         followUpAdvice: 'Maintain hydration and steam inhale twice daily. Follow up if fever exceeds 101F.',
-      };
-    }
+      }),
+      endpointName: 'doctor-summary',
+    });
+
+    return {
+      ...pipelineResult.data,
+      mode: pipelineResult.mode,
+    };
   }
 }
+export default DoctorSummaryService;

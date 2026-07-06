@@ -1,15 +1,17 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
-import type { StockForecastInput } from '../services/stockForecast.service';
-import type { PatientForecastInput } from '../services/patientForecast.service';
-import type { ResourceRedistributionInput } from '../services/resource.service';
-import type { HealthScoreInput } from '../services/healthScore.service';
-import type { DoctorSummaryInput } from '../services/doctorSummary.service';
-import type { DistrictSummaryInput } from '../services/districtSummary.service';
-import type { ChatInput } from '../services/chat.service';
+import type { StockForecastInput, StockForecastResult } from '../services/stockForecast.service';
+import type { PatientForecastInput, PatientForecastResult } from '../services/patientForecast.service';
+import type { ResourceRedistributionInput, ResourceRedistributionResult } from '../services/resource.service';
+import type { HealthScoreInput, HealthScoreResult } from '../services/healthScore.service';
+import type { DoctorSummaryInput, DoctorSummaryResult } from '../services/doctorSummary.service';
+import type { DistrictSummaryInput, DistrictSummaryResult } from '../services/districtSummary.service';
+import type { ChatInput, ChatResult } from '../services/chat.service';
+
+export type ArrayWithMode<T> = T[] & { mode: 'live' | 'demo' | 'fallback' };
 
 // ─── Stock Forecast ─────────────────────────────────────────────────────────
 export function useStockForecast(inventory: StockForecastInput[], enabled = true) {
-  return useQuery({
+  return useQuery<ArrayWithMode<StockForecastResult>, Error>({
     queryKey: ['ai', 'stock-forecast', inventory],
     queryFn: async () => {
       const res = await fetch('/api/ai/stock-forecast', {
@@ -18,7 +20,14 @@ export function useStockForecast(inventory: StockForecastInput[], enabled = true
         body: JSON.stringify(inventory),
       });
       if (!res.ok) throw new Error('Stock forecast request failed');
-      return res.json();
+      const data = await res.json();
+      const predictions = (data.predictions || []) as ArrayWithMode<StockForecastResult>;
+      Object.defineProperty(predictions, 'mode', {
+        value: data.mode || 'fallback',
+        writable: true,
+        enumerable: true,
+      });
+      return predictions;
     },
     enabled: enabled && inventory.length > 0,
     staleTime: 5 * 60 * 1000,
@@ -28,7 +37,7 @@ export function useStockForecast(inventory: StockForecastInput[], enabled = true
 
 // ─── Patient Forecast ────────────────────────────────────────────────────────
 export function usePatientForecast(input: PatientForecastInput, enabled = true) {
-  return useQuery({
+  return useQuery<ArrayWithMode<PatientForecastResult>, Error>({
     queryKey: ['ai', 'patient-forecast', input],
     queryFn: async () => {
       const res = await fetch('/api/ai/patient-forecast', {
@@ -37,7 +46,14 @@ export function usePatientForecast(input: PatientForecastInput, enabled = true) 
         body: JSON.stringify(input),
       });
       if (!res.ok) throw new Error('Patient forecast request failed');
-      return res.json();
+      const data = await res.json();
+      const forecasts = (data.forecasts || []) as ArrayWithMode<PatientForecastResult>;
+      Object.defineProperty(forecasts, 'mode', {
+        value: data.mode || 'fallback',
+        writable: true,
+        enumerable: true,
+      });
+      return forecasts;
     },
     enabled,
     staleTime: 5 * 60 * 1000,
@@ -47,7 +63,7 @@ export function usePatientForecast(input: PatientForecastInput, enabled = true) 
 
 // ─── Resource Redistribution ──────────────────────────────────────────────────
 export function useResourceRedistribution(input: ResourceRedistributionInput, enabled = true) {
-  return useQuery({
+  return useQuery<ArrayWithMode<ResourceRedistributionResult>, Error>({
     queryKey: ['ai', 'resource-redistribution', input],
     queryFn: async () => {
       const res = await fetch('/api/ai/resource-redistribution', {
@@ -56,7 +72,14 @@ export function useResourceRedistribution(input: ResourceRedistributionInput, en
         body: JSON.stringify(input),
       });
       if (!res.ok) throw new Error('Resource redistribution request failed');
-      return res.json();
+      const data = await res.json();
+      const recommendations = (data.recommendations || []) as ArrayWithMode<ResourceRedistributionResult>;
+      Object.defineProperty(recommendations, 'mode', {
+        value: data.mode || 'fallback',
+        writable: true,
+        enumerable: true,
+      });
+      return recommendations;
     },
     enabled,
     staleTime: 5 * 60 * 1000,
@@ -66,7 +89,7 @@ export function useResourceRedistribution(input: ResourceRedistributionInput, en
 
 // ─── Hospital Health Score ────────────────────────────────────────────────────
 export function useHealthScore(input: HealthScoreInput, enabled = true) {
-  return useQuery({
+  return useQuery<HealthScoreResult, Error>({
     queryKey: ['ai', 'health-score', input],
     queryFn: async () => {
       const res = await fetch('/api/ai/health-score', {
@@ -85,7 +108,7 @@ export function useHealthScore(input: HealthScoreInput, enabled = true) {
 
 // ─── Doctor Summary ───────────────────────────────────────────────────────────
 export function useDoctorSummaryMutation() {
-  return useMutation({
+  return useMutation<DoctorSummaryResult, Error, DoctorSummaryInput>({
     mutationFn: async (input: DoctorSummaryInput) => {
       const res = await fetch('/api/ai/doctor-summary', {
         method: 'POST',
@@ -101,7 +124,7 @@ export function useDoctorSummaryMutation() {
 
 // ─── District Summary ─────────────────────────────────────────────────────────
 export function useDistrictAISummary(input: DistrictSummaryInput, enabled = true) {
-  return useQuery({
+  return useQuery<DistrictSummaryResult, Error>({
     queryKey: ['ai', 'district-summary', input],
     queryFn: async () => {
       const res = await fetch('/api/ai/district-summary', {
@@ -120,7 +143,7 @@ export function useDistrictAISummary(input: DistrictSummaryInput, enabled = true
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
 export function useAIChatMutation() {
-  return useMutation({
+  return useMutation<ChatResult, Error, ChatInput>({
     mutationFn: async (input: ChatInput) => {
       const res = await fetch('/api/ai/chat', {
         method: 'POST',
