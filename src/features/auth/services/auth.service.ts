@@ -12,62 +12,37 @@ import { UserRole } from '@/config/roles';
 import { UserDocument } from '@/firebase/types';
 import { loginFormSchema } from '@/utils/validators';
 import { z } from 'zod';
+import {
+  validateDoc,
+  userDocSchema,
+  patientProfileSchema,
+  doctorProfileSchema,
+  hospitalProfileSchema,
+  districtProfileSchema
+} from '@/firebase/validation';
 
 type LoginParams = z.infer<typeof loginFormSchema>;
 
 function getProfileCollectionName(role: UserRole): string {
   switch (role) {
-    case 'citizen':
-      return 'patient_profiles';
-    case 'doctor':
-      return 'doctor_profiles';
-    case 'hospital_admin':
-      return 'hospital_profiles';
-    case 'district_admin':
-      return 'district_profiles';
-    default:
-      return 'patient_profiles';
+    case 'citizen':      return 'patient_profiles';
+    case 'doctor':       return 'doctor_profiles';
+    case 'hospital_admin': return 'hospital_profiles';
+    case 'district_admin': return 'district_profiles';
+    default:             return 'patient_profiles';
   }
 }
 
 function getInitialProfileData(role: UserRole, uid: string, fullName: string) {
   switch (role) {
     case 'citizen':
-      return {
-        uid,
-        age: 0,
-        gender: 'other' as const,
-        bloodGroup: '',
-        allergies: [],
-        emergencyContact: '',
-        familyMembers: [],
-      };
+      return { uid, age: 0, gender: 'other' as const, bloodGroup: '', allergies: [], emergencyContact: '', familyMembers: [] };
     case 'doctor':
-      return {
-        uid,
-        hospitalId: '',
-        departmentId: '',
-        specialization: '',
-        qualification: '',
-        consultationFee: 0,
-        availability: [],
-      };
+      return { uid, hospitalId: '', departmentId: '', specialization: '', qualification: '', consultationFee: 0, availability: [] };
     case 'hospital_admin':
-      return {
-        uid,
-        hospitalId: `hosp_${uid.slice(0, 5)}`,
-        hospitalName: `${fullName}'s Hospital`,
-        districtId: '',
-        address: '',
-        location: { lat: 0, lng: 0 },
-      };
+      return { uid, hospitalId: `hosp_${uid.slice(0, 5)}`, hospitalName: `${fullName}'s Hospital`, districtId: '', address: '', location: { lat: 0, lng: 0 } };
     case 'district_admin':
-      return {
-        uid,
-        districtId: `dist_${uid.slice(0, 5)}`,
-        districtName: `${fullName}'s District`,
-        state: '',
-      };
+      return { uid, districtId: `dist_${uid.slice(0, 5)}`, districtName: `${fullName}'s District`, state: '' };
     default:
       return { uid };
   }
@@ -76,16 +51,39 @@ function getInitialProfileData(role: UserRole, uid: string, fullName: string) {
 async function syncCustomClaims(token: string, role: UserRole): Promise<void> {
   const response = await fetch('/api/auth/set-role', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ role }),
   });
-
   if (!response.ok) {
     const errData = await response.json();
     throw new Error(errData.error || 'Failed to sync authentication privileges.');
+  }
+}
+
+/**
+ * Exchange a Firebase ID token for a server-issued HttpOnly session cookie.
+ * Called as the final step of every login/register flow so the cookie is
+ * guaranteed to exist before router.push() navigates to the dashboard.
+ */
+async function createServerSession(token: string): Promise<void> {
+  const response = await fetch('/api/auth/session', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) {
+    throw new Error('Failed to establish server session.');
+  }
+}
+
+/**
+ * Delete the server-issued HttpOnly session cookie.
+ * Never throws — logout must always succeed even if the server is slow.
+ */
+async function deleteServerSession(): Promise<void> {
+  try {
+    await fetch('/api/auth/session', { method: 'DELETE' });
+  } catch {
+    // Intentionally silent — the cookie TTL will expire naturally
   }
 }
 
@@ -94,7 +92,6 @@ export class AuthService {
     const userCredential = await signInWithEmailAndPassword(auth, params.email, params.password);
     const { uid } = userCredential.user;
 
-    // Fetch user document to check status and load claims
     const userDocRef = doc(db, 'users', uid);
     const snap = await getDoc(userDocRef);
 
@@ -110,25 +107,33 @@ export class AuthService {
 
     const role = data.role as UserRole;
 
-    // Ensure custom claims are synchronized
     const idTokenResult = await userCredential.user.getIdTokenResult();
     if (idTokenResult.claims.role !== role) {
       const token = await userCredential.user.getIdToken();
       await syncCustomClaims(token, role);
-      await userCredential.user.getIdToken(true); // force refresh claims
+      await userCredential.user.getIdToken(true);
     }
 
-    return {
-      uid,
-      email: data.email,
-      fullName: data.fullName,
-      role,
-      status: data.status,
-      createdAt: data.createdAt,
-    };
+    // Session cookie must be set before returning so it exists before router.push
+    const finalToken = await userCredential.user.getIdToken();
+    await createServerSession(finalToken);
+
+    return { uid, email: data.email, fullName: data.fullName, role, status: data.status, createdAt: data.createdAt };
   }
 
+  /**
+   * Complete logout:
+   * 1. Delete the HttpOnly session cookie FIRST (before signOut).
+   * 2. Sign out of Firebase (triggers onIdTokenChanged(null) in AuthProvider).
+   *
+   * Deleting the cookie first ensures that if the browser navigates while
+   * onIdTokenChanged is still firing, middleware will not find a valid cookie
+   * and will not allow dashboard access.
+   */
   static async logout(): Promise<void> {
+    // Step 1: clear the server session cookie synchronously before anything else
+    await deleteServerSession();
+    // Step 2: sign out of Firebase client (clears IndexedDB/localStorage state)
     await fbSignOut(auth);
   }
 
@@ -145,34 +150,38 @@ export class AuthService {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const { uid } = userCredential.user;
 
-    // Set displayName on auth profile
     await updateProfile(userCredential.user, { displayName: fullName });
 
-    // Atomic batch write for user metadata and profile setup
+    // Validate User Document
+    const userDoc: UserDocument = { uid, email, fullName, role, status: 'active', createdAt: serverTimestamp() };
+    validateDoc(userDocSchema, { ...userDoc, createdAt: new Date() });
+
+    // Validate Profile Document
+    const initialProfile = getInitialProfileData(role, uid, fullName);
+    if (role === 'citizen') {
+      validateDoc(patientProfileSchema, initialProfile);
+    } else if (role === 'doctor') {
+      validateDoc(doctorProfileSchema, initialProfile);
+    } else if (role === 'hospital_admin') {
+      validateDoc(hospitalProfileSchema, initialProfile);
+    } else if (role === 'district_admin') {
+      validateDoc(districtProfileSchema, initialProfile);
+    }
+
     const batch = writeBatch(db);
-
     const userDocRef = doc(db, 'users', uid);
-    const userDoc: UserDocument = {
-      uid,
-      email,
-      fullName,
-      role,
-      status: 'active',
-      createdAt: serverTimestamp(),
-    };
-
     batch.set(userDocRef, userDoc);
 
-    const profileColl = getProfileCollectionName(role);
-    const profileDocRef = doc(db, profileColl, uid);
-    batch.set(profileDocRef, getInitialProfileData(role, uid, fullName));
-
+    const profileDocRef = doc(db, getProfileCollectionName(role), uid);
+    batch.set(profileDocRef, initialProfile);
     await batch.commit();
 
-    // Sync custom claims on server and force-refresh client token
     const token = await userCredential.user.getIdToken();
     await syncCustomClaims(token, role);
     await userCredential.user.getIdToken(true);
+
+    const finalToken = await userCredential.user.getIdToken();
+    await createServerSession(finalToken);
 
     return userDoc;
   }
@@ -182,9 +191,7 @@ export class AuthService {
     const userCredential = await signInWithPopup(auth, provider);
     const { uid, email, displayName } = userCredential.user;
 
-    if (!email) {
-      throw new Error('Google account is missing an email address.');
-    }
+    if (!email) throw new Error('Google account is missing an email address.');
 
     const userDocRef = doc(db, 'users', uid);
     const snap = await getDoc(userDocRef);
@@ -204,40 +211,35 @@ export class AuthService {
         await userCredential.user.getIdToken(true);
       }
 
-      return {
-        uid,
-        email: data.email,
-        fullName: data.fullName,
-        role,
-        status: data.status,
-        createdAt: data.createdAt,
-      };
+      const finalToken = await userCredential.user.getIdToken();
+      await createServerSession(finalToken);
+
+      return { uid, email: data.email, fullName: data.fullName, role, status: data.status, createdAt: data.createdAt };
     }
 
-    // New Google Signup - Initialize as default citizen
+    // New Google sign-up
     const fullName = displayName || 'Google User';
     const role: UserRole = 'citizen';
+
+    // Validate User Document
+    const userDoc: UserDocument = { uid, email, fullName, role, status: 'active', createdAt: serverTimestamp() };
+    validateDoc(userDocSchema, { ...userDoc, createdAt: new Date() });
+
+    // Validate Patient Profile
+    const initialProfile = getInitialProfileData(role, uid, fullName);
+    validateDoc(patientProfileSchema, initialProfile);
+
     const batch = writeBatch(db);
-
-    const userDoc: UserDocument = {
-      uid,
-      email,
-      fullName,
-      role,
-      status: 'active',
-      createdAt: serverTimestamp(),
-    };
-
     batch.set(userDocRef, userDoc);
-
-    const profileDocRef = doc(db, 'patient_profiles', uid);
-    batch.set(profileDocRef, getInitialProfileData(role, uid, fullName));
-
+    batch.set(doc(db, 'patient_profiles', uid), initialProfile);
     await batch.commit();
 
     const token = await userCredential.user.getIdToken();
     await syncCustomClaims(token, role);
     await userCredential.user.getIdToken(true);
+
+    const finalToken = await userCredential.user.getIdToken();
+    await createServerSession(finalToken);
 
     return userDoc;
   }

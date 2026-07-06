@@ -19,6 +19,16 @@ import {
   PrescriptionDocument,
   UserDocument,
 } from '@/firebase/types';
+import {
+  validateDoc,
+  patientProfileSchema,
+  doctorProfileSchema,
+  hospitalProfileSchema,
+  appointmentSchema,
+  prescriptionSchema,
+  labReportSchema,
+  notificationSchema,
+} from '@/firebase/validation';
 
 export interface CombinedPatientProfile extends PatientProfileDocument {
   fullName: string;
@@ -93,20 +103,46 @@ export class CitizenService {
     const userDocRef = doc(db, 'users', uid);
     const profileDocRef = doc(db, 'patient_profiles', uid);
 
+    const [userSnap, profileSnap] = await Promise.all([
+      getDoc(userDocRef),
+      getDoc(profileDocRef),
+    ]);
+
+    if (!userSnap.exists()) {
+      throw new Error('User account not found.');
+    }
+
+    const currentProfile = profileSnap.exists()
+      ? (profileSnap.data() as PatientProfileDocument)
+      : {
+          uid,
+          age: 0,
+          gender: 'other' as const,
+          bloodGroup: '',
+          allergies: [],
+          emergencyContact: '',
+          familyMembers: [],
+        };
+
+    const updatedProfile: PatientProfileDocument = {
+      uid,
+      age: data.age !== undefined ? data.age : currentProfile.age,
+      gender: data.gender !== undefined ? data.gender : currentProfile.gender,
+      bloodGroup: data.bloodGroup !== undefined ? data.bloodGroup : currentProfile.bloodGroup,
+      allergies: data.allergies !== undefined ? data.allergies : currentProfile.allergies,
+      emergencyContact: data.emergencyContact !== undefined ? data.emergencyContact : currentProfile.emergencyContact,
+      familyMembers: currentProfile.familyMembers || [],
+    };
+
+    validateDoc(patientProfileSchema, updatedProfile);
+
     const batch = writeBatch(db);
 
     if (data.fullName) {
       batch.update(userDocRef, { fullName: data.fullName });
     }
 
-    const profileUpdate: Partial<PatientProfileDocument> = {};
-    if (data.age !== undefined) profileUpdate.age = data.age;
-    if (data.gender !== undefined) profileUpdate.gender = data.gender;
-    if (data.bloodGroup !== undefined) profileUpdate.bloodGroup = data.bloodGroup;
-    if (data.allergies !== undefined) profileUpdate.allergies = data.allergies;
-    if (data.emergencyContact !== undefined) profileUpdate.emergencyContact = data.emergencyContact;
-
-    batch.set(profileDocRef, profileUpdate, { merge: true });
+    batch.set(profileDocRef, updatedProfile);
 
     await batch.commit();
   }
@@ -127,8 +163,20 @@ export class CitizenService {
     const profile = await this.getProfile(uid);
     const currentMembers = profile.familyMembers || [];
 
-    await updateDoc(profileDocRef, {
+    const updatedProfile: PatientProfileDocument = {
+      uid,
+      age: profile.age,
+      gender: profile.gender,
+      bloodGroup: profile.bloodGroup,
+      allergies: profile.allergies,
+      emergencyContact: profile.emergencyContact,
       familyMembers: [...currentMembers, member],
+    };
+
+    validateDoc(patientProfileSchema, updatedProfile);
+
+    await updateDoc(profileDocRef, {
+      familyMembers: updatedProfile.familyMembers,
     });
   }
 
@@ -139,8 +187,20 @@ export class CitizenService {
       (m) => m.fullName !== fullName
     );
 
-    await updateDoc(profileDocRef, {
+    const updatedProfile: PatientProfileDocument = {
+      uid,
+      age: profile.age,
+      gender: profile.gender,
+      bloodGroup: profile.bloodGroup,
+      allergies: profile.allergies,
+      emergencyContact: profile.emergencyContact,
       familyMembers: filteredMembers,
+    };
+
+    validateDoc(patientProfileSchema, updatedProfile);
+
+    await updateDoc(profileDocRef, {
+      familyMembers: updatedProfile.familyMembers,
     });
   }
 
@@ -180,6 +240,7 @@ export class CitizenService {
 
       const batch = writeBatch(db);
       for (const hosp of seedHospitals) {
+        validateDoc(hospitalProfileSchema, hosp);
         const docRef = doc(db, 'hospital_profiles', hosp.hospitalId);
         batch.set(docRef, hosp);
       }
@@ -248,6 +309,7 @@ export class CitizenService {
           consultationFee: docObj.consultationFee,
           availability: docObj.availability,
         };
+        validateDoc(doctorProfileSchema, profileOnly);
         batch.set(profileRef, profileOnly);
 
         // Save user record
@@ -325,6 +387,8 @@ export class CitizenService {
       createdAt: new Date().toISOString(),
     };
 
+    validateDoc(appointmentSchema, appointment);
+
     await setDoc(docRef, appointment);
     return appointment;
   }
@@ -340,6 +404,20 @@ export class CitizenService {
     time: string
   ): Promise<void> {
     const docRef = doc(db, 'appointments', appointmentId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      throw new Error('Appointment not found.');
+    }
+    const currentAppt = docSnap.data() as AppointmentDocument;
+    const updatedAppt = {
+      ...currentAppt,
+      appointmentDate: date,
+      appointmentTime: time,
+      status: 'scheduled' as const,
+    };
+
+    validateDoc(appointmentSchema, updatedAppt);
+
     await updateDoc(docRef, {
       appointmentDate: date,
       appointmentTime: time,
@@ -367,6 +445,8 @@ export class CitizenService {
         labTests: ['Complete Blood Count (CBC)', 'Electrocardiogram (ECG)'],
         createdAt: new Date().toISOString(),
       };
+
+      validateDoc(prescriptionSchema, samplePrescription);
 
       await setDoc(doc(db, 'prescriptions', samplePrescription.prescriptionId), samplePrescription);
       return [samplePrescription];
@@ -412,6 +492,7 @@ export class CitizenService {
 
       const batch = writeBatch(db);
       for (const r of sampleReports) {
+        validateDoc(labReportSchema, r);
         batch.set(doc(db, 'lab_reports', r.id), r);
       }
       await batch.commit();
@@ -448,6 +529,7 @@ export class CitizenService {
 
       const batch = writeBatch(db);
       for (const n of sampleNotifications) {
+        validateDoc(notificationSchema, n);
         batch.set(doc(db, 'notifications', n.id), n);
       }
       await batch.commit();

@@ -25,9 +25,14 @@ import { UserRole, isValidRole } from './config/roles';
 // routes are always re-verified server-side with adminAuth.verifySessionCookie().
 // ──────────────────────────────────────────────────────────────────────────────
 
-function decodeSessionCookieClaims(
-  cookie: string
-): { uid?: string; role?: string; exp?: number } | null {
+interface SessionClaims {
+  uid?: string;  // present in Firebase ID tokens
+  sub?: string;  // present in Firebase session cookies (same value as uid)
+  role?: string;
+  exp?: number;
+}
+
+function decodeSessionCookieClaims(cookie: string): SessionClaims | null {
   try {
     const parts = cookie.split('.');
     if (parts.length !== 3) return null;
@@ -46,6 +51,11 @@ function decodeSessionCookieClaims(
   }
 }
 
+/** Returns the subject UID from either `uid` or `sub` (Firebase session cookies use `sub`). */
+function getSubjectId(claims: SessionClaims): string | undefined {
+  return claims.uid || claims.sub;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -61,20 +71,22 @@ export function middleware(request: NextRequest) {
     }
 
     const claims = decodeSessionCookieClaims(sessionCookie);
+    const subjectId = claims ? getSubjectId(claims) : undefined;
 
-    // Check expiry and basic structural validity
-    if (!claims || !claims.uid || (claims.exp && claims.exp * 1000 < Date.now())) {
+    // Check expiry and basic structural validity.
+    // Use sub || uid — Firebase session cookies carry the UID in `sub`.
+    if (!claims || !subjectId || (claims.exp && claims.exp * 1000 < Date.now())) {
       const response = NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete(APP_CONFIG.sessionCookieName);
       return response;
     }
 
-    // Validate role before using it — reject tokens with unrecognised roles
+    // Validate role before using it — reject tokens with unrecognised roles.
+    // Do NOT delete the cookie here: it may be a valid session created just before
+    // role claims were propagated. Redirect to login so the client can re-establish.
     const rawRole = claims.role;
     if (!rawRole || !isValidRole(rawRole)) {
-      const response = NextResponse.redirect(new URL('/unauthorized', request.url));
-      response.cookies.delete(APP_CONFIG.sessionCookieName);
-      return response;
+      return NextResponse.redirect(new URL('/login', request.url));
     }
 
     const role = rawRole as UserRole;
@@ -114,13 +126,16 @@ export function middleware(request: NextRequest) {
   // 2. Redirect already-authenticated users away from auth pages
   if (sessionCookie && (pathname === '/login' || pathname === '/register')) {
     const claims = decodeSessionCookieClaims(sessionCookie);
-    if (claims && claims.uid && (!claims.exp || claims.exp * 1000 > Date.now())) {
+    const subjectId = claims ? getSubjectId(claims) : undefined;
+    if (claims && subjectId && (!claims.exp || claims.exp * 1000 > Date.now())) {
       const rawRole = claims.role;
       if (rawRole && isValidRole(rawRole)) {
         return NextResponse.redirect(
           new URL(getHomeRouteForRole(rawRole as UserRole), request.url)
         );
       }
+      // If role claim is absent but session is valid, let them through to login
+      // so the client can re-establish the session with a fresh token
     }
   }
 

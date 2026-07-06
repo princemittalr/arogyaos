@@ -18,6 +18,11 @@ import {
   UserDocument,
   PatientProfileDocument,
 } from '@/firebase/types';
+import {
+  validateDoc,
+  doctorProfileSchema,
+  prescriptionSchema
+} from '@/firebase/validation';
 
 export interface DetailedDoctorProfile extends DoctorProfileDocument {
   fullName: string;
@@ -93,7 +98,7 @@ export interface FollowUpDocument {
 
 export class DoctorService {
   static async getProfile(uid: string): Promise<DetailedDoctorProfile> {
-    const docRef = doc(db, 'doctors', uid);
+    const docRef = doc(db, 'doctor_profiles', uid);
     let docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
@@ -112,6 +117,7 @@ export class DoctorService {
           { dayOfWeek: 5, startTime: '09:00', endTime: '17:00' },
         ],
       };
+      validateDoc(doctorProfileSchema, defaultProfile);
       await setDoc(docRef, defaultProfile);
       docSnap = await getDoc(docRef);
 
@@ -140,16 +146,28 @@ export class DoctorService {
   }
 
   static async updateProfile(uid: string, data: Partial<DetailedDoctorProfile>): Promise<void> {
-    const docRef = doc(db, 'doctors', uid);
-    const profileUpdates: Partial<DoctorProfileDocument> = {};
-    if (data.specialization !== undefined) profileUpdates.specialization = data.specialization;
-    if (data.qualification !== undefined) profileUpdates.qualification = data.qualification;
-    if (data.consultationFee !== undefined) profileUpdates.consultationFee = data.consultationFee;
-    if (data.availability !== undefined) profileUpdates.availability = data.availability;
-
-    if (Object.keys(profileUpdates).length > 0) {
-      await updateDoc(docRef, profileUpdates);
+    const docRef = doc(db, 'doctor_profiles', uid);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      throw new Error('Doctor profile not found.');
     }
+    const currentProfile = docSnap.data() as DoctorProfileDocument;
+    const updatedProfile = {
+      ...currentProfile,
+      specialization: data.specialization !== undefined ? data.specialization : currentProfile.specialization,
+      qualification: data.qualification !== undefined ? data.qualification : currentProfile.qualification,
+      consultationFee: data.consultationFee !== undefined ? data.consultationFee : currentProfile.consultationFee,
+      availability: data.availability !== undefined ? data.availability : currentProfile.availability,
+    };
+
+    validateDoc(doctorProfileSchema, updatedProfile);
+
+    await updateDoc(docRef, {
+      specialization: updatedProfile.specialization,
+      qualification: updatedProfile.qualification,
+      consultationFee: updatedProfile.consultationFee,
+      availability: updatedProfile.availability,
+    });
 
     const userUpdates: { fullName?: string } = {};
     if (data.fullName !== undefined) userUpdates.fullName = data.fullName;
@@ -257,7 +275,19 @@ export class DoctorService {
       followUpDate?: string;
     }
   ): Promise<void> {
-    const batch = writeBatch(db);
+    // Validate appointment exists and is not already completed/cancelled
+    const apptRef = doc(db, 'appointments', appointmentId);
+    const apptSnap = await getDoc(apptRef);
+    if (!apptSnap.exists()) {
+      throw new Error('Appointment does not exist.');
+    }
+    const apptData = apptSnap.data();
+    if (apptData.status === 'completed') {
+      throw new Error('This appointment has already been completed.');
+    }
+    if (apptData.status === 'cancelled') {
+      throw new Error('This appointment has been cancelled.');
+    }
 
     // 1. Create prescription document
     const prescriptionId = `presc_${Date.now()}`;
@@ -272,6 +302,9 @@ export class DoctorService {
       labTests: data.labTests || [],
       createdAt: new Date().toISOString(),
     };
+    validateDoc(prescriptionSchema, prescription);
+
+    const batch = writeBatch(db);
     batch.set(prescRef, prescription);
 
     // 2. Create lab orders if needed
@@ -315,7 +348,6 @@ export class DoctorService {
     }
 
     // 4. Update appointment status to completed
-    const apptRef = doc(db, 'appointments', appointmentId);
     batch.update(apptRef, {
       status: 'completed',
       diagnosis: data.diagnosis,

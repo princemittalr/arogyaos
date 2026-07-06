@@ -1,6 +1,13 @@
-import { doc, getDocs, collection, query, where, writeBatch, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, query, where, writeBatch, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { DistrictProfileDocument } from '@/firebase/types';
+import {
+  validateDoc,
+  districtFacilitySchema,
+  aiRecommendationSchema,
+  redistributionProposalSchema,
+  districtAlertSchema,
+} from '@/firebase/validation';
 
 export interface DistrictFacility {
   facilityId: string;
@@ -106,15 +113,39 @@ export class DistrictService {
 
   static async resolveProposal(proposalId: string, action: 'approve' | 'reject'): Promise<void> {
     const docRef = doc(db, 'district_redistributions', proposalId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      throw new Error('Proposal not found.');
+    }
+    const currentProposal = docSnap.data() as RedistributionProposal;
+    const updatedProposal = {
+      ...currentProposal,
+      status: (action === 'approve' ? 'approved' : 'rejected') as 'approved' | 'rejected',
+    };
+
+    validateDoc(redistributionProposalSchema, updatedProposal);
+
     await updateDoc(docRef, {
-      status: action === 'approve' ? 'approved' : 'rejected',
+      status: updatedProposal.status,
     });
   }
 
   static async resolveRecommendation(recId: string): Promise<void> {
     const docRef = doc(db, 'district_recommendations', recId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      throw new Error('Recommendation not found.');
+    }
+    const currentRecommendation = docSnap.data() as AIRecommendation;
+    const updatedRecommendation = {
+      ...currentRecommendation,
+      status: 'reviewed' as const,
+    };
+
+    validateDoc(aiRecommendationSchema, updatedRecommendation);
+
     await updateDoc(docRef, {
-      status: 'reviewed',
+      status: updatedRecommendation.status,
     });
   }
 
@@ -302,6 +333,7 @@ export class DistrictService {
     ];
 
     facilities.forEach((f) => {
+      validateDoc(districtFacilitySchema, f);
       batch.set(doc(db, 'district_facilities', f.facilityId), f);
     });
 
@@ -358,6 +390,7 @@ export class DistrictService {
     ];
 
     recs.forEach((r) => {
+      validateDoc(aiRecommendationSchema, r);
       batch.set(doc(db, 'district_recommendations', r.recId), r);
     });
 
@@ -396,6 +429,7 @@ export class DistrictService {
     ];
 
     proposals.forEach((p) => {
+      validateDoc(redistributionProposalSchema, p);
       batch.set(doc(db, 'district_redistributions', p.proposalId), p);
     });
 
@@ -431,6 +465,7 @@ export class DistrictService {
     ];
 
     alerts.forEach((a) => {
+      validateDoc(districtAlertSchema, a);
       batch.set(doc(db, 'district_alerts', a.alertId), a);
     });
 

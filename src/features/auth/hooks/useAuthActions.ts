@@ -72,8 +72,12 @@ export function useAuthActions() {
   const logoutMutation = useMutation({
     mutationFn: () => AuthService.logout(),
     onSuccess: () => {
+      // Clear the ENTIRE React Query cache so no stale data from the previous
+      // user can ever be served to the next authenticated session.
+      queryClient.clear();
       toast.success('Signed out successfully');
-      queryClient.setQueryData(['auth_user'], null);
+      // Navigate only AFTER the cache is cleared and the server session cookie
+      // has been deleted (AuthService.logout awaits deleteServerSession first).
       router.push('/login');
     },
     onError: (error: unknown) => {

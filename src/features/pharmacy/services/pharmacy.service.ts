@@ -1,5 +1,6 @@
 import {
   doc,
+  getDoc,
   getDocs,
   setDoc,
   updateDoc,
@@ -8,9 +9,11 @@ import {
   query,
   where,
   writeBatch,
+  runTransaction,
 } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { PrescriptionDocument } from '@/firebase/types';
+import { validateDoc, inventoryItemSchema } from '@/firebase/validation';
 
 export interface InventoryItem {
   inventoryId: string;
@@ -52,7 +55,7 @@ export class PharmacyService {
     await this.ensureSeededData(hospitalId);
 
     const q = query(
-      collection(db, 'inventories'),
+      collection(db, 'inventory'),
       where('hospitalId', '==', hospitalId)
     );
     const snap = await getDocs(q);
@@ -71,7 +74,9 @@ export class PharmacyService {
       createdAt: new Date().toISOString(),
     };
 
-    await setDoc(doc(db, 'inventories', inventoryId), newItem);
+    validateDoc(inventoryItemSchema, newItem);
+
+    await setDoc(doc(db, 'inventory', inventoryId), newItem);
     return newItem;
   }
 
@@ -79,12 +84,24 @@ export class PharmacyService {
     inventoryId: string,
     data: Partial<Omit<InventoryItem, 'inventoryId' | 'hospitalId'>>
   ): Promise<void> {
-    const docRef = doc(db, 'inventories', inventoryId);
+    const docRef = doc(db, 'inventory', inventoryId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      throw new Error('Inventory item not found.');
+    }
+    const currentItem = docSnap.data() as InventoryItem;
+    const updatedItem = {
+      ...currentItem,
+      ...data,
+    };
+
+    validateDoc(inventoryItemSchema, updatedItem);
+
     await updateDoc(docRef, data);
   }
 
   static async deleteInventoryItem(inventoryId: string): Promise<void> {
-    const docRef = doc(db, 'inventories', inventoryId);
+    const docRef = doc(db, 'inventory', inventoryId);
     await deleteDoc(docRef);
   }
 
@@ -96,60 +113,72 @@ export class PharmacyService {
     dispensedBy: string,
     medicinesToDispense: Array<{ medicineId: string; quantity: number }>
   ): Promise<void> {
-    const batch = writeBatch(db);
-
-    // 1. Fetch inventory items to validate stock
+    // 1. Fetch inventory items first to retrieve document IDs
     const inventoriesQ = query(
-      collection(db, 'inventories'),
+      collection(db, 'inventory'),
       where('hospitalId', '==', hospitalId)
     );
     const snap = await getDocs(inventoriesQ);
     const inventoryList = snap.docs.map((d) => d.data() as InventoryItem);
 
-    for (const item of medicinesToDispense) {
-      const invItem = inventoryList.find((inv) => inv.medicineId === item.medicineId);
-      if (!invItem) {
-        throw new Error(`Medicine not found in inventory.`);
+    // 2. Perform validation and updates atomically within a transaction to prevent race conditions
+    await runTransaction(db, async (transaction) => {
+      const currentInventoryDocs = [];
+
+      for (const item of medicinesToDispense) {
+        const invItem = inventoryList.find((inv) => inv.medicineId === item.medicineId);
+        if (!invItem) {
+          throw new Error(`Medicine not found in inventory.`);
+        }
+
+        const invRef = doc(db, 'inventory', invItem.inventoryId);
+        const invSnap = await transaction.get(invRef);
+        if (!invSnap.exists()) {
+          throw new Error(`Inventory record for ${invItem.medicineName} not found.`);
+        }
+
+        const invData = invSnap.data() as InventoryItem;
+        if (invData.quantity < item.quantity) {
+          throw new Error(`Insufficient stock for ${invData.medicineName}. Requested: ${item.quantity}, Available: ${invData.quantity}`);
+        }
+
+        currentInventoryDocs.push({
+          ref: invRef,
+          currentQty: invData.quantity,
+          dispenseQty: item.quantity,
+          name: invData.medicineName,
+          medicineId: item.medicineId,
+        });
       }
-      if (invItem.quantity < item.quantity) {
-        throw new Error(`Insufficient stock for ${invItem.medicineName}. Requested: ${item.quantity}, Available: ${invItem.quantity}`);
+
+      // Perform all mutations after all gets/reads are complete
+      for (const docInfo of currentInventoryDocs) {
+        transaction.update(docInfo.ref, {
+          quantity: docInfo.currentQty - docInfo.dispenseQty,
+        });
       }
 
-      // Deduct stock
-      const invRef = doc(db, 'inventories', invItem.inventoryId);
-      batch.update(invRef, {
-        quantity: invItem.quantity - item.quantity,
-      });
-    }
+      // Write dispensation log
+      const dispenseId = `disp_${Date.now()}`;
+      const logRef = doc(db, 'dispensation_logs', dispenseId);
 
-    // 2. Write dispensation log
-    const dispenseId = `disp_${Date.now()}`;
-    const logRef = doc(db, 'dispensation_logs', dispenseId);
-
-    // Look up detailed medicine names for log
-    const mappedMedicines = medicinesToDispense.map((m) => {
-      const invItem = inventoryList.find((inv) => inv.medicineId === m.medicineId);
-      return {
-        medicineId: m.medicineId,
-        name: invItem?.medicineName || 'Unknown Medicine',
-        quantity: m.quantity,
+      const log: DispensationLog = {
+        dispenseId,
+        prescriptionId,
+        patientId,
+        patientName,
+        hospitalId,
+        medicines: currentInventoryDocs.map((docInfo) => ({
+          medicineId: docInfo.medicineId,
+          name: docInfo.name,
+          quantity: docInfo.dispenseQty,
+        })),
+        dispensedAt: new Date().toISOString(),
+        dispensedBy,
       };
+
+      transaction.set(logRef, log);
     });
-
-    const log: DispensationLog = {
-      dispenseId,
-      prescriptionId,
-      patientId,
-      patientName,
-      hospitalId,
-      medicines: mappedMedicines,
-      dispensedAt: new Date().toISOString(),
-      dispensedBy,
-    };
-    batch.set(logRef, log);
-
-    // 3. Mark prescription status if applicable (simulated here since prescriptions collection has no status, we can log it)
-    await batch.commit();
   }
 
   static async getDispenseHistory(hospitalId: string): Promise<DispensationLog[]> {
@@ -163,7 +192,7 @@ export class PharmacyService {
 
   static async ensureSeededData(hospitalId: string): Promise<void> {
     const q = query(
-      collection(db, 'inventories'),
+      collection(db, 'inventory'),
       where('hospitalId', '==', hospitalId)
     );
     const snap = await getDocs(q);
@@ -207,7 +236,9 @@ export class PharmacyService {
           status: 'active',
         };
 
-        batch.set(doc(db, 'inventories', invId), invDoc);
+        validateDoc(inventoryItemSchema, invDoc);
+
+        batch.set(doc(db, 'inventory', invId), invDoc);
       }
 
       // Seed a few initial dispense history records

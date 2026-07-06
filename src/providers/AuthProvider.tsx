@@ -24,8 +24,8 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 /**
  * Exchange a Firebase ID token for a server-set HttpOnly session cookie.
- * The cookie is written by the server — never by client-side JS — so it
- * cannot be stolen by XSS.
+ * Used here for automatic hourly token refreshes that Firebase performs.
+ * Initial session creation on login/register is handled in auth.service.ts.
  */
 async function createServerSession(idToken: string): Promise<void> {
   const response = await fetch('/api/auth/session', {
@@ -33,23 +33,34 @@ async function createServerSession(idToken: string): Promise<void> {
     headers: { Authorization: `Bearer ${idToken}` },
   });
   if (!response.ok) {
-    throw new Error('Failed to create server session');
+    throw new Error('Failed to refresh server session');
   }
 }
 
 /**
- * Ask the server to clear the HttpOnly session cookie.
+ * Delete the server HttpOnly session cookie.
+ * AuthService.logout() calls this first. This is a safety-net for edge cases
+ * (e.g. token expiry detected by onIdTokenChanged before an explicit logout).
  */
-async function clearServerSession(): Promise<void> {
-  await fetch('/api/auth/session', { method: 'DELETE' });
+async function deleteServerSession(): Promise<void> {
+  try {
+    await fetch('/api/auth/session', { method: 'DELETE' });
+  } catch {
+    // Intentionally silent
+  }
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [fbUser, setFbUser] = useState<FirebaseUser | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  // Track last token to avoid redundant session refreshes
-  const lastTokenRef = useRef<string | null>(null);
+
+  // Track the last token we issued a server session for to deduplicate calls.
+  // auth.service.ts creates the initial session; we only update it on token refresh.
+  const lastSessionTokenRef = useRef<string | null>(null);
+  // Guard: track whether we are currently in a logout flow to prevent
+  // onIdTokenChanged from re-creating a session while logout is in progress.
+  const isLoggingOutRef = useRef(false);
 
   useEffect(() => {
     const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
@@ -57,50 +68,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setFbUser(firebaseUser);
 
       if (firebaseUser) {
+        // Do not create a new session if we are in the middle of a logout flow.
+        // This prevents the stale-token race: fbSignOut fires onIdTokenChanged
+        // once more before the SDK fully clears state.
+        if (isLoggingOutRef.current) {
+          setLoading(false);
+          return;
+        }
+
         try {
-          // Fetch user metadata from Firestore
           const userDocRef = doc(db, 'users', firebaseUser.uid);
           const snap = await getDoc(userDocRef);
 
           if (snap.exists()) {
             const data = snap.data();
-            const profileUser: AuthUser = {
+            setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               fullName: data.fullName || firebaseUser.displayName || 'Healthcare User',
               role: data.role as UserRole,
               status: data.status || 'active',
-            };
-            setUser(profileUser);
+            });
 
-            // Exchange the Firebase ID token for a server-issued HttpOnly session cookie.
-            // The token is never written to document.cookie by the client.
+            // Only refresh the server session when the Firebase token actually
+            // changes (i.e., on automatic hourly refresh). The initial session
+            // was already created in auth.service.ts before router.push fired.
             const idToken = await firebaseUser.getIdToken();
-            if (idToken !== lastTokenRef.current) {
-              lastTokenRef.current = idToken;
+            if (idToken !== lastSessionTokenRef.current) {
+              lastSessionTokenRef.current = idToken;
               await createServerSession(idToken);
             }
           } else {
-            // Fallback during new registration before Firestore record exists
-            const fallbackUser: AuthUser = {
+            // Transient state during new registration (batch.commit in progress)
+            setUser({
               uid: firebaseUser.uid,
               email: firebaseUser.email,
               fullName: firebaseUser.displayName || 'Healthcare User',
               role: 'citizen',
               status: 'active',
-            };
-            setUser(fallbackUser);
+            });
           }
         } catch {
-          // Avoid logging error objects that may contain token data
           setUser(null);
-          await clearServerSession();
+          lastSessionTokenRef.current = null;
+          await deleteServerSession();
         }
       } else {
+        // Firebase has fully signed out the user.
         setUser(null);
-        lastTokenRef.current = null;
-        // Ask the server to clear the HttpOnly session cookie
-        await clearServerSession();
+        lastSessionTokenRef.current = null;
+        isLoggingOutRef.current = false; // reset for next login cycle
+
+        // Safety-net: delete the server cookie in case AuthService.logout()
+        // was not the initiator (e.g., token revocation by Firebase Console).
+        await deleteServerSession();
       }
 
       setLoading(false);
