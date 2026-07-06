@@ -1,211 +1,190 @@
-'use client';import { useLanguage } from "@/providers/LanguageProvider";
+'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
-import { usePrescriptions, useDoctors } from '@/features/citizen/hooks/useCitizen';
+import { usePrescriptions } from '@/features/prescriptions/hooks/usePrescriptions';
+import { ActiveMedicationDashboard } from '@/features/prescriptions/components/ActiveMedicationDashboard';
+import { MedicationTimeline } from '@/features/prescriptions/components/MedicationTimeline';
+import { PrescriptionFilterBar } from '@/features/prescriptions/components/PrescriptionFilterBar';
+import { PrescriptionRow } from '@/features/prescriptions/components/PrescriptionRow';
+import { PrescriptionDetailDrawer } from '@/features/prescriptions/components/PrescriptionDetailDrawer';
 import { PageHeader, LoadingState, EmptyState } from '@/features/shared';
-import { componentStyles } from '@/design-system/components';
 import { icons } from '@/design-system/icons';
-import { toast } from 'sonner';
 import { motion } from 'framer-motion';
-import { Download } from 'lucide-react';
+import { PrescriptionRecord, PrescriptionStatus } from '@/features/prescriptions/types';
 
-export default function CitizenPrescriptionsPage() {const { t } = useLanguage();
+export default function CitizenPrescriptionsPage() {
+  const { t } = useLanguage();
   const { user } = useAuth();
   const uid = user?.uid || '';
+  const fullName = user?.fullName || 'Patient';
 
-  // Queries
-  const { data: prescriptions, isLoading: rxLoading } = usePrescriptions(uid);
-  const { data: doctors, isLoading: docsLoading } = useDoctors();
+  // 1. Fetch prescriptions via new query hook
+  const { prescriptions, isLoading, archive, restore } = usePrescriptions(uid);
 
-  const isLoading = rxLoading || docsLoading;
+  // 2. State for filters and detail drawer
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<PrescriptionStatus | 'all'>('all');
+  const [sortBy, setSortBy] = useState('newest');
+  const [selectedPrescription, setSelectedPrescription] = useState<PrescriptionRecord | null>(null);
 
   if (isLoading) {
     return <LoadingState variant="table" rows={4} />;
   }
 
-  const handleDownloadPDF = (rx: typeof prescriptions extends (infer T)[] | undefined ? T : never) => {
-    const doctorMatch = doctors?.find((d) => d.uid === rx.doctorId);
-    const patientName = user?.fullName || 'Patient';
-    const doctorName = doctorMatch?.doctorName || 'Healthcare Specialist';
-    const hospitalName = doctorMatch?.hospitalName || 'ArogyaOS Medical Center';
-    const date = typeof rx.createdAt === 'string' ?
-    rx.createdAt :
-    (rx.createdAt as {toDate?: () => Date;})?.toDate ?
-    (rx.createdAt as {toDate: () => Date;}).toDate().toLocaleDateString() :
-    new Date().toLocaleDateString();
+  // 3. Client-side filtering & sorting logic
+  const filteredPrescriptions = prescriptions
+    .filter((rx) => {
+      // Search matches
+      const matchesSearch =
+        searchQuery === '' ||
+        rx.diagnosis.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        rx.doctorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        rx.hospitalName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        rx.medicines.some((m) => m.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const medicineRows = rx.medicines.map((m) =>
-    `<tr style="border-bottom:1px solid #e2e8f0">
-        <td style="padding:10px 14px;font-weight:600">${m.name}</td>
-        <td style="padding:10px 14px">${m.dosage}</td>
-        <td style="padding:10px 14px">${m.frequency}</td>
-        <td style="padding:10px 14px">${m.duration} days</td>
-      </tr>`
-    ).join('');
+      // Status matches
+      const matchesStatus = selectedStatus === 'all' || rx.status === selectedStatus;
 
-    const html = `<!DOCTYPE html><html><head><title>Prescription – ${rx.prescriptionId}</title>
-    <style>body{font-family:system-ui,sans-serif;margin:0;padding:40px;color:#0f172a}
-    h1{color:#1d4ed8;font-size:22px;margin-bottom:4px}.sub{color:#64748b;font-size:13px}
-    .card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin:20px 0}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    th{background:#1d4ed8;color:white;padding:10px 14px;text-align:left}
-    .badge{display:inline-block;background:#dbeafe;color:#1d4ed8;padding:2px 10px;border-radius:99px;font-size:12px;font-weight:700}
-    .row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
-    .label{color:#64748b}.qr{width:80px;height:80px;background:#e2e8f0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#94a3b8}
-    @media print{body{padding:20px}}</style></head>
-    <body>
-      <div style="display:flex;justify-content:space-between;align-items:start">
-        <div>
-          <h1>🏥 ArogyaOS Prescription</h1>
-          <p class="sub">Official Medical Prescription Document</p>
-          <span class="badge">Rx #${rx.prescriptionId.slice(-8).toUpperCase()}</span>
-        </div>
-        <div class="qr">QR Code</div>
-      </div>
-      <div class="card">
-        <div class="row"><span class="label">Patient</span><strong>${patientName}</strong></div>
-        <div class="row"><span class="label">Doctor</span><strong>${doctorName}</strong></div>
-        <div class="row"><span class="label">Hospital</span><strong>${hospitalName}</strong></div>
-        <div class="row"><span class="label">Diagnosis</span><strong>${rx.diagnosis}</strong></div>
-        <div class="row"><span class="label">Date</span><strong>${date}</strong></div>
-      </div>
-      <h3 style="font-size:14px;color:#475569;margin-bottom:8px">PRESCRIBED MEDICINES</h3>
-      <table><thead><tr><th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Duration</th></tr></thead>
-      <tbody>${medicineRows}</tbody></table>
-      ${rx.labTests && rx.labTests.length > 0 ? `<div class="card" style="margin-top:20px"><strong>Lab Investigations:</strong> ${rx.labTests.join(', ')}</div>` : ''}
-      <p style="font-size:11px;color:#94a3b8;margin-top:30px;text-align:center">Generated by ArogyaOS · ${new Date().toLocaleString()}</p>
-    </body></html>`;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      const getMs = (dateVal: unknown) => {
+        if (!dateVal) return 0;
+        if (typeof dateVal === 'object' && 'toDate' in dateVal) {
+          const obj = dateVal as { toDate?: () => unknown };
+          if (typeof obj.toDate === 'function') {
+            const date = obj.toDate();
+            if (date instanceof Date) {
+              return date.getTime();
+            }
+          }
+        }
+        if (typeof dateVal === 'string') {
+          return new Date(dateVal).getTime();
+        }
+        if (dateVal instanceof Date) {
+          return dateVal.getTime();
+        }
+        return 0;
+      };
 
-    const win = window.open('', '_blank');
-    if (win) {
-      win.document.write(html);
-      win.document.close();
-      win.focus();
-      setTimeout(() => {win.print();}, 500);
-      toast.success(t("citizen.prescription_pdf_ready_printing_dialog_opened"));
-    }
+      if (sortBy === 'oldest') {
+        return getMs(a.metadata?.createdAt) - getMs(b.metadata?.createdAt);
+      }
+      if (sortBy === 'doctor') {
+        return a.doctorName.localeCompare(b.doctorName);
+      }
+      if (sortBy === 'hospital') {
+        return a.hospitalName.localeCompare(b.hospitalName);
+      }
+      // default: newest
+      return getMs(b.metadata?.createdAt) - getMs(a.metadata?.createdAt);
+    });
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setSelectedStatus('all');
   };
 
+  // Find updated instance of the currently selected prescription if status changes
+  const activeSelectedPrescription = selectedPrescription
+    ? prescriptions.find((rx) => rx.recordId === selectedPrescription.recordId) || selectedPrescription
+    : null;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto space-y-8">
-      
+      className="max-w-6xl mx-auto space-y-8"
+    >
       <PageHeader
-        title={t("citizen.active_prescriptions")}
-        description={t("citizen.verify_medication_dosages_course_schedules_and_practitioner_advice")} />
-      
+        title={t('citizen.active_prescriptions') || 'Prescriptions Vault'}
+        description={
+          t('citizen.verify_medication_dosages_course_schedules_and_practitioner_advice') ||
+          'Monitor active drug courses, schedules, refills, and official doctor prescriptions.'
+        }
+      />
 
-      {prescriptions && prescriptions.length > 0 ?
-      <div className="space-y-6">
-          {prescriptions.map((rx) => {
-          const doctorMatch = doctors?.find((d) => d.uid === rx.doctorId);
+      {prescriptions && prescriptions.length > 0 ? (
+        <div className="space-y-8">
+          {/* Active Medication Progress Dashboard */}
+          <ActiveMedicationDashboard prescriptions={prescriptions} />
 
-          return (
-            <motion.div
-              key={rx.prescriptionId}
-              whileHover={{ y: -1 }}
-              className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 space-y-6">
-              
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-4 gap-3">
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-650 dark:text-blue-400">{t("citizen.diagnosis")}
-                    {rx.diagnosis}
-                    </span>
-                    <h4 className="font-bold text-base text-slate-900 dark:text-slate-55">
-                      {doctorMatch ? doctorMatch.doctorName : 'Healthcare Specialist'}
-                    </h4>
-                    <p className="text-xs text-slate-500">
-                      {doctorMatch ? doctorMatch.hospitalName : 'Medical Center'} &bull;{' '}
-                      {typeof rx.createdAt === 'string' ?
-                    rx.createdAt :
-                    (rx.createdAt as {toDate?: () => Date;})?.toDate ?
-                    (rx.createdAt as {toDate: () => Date;}).toDate().toLocaleDateString() :
-                    'Recent'}
-                    </p>
-                  </div>
+          {/* Gantt Schedule Timeline */}
+          <MedicationTimeline prescriptions={prescriptions} />
 
-                  <button
-                  onClick={() => handleDownloadPDF(rx)}
-                  className={`${componentStyles.button.base} ${componentStyles.button.outline} px-3.5 py-2 text-xs flex items-center gap-1.5 self-start sm:self-center`}>
-                  
-                    <Download className="h-4 w-4" />
-                    <span>{t("citizen.download_pdf")}</span>
-                  </button>
+          {/* Search, Sort and Filters */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-extrabold text-slate-500 uppercase tracking-wider">
+                All Prescriptions
+              </h3>
+            </div>
+
+            <PrescriptionFilterBar
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              selectedStatus={selectedStatus}
+              setSelectedStatus={setSelectedStatus}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              onClear={handleClearFilters}
+            />
+
+            {/* List */}
+            <div className="space-y-3">
+              {filteredPrescriptions.map((rx) => (
+                <PrescriptionRow
+                  key={rx.recordId}
+                  prescription={rx}
+                  onClick={() => setSelectedPrescription(rx)}
+                />
+              ))}
+
+              {filteredPrescriptions.length === 0 && (
+                <div className="text-center py-10 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                  <p className="text-xs text-slate-450 italic">
+                    No prescriptions match the filter criteria.
+                  </p>
                 </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <EmptyState
+          title={t('citizen.no_active_prescriptions') || 'No Prescriptions Found'}
+          description={
+            t(
+              'citizen.your_medical_prescriptions_will_appear_here_once_consult_visits_are_recorded_by_doctors'
+            ) || 'Your official digital clinical prescriptions will appear here once registered.'
+          }
+          icon={icons.FileText || icons.Home}
+        />
+      )}
 
-                {/* Medicines List */}
-                <div className="space-y-3">
-                  <h5 className="font-bold text-xs text-slate-500 uppercase tracking-wide">{t("citizen.medication_guidelines")}
+      {/* Slide-over Drawer */}
+      {activeSelectedPrescription && (
+        <div className="fixed inset-0 z-40 overflow-hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-slate-905/40 backdrop-blur-xs transition-opacity"
+            onClick={() => setSelectedPrescription(null)}
+          />
 
-                </h5>
-
-                  <div className="overflow-x-auto border border-slate-100 dark:border-slate-850 rounded-xl">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="bg-slate-50 dark:bg-slate-950 font-bold text-slate-500 border-b border-slate-150 dark:border-slate-850">
-                          <th className="px-4 py-3">{t("citizen.medicine_name")}</th>
-                          <th className="px-4 py-3">{t("citizen.dosage_instruction")}</th>
-                          <th className="px-4 py-3">{t("citizen.frequency")}</th>
-                          <th className="px-4 py-3">{t("citizen.duration_days")}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rx.medicines.map((med, idx) =>
-                      <tr
-                        key={idx}
-                        className="border-b border-slate-100 dark:border-slate-850 last:border-b-0 text-slate-800 dark:text-slate-300 font-semibold">
-                        
-                            <td className="px-4 py-3 text-slate-900 dark:text-slate-100">
-                              {med.name}
-                            </td>
-                            <td className="px-4 py-3">
-                              <span className="rounded bg-blue-50 px-2 py-0.5 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400">
-                                {med.dosage}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3">{med.frequency}</td>
-                            <td className="px-4 py-3">{med.duration}{t("citizen.days")}</td>
-                          </tr>
-                      )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* Lab tests requested */}
-                {rx.labTests && rx.labTests.length > 0 &&
-              <div className="space-y-2.5 border-t border-slate-100 dark:border-slate-850 pt-4">
-                    <h5 className="font-bold text-xs text-slate-500 uppercase tracking-wide">{t("citizen.recommended_lab_investigations")}
-
-                </h5>
-                    <div className="flex flex-wrap gap-2">
-                      {rx.labTests.map((test, idx) =>
-                  <span
-                    key={idx}
-                    className="rounded-lg border border-slate-200 dark:border-slate-850 bg-slate-50/50 px-3 py-1.5 text-xs text-slate-650 dark:bg-slate-950/40 dark:text-slate-350 font-semibold">
-                    
-                          {test}
-                        </span>
-                  )}
-                    </div>
-                  </div>
-              }
-              </motion.div>);
-
-        })}
-        </div> :
-
-      <EmptyState
-        title={t("citizen.no_active_prescriptions")}
-        description={t("citizen.your_medical_prescriptions_will_appear_here_once_consult_visits_are_recorded_by_doctors")}
-        icon={icons.FileText || icons.Home} />
-
-      }
-    </motion.div>);
-
+          <PrescriptionDetailDrawer
+            prescription={activeSelectedPrescription}
+            patientId={uid}
+            patientName={fullName}
+            onClose={() => setSelectedPrescription(null)}
+            onArchive={archive}
+            onRestore={restore}
+            isProcessing={false}
+          />
+        </div>
+      )}
+    </motion.div>
+  );
 }
