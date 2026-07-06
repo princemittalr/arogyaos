@@ -4,8 +4,13 @@ import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useDistrictDoctorAttendance } from '@/features/district/hooks/useDistrict';
 import { PageHeader, LoadingState } from '@/features/shared';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { CheckCircle2, AlertCircle, Calendar } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const AttendanceTrendChart = dynamic(() => import('@/features/shared/charts/AttendanceTrendChart'), {
+  ssr: false,
+  loading: () => <div className="h-60 w-full bg-slate-50 dark:bg-slate-950 animate-pulse rounded-lg" />
+});
 
 const mockAttendanceTrends = [
 { name: 'Monday', present: 88 },
@@ -108,29 +113,7 @@ export default function DistrictDoctorAttendancePage() {const { t } = useLanguag
           </h3>
 
           <div className="h-60">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={mockAttendanceTrends}>
-                <defs>
-                  <linearGradient id="colorAtt" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={9} tickLine={false} domain={[0, 100]} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: '#fff',
-                    fontSize: '10px',
-                    fontWeight: 'bold'
-                  }} />
-                
-                <Area type="monotone" dataKey="present" stroke="#10b981" fillOpacity={1} fill="url(#colorAtt)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
+            <AttendanceTrendChart data={mockAttendanceTrends} />
           </div>
         </div>
       </div>

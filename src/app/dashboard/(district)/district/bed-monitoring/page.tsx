@@ -4,8 +4,13 @@ import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { useDistrictBedStats } from '@/features/district/hooks/useDistrict';
 import { PageHeader, LoadingState } from '@/features/shared';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Layers, Activity, Users } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const BedOccupancyChart = dynamic(() => import('@/features/shared/charts/BedOccupancyChart'), {
+  ssr: false,
+  loading: () => <div className="h-60 w-full bg-slate-50 dark:bg-slate-950 animate-pulse rounded-lg" />
+});
 
 const mockOccupancyTrend = [
 { name: '08:00', occupancy: 72 },
@@ -139,29 +144,7 @@ export default function DistrictBedMonitoringPage() {const { t } = useLanguage()
           </h3>
 
           <div className="h-60">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={mockOccupancyTrend}>
-                <defs>
-                  <linearGradient id="colorBeds" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="name" stroke="#94a3b8" fontSize={9} tickLine={false} />
-                <YAxis stroke="#94a3b8" fontSize={9} tickLine={false} domain={[0, 100]} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    color: '#fff',
-                    fontSize: '10px',
-                    fontWeight: 'bold'
-                  }} />
-                
-                <Area type="monotone" dataKey="occupancy" stroke="#3b82f6" fillOpacity={1} fill="url(#colorBeds)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
+            <BedOccupancyChart data={mockOccupancyTrend} />
           </div>
         </div>
       </div>

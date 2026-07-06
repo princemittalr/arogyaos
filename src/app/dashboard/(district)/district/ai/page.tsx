@@ -1,7 +1,13 @@
 'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React, { useState } from 'react';
-import { AIChatPanel } from '@/features/ai/components';
+import dynamic from 'next/dynamic';
+
+const AIChatPanel = dynamic(() => import('@/features/ai/components/AIChatPanel'), {
+  ssr: false,
+  loading: () => <div className="h-96 w-full bg-slate-50 dark:bg-slate-950 animate-pulse rounded-2xl" />
+});
+
 import { useDistrictFacilities, useDistrictAlerts } from '@/features/district/hooks/useDistrict';
 import { useDistrictAISummary } from '@/features/ai/hooks/useAI';
 import { useAuth } from '@/providers/AuthProvider';
