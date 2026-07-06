@@ -1,0 +1,71 @@
+// ─── ArogyaOS Firebase Storage Security Rules ─────────────────────────────────
+// Enforces:
+//   • Authenticated uploads only (no anonymous access).
+//   • File size limits to prevent storage abuse.
+//   • Allowed MIME types per folder to prevent malicious uploads.
+//   • Users can only read/write their own files.
+//   • Clinical staff can read patient report files.
+//   • No public read access to any file.
+// ─────────────────────────────────────────────────────────────────────────────
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Helper functions ────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasRole(role) {
+      return isSignedIn() && request.auth.token.role == role;
+    }
+
+    function isSuperAdmin() {
+      return hasRole('super_admin');
+    }
+
+    function isClinicalStaff() {
+      return hasRole('doctor') || hasRole('nurse') || hasRole('hospital_admin');
+    }
+
+    function isOwnerByUid(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── Patient documents ─────────────────────────────────────────────────
+    // patients/{uid}/documents/{fileName}
+    match /patients/{uid}/documents/{fileName} {
+      allow read: if isOwnerByUid(uid) || isClinicalStaff() || isSuperAdmin();
+      allow write: if isOwnerByUid(uid)
+        && request.resource.size < 10 * 1024 * 1024  // 10 MB max
+        && request.resource.contentType.matches('application/(pdf|msword|vnd\\.openxmlformats.*)|image/(jpeg|png|webp)');
+      allow delete: if isOwnerByUid(uid) || isSuperAdmin();
+    }
+
+    // ── Lab reports ───────────────────────────────────────────────────────
+    // labs/{hospitalId}/reports/{reportId}
+    match /labs/{hospitalId}/reports/{reportId} {
+      allow read: if isClinicalStaff() || isSuperAdmin();
+      allow write: if (hasRole('lab_technician') || hasRole('hospital_admin'))
+        && request.resource.size < 20 * 1024 * 1024  // 20 MB max
+        && request.resource.contentType.matches('application/pdf|image/(jpeg|png|webp)');
+      allow delete: if isSuperAdmin();
+    }
+
+    // ── Profile avatars ───────────────────────────────────────────────────
+    // avatars/{uid}
+    match /avatars/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isOwnerByUid(uid)
+        && request.resource.size < 2 * 1024 * 1024   // 2 MB max
+        && request.resource.contentType.matches('image/(jpeg|png|webp|gif)');
+      allow delete: if isOwnerByUid(uid) || isSuperAdmin();
+    }
+
+    // ── Deny everything else ─────────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

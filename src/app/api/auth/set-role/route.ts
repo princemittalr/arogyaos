@@ -1,69 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/firebase/admin';
-import { UserRole } from '@/config/roles';
+import { isValidRole } from '@/config/roles';
 
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('Authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Missing or invalid authorization header' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const token = authHeader.split('Bearer ')[1];
-    const decodedToken = await adminAuth.verifyIdToken(token);
-    const { uid } = decodedToken;
-
-    const { role } = (await request.json()) as { role: UserRole };
-
-    // Verify role is one of the valid application roles
-    const validRoles: UserRole[] = [
-      'citizen',
-      'doctor',
-      'hospital_admin',
-      'nurse',
-      'pharmacist',
-      'lab_technician',
-      'district_admin',
-      'super_admin',
-    ];
-
-    if (!validRoles.includes(role)) {
-      return NextResponse.json({ error: 'Invalid user role' }, { status: 400 });
+    const token = authHeader.split('Bearer ')[1]?.trim();
+    if (!token) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Verify role against Firestore to prevent privilege escalation
+    // Cryptographically verify the Firebase ID token; check revocation
+    let uid: string;
+    try {
+      const decodedToken = await adminAuth.verifyIdToken(token, true);
+      uid = decodedToken.uid;
+    } catch {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Parse and validate request body
+    let role: unknown;
+    try {
+      const body = await request.json();
+      role = body?.role;
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    }
+
+    // Use the canonical isValidRole() — single source of truth for role validation
+    if (typeof role !== 'string' || !isValidRole(role)) {
+      return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
+    }
+
+    // Verify that the requested role matches what Firestore has for this user
+    // to prevent privilege escalation
     const userDocRef = adminDb.collection('users').doc(uid);
     const userDocSnap = await userDocRef.get();
 
     if (!userDocSnap.exists) {
-      return NextResponse.json({ error: 'User directory record not found' }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     const userData = userDocSnap.data();
-    if (!userData) {
-      return NextResponse.json({ error: 'Empty user directory record' }, { status: 500 });
+    if (!userData || userData.role !== role) {
+      // Return 403 but do NOT reveal which side mismatched to prevent enumeration
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    if (userData.role !== role) {
-      return NextResponse.json(
-        { error: 'Privilege escalation attempt: role mismatch' },
-        { status: 403 }
-      );
-    }
-
-    // Set custom user claims
+    // Set custom user claims on the Firebase Auth account
     await adminAuth.setCustomUserClaims(uid, { role });
 
-    return NextResponse.json({ success: true, uid, role });
-  } catch (error: unknown) {
-    const err = error as Error;
-    console.error('Error setting custom claims:', err);
-    return NextResponse.json(
-      { error: err.message || 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true });
+  } catch {
+    // Never expose internal errors to the client
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

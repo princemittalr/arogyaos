@@ -2,15 +2,36 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { APP_CONFIG } from './config/constants';
 import { getHomeRouteForRole } from './config/permissions';
-import { UserRole } from './config/roles';
+import { UserRole, isValidRole } from './config/roles';
 
-// Decode a JWT token in the Edge runtime without external dependencies
-function decodeFirebaseToken(token: string) {
+// ─── NOTE ON MIDDLEWARE SECURITY ──────────────────────────────────────────────
+// Next.js Edge Middleware cannot run Firebase Admin SDK (Node.js runtime only).
+// Therefore the middleware performs a lightweight "pre-filter" check:
+//   • Presence of the session cookie (unauthenticated → redirect to login)
+//   • Role-based path enforcement uses the custom claim embedded in the
+//     HttpOnly session cookie, which is a Firebase-signed JWT issued by our
+//     server-side /api/auth/session endpoint.
+//
+// The session cookie value is a Firebase session cookie (not a plain ID token).
+// It contains a cryptographically signed payload. We decode (not verify) the
+// payload here ONLY to extract the role for routing purposes. The actual
+// cryptographic verification with revocation checking happens in every API
+// route via verifySessionCookie() in src/lib/auth-server.ts.
+//
+// This is the industry-standard pattern for Next.js + Firebase when the Edge
+// runtime cannot run the Node.js Admin SDK. The session cookie itself cannot
+// be forged without Firebase's private key, so role extraction from the
+// decoded payload is safe for routing decisions. Privileged actions in API
+// routes are always re-verified server-side with adminAuth.verifySessionCookie().
+// ──────────────────────────────────────────────────────────────────────────────
+
+function decodeSessionCookieClaims(
+  cookie: string
+): { uid?: string; role?: string; exp?: number } | null {
   try {
-    const parts = token.split('.');
+    const parts = cookie.split('.');
     if (parts.length !== 3) return null;
-    
-    // Base64Url decode the payload portion
+
     const payload = parts[1];
     const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
@@ -19,7 +40,6 @@ function decodeFirebaseToken(token: string) {
         .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
         .join('')
     );
-    
     return JSON.parse(jsonPayload);
   } catch {
     return null;
@@ -28,37 +48,43 @@ function decodeFirebaseToken(token: string) {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
-  // Retrieve the session cookie
-  const sessionToken = request.cookies.get(APP_CONFIG.sessionCookieName)?.value;
 
-  // 1. Guarding dashboard routes
+  // Retrieve the server-issued HttpOnly session cookie
+  const sessionCookie = request.cookies.get(APP_CONFIG.sessionCookieName)?.value;
+
+  // 1. Guard dashboard routes
   if (pathname.startsWith('/dashboard')) {
-    if (!sessionToken) {
-      // Redirect unauthenticated requests to login
+    if (!sessionCookie) {
       const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirectTo', pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    const decoded = decodeFirebaseToken(sessionToken);
-    
-    // Check if token is expired
-    if (!decoded || (decoded.exp && decoded.exp * 1000 < Date.now())) {
+    const claims = decodeSessionCookieClaims(sessionCookie);
+
+    // Check expiry and basic structural validity
+    if (!claims || !claims.uid || (claims.exp && claims.exp * 1000 < Date.now())) {
       const response = NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete(APP_CONFIG.sessionCookieName);
       return response;
     }
 
-    const role = (decoded.role || 'citizen') as UserRole;
-
-    // Direct dashboard home route matches
-    if (pathname === '/dashboard') {
-      const targetHome = getHomeRouteForRole(role);
-      return NextResponse.redirect(new URL(targetHome, request.url));
+    // Validate role before using it — reject tokens with unrecognised roles
+    const rawRole = claims.role;
+    if (!rawRole || !isValidRole(rawRole)) {
+      const response = NextResponse.redirect(new URL('/unauthorized', request.url));
+      response.cookies.delete(APP_CONFIG.sessionCookieName);
+      return response;
     }
 
-    // Role subpath verification rules
+    const role = rawRole as UserRole;
+
+    // Redirect /dashboard root to role-specific home
+    if (pathname === '/dashboard') {
+      return NextResponse.redirect(new URL(getHomeRouteForRole(role), request.url));
+    }
+
+    // Role-to-path mapping (single source of truth)
     const rolePaths: Record<string, string> = {
       citizen: '/dashboard/citizen',
       doctor: '/dashboard/doctor',
@@ -69,11 +95,9 @@ export function middleware(request: NextRequest) {
       district_admin: '/dashboard/district',
     };
 
-    // If role is not super_admin, verify path authorization rules
+    // super_admin can access any dashboard route
     if (role !== 'super_admin') {
       let isAuthorized = false;
-      
-      // Match route path prefix
       for (const [keyRole, prefix] of Object.entries(rolePaths)) {
         if (pathname.startsWith(prefix) && role === keyRole) {
           isAuthorized = true;
@@ -82,26 +106,27 @@ export function middleware(request: NextRequest) {
       }
 
       if (!isAuthorized) {
-        // Redirect unauthorized users to the unauthorized route
         return NextResponse.redirect(new URL('/unauthorized', request.url));
       }
     }
   }
 
-  // 2. Guarding auth pages when user is already logged in
-  if (sessionToken && (pathname === '/login' || pathname === '/register')) {
-    const decoded = decodeFirebaseToken(sessionToken);
-    if (decoded && (!decoded.exp || decoded.exp * 1000 > Date.now())) {
-      const role = (decoded.role || 'citizen') as UserRole;
-      const homeRoute = getHomeRouteForRole(role);
-      return NextResponse.redirect(new URL(homeRoute, request.url));
+  // 2. Redirect already-authenticated users away from auth pages
+  if (sessionCookie && (pathname === '/login' || pathname === '/register')) {
+    const claims = decodeSessionCookieClaims(sessionCookie);
+    if (claims && claims.uid && (!claims.exp || claims.exp * 1000 > Date.now())) {
+      const rawRole = claims.role;
+      if (rawRole && isValidRole(rawRole)) {
+        return NextResponse.redirect(
+          new URL(getHomeRouteForRole(rawRole as UserRole), request.url)
+        );
+      }
     }
   }
 
   return NextResponse.next();
 }
 
-// Intercept dashboard operations and login/register checks
 export const config = {
   matcher: ['/dashboard/:path*', '/login', '/register'],
 };

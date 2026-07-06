@@ -1,11 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { User as FirebaseUser, onIdTokenChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/firebase/client';
 import { UserRole } from '@/config/roles';
-import { APP_CONFIG } from '@/config/constants';
 
 interface AuthUser {
   uid: string;
@@ -23,10 +22,34 @@ interface AuthContextProps {
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
+/**
+ * Exchange a Firebase ID token for a server-set HttpOnly session cookie.
+ * The cookie is written by the server — never by client-side JS — so it
+ * cannot be stolen by XSS.
+ */
+async function createServerSession(idToken: string): Promise<void> {
+  const response = await fetch('/api/auth/session', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${idToken}` },
+  });
+  if (!response.ok) {
+    throw new Error('Failed to create server session');
+  }
+}
+
+/**
+ * Ask the server to clear the HttpOnly session cookie.
+ */
+async function clearServerSession(): Promise<void> {
+  await fetch('/api/auth/session', { method: 'DELETE' });
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [fbUser, setFbUser] = useState<FirebaseUser | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  // Track last token to avoid redundant session refreshes
+  const lastTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
@@ -35,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (firebaseUser) {
         try {
-          // Fetch user metadata role from Firestore
+          // Fetch user metadata from Firestore
           const userDocRef = doc(db, 'users', firebaseUser.uid);
           const snap = await getDoc(userDocRef);
 
@@ -50,11 +73,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             setUser(profileUser);
 
-            // Sync auth token to Cookie for middleware verification
-            const token = await firebaseUser.getIdToken();
-            document.cookie = `${APP_CONFIG.sessionCookieName}=${token}; path=/; max-age=${APP_CONFIG.sessionMaxAge}; SameSite=Lax; Secure`;
+            // Exchange the Firebase ID token for a server-issued HttpOnly session cookie.
+            // The token is never written to document.cookie by the client.
+            const idToken = await firebaseUser.getIdToken();
+            if (idToken !== lastTokenRef.current) {
+              lastTokenRef.current = idToken;
+              await createServerSession(idToken);
+            }
           } else {
-            // Fallback for new registration context before firestore records populate
+            // Fallback during new registration before Firestore record exists
             const fallbackUser: AuthUser = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
@@ -64,15 +91,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             };
             setUser(fallbackUser);
           }
-        } catch (error) {
-          console.error('Error fetching user document from Firestore:', error);
+        } catch {
+          // Avoid logging error objects that may contain token data
           setUser(null);
+          await clearServerSession();
         }
       } else {
         setUser(null);
-        // Clear session cookie
-        document.cookie = `${APP_CONFIG.sessionCookieName}=; path=/; max-age=0; SameSite=Lax; Secure`;
+        lastTokenRef.current = null;
+        // Ask the server to clear the HttpOnly session cookie
+        await clearServerSession();
       }
+
       setLoading(false);
     });
 

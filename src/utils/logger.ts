@@ -5,6 +5,39 @@ interface LogOptions {
   data?: unknown;
 }
 
+// Fields that must never appear in log output
+const SENSITIVE_KEYS = new Set([
+  'password',
+  'token',
+  'idToken',
+  'sessionCookie',
+  'privateKey',
+  'apiKey',
+  'secret',
+  'authorization',
+  'cookie',
+  'credentials',
+]);
+
+/**
+ * Recursively scrub known-sensitive keys from an object before logging.
+ * Primitive values are passed through unchanged.
+ */
+function redactSensitive(value: unknown, depth = 0): unknown {
+  if (depth > 5 || value === null || typeof value !== 'object') return value;
+  if (Array.isArray(value)) return value.map((v) => redactSensitive(v, depth + 1));
+
+  const result: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+    if (SENSITIVE_KEYS.has(k.toLowerCase())) {
+      result[k] = '[REDACTED]';
+    } else {
+      result[k] = redactSensitive(v, depth + 1);
+    }
+  }
+  return result;
+}
+
 export const logger = {
   info(message: string, options?: LogOptions) {
     this._log('info', message, options);
@@ -21,7 +54,8 @@ export const logger = {
   _log(level: LogLevel, message: string, options?: LogOptions) {
     const timestamp = new Date().toISOString();
     const tagStr = options?.tag ? `[${options.tag.toUpperCase()}]` : '';
-    const dataStr = options?.data ? `| Data: ${JSON.stringify(options.data)}` : '';
+    const safeData = options?.data ? redactSensitive(options.data) : undefined;
+    const dataStr = safeData !== undefined ? `| Data: ${JSON.stringify(safeData)}` : '';
     const formatted = `${timestamp} [${level.toUpperCase()}]${tagStr}: ${message} ${dataStr}`;
 
     if (level === 'error') {

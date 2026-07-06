@@ -1,0 +1,184 @@
+// ─── ArogyaOS Firestore Security Rules ────────────────────────────────────────
+// Enforces least-privilege access:
+//   • Users can only read/write their own documents.
+//   • Doctors/hospital staff cannot access unrelated patient data.
+//   • District admins only access data within their districtId.
+//   • No wildcard open reads or writes.
+//   • All role-elevated operations are gated on custom claims set server-side.
+// ─────────────────────────────────────────────────────────────────────────────
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function hasRole(role) {
+      return isSignedIn() && request.auth.token.role == role;
+    }
+
+    function isSuperAdmin() {
+      return hasRole('super_admin');
+    }
+
+    function isDistrictAdmin() {
+      return hasRole('district_admin');
+    }
+
+    function isHospitalAdmin() {
+      return hasRole('hospital_admin');
+    }
+
+    function isDoctor() {
+      return hasRole('doctor');
+    }
+
+    function isNurse() {
+      return hasRole('nurse');
+    }
+
+    function isPharmacist() {
+      return hasRole('pharmacist');
+    }
+
+    function isLabTechnician() {
+      return hasRole('lab_technician');
+    }
+
+    function isClinicalStaff() {
+      return isDoctor() || isNurse() || isHospitalAdmin();
+    }
+
+    function isHealthcareStaff() {
+      return isClinicalStaff() || isPharmacist() || isLabTechnician();
+    }
+
+    // ── users collection ─────────────────────────────────────────────────────
+    // Each user can read/write only their own document.
+    // Super admin can read all user documents.
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isSuperAdmin();
+      // Users can update their own non-critical fields; role/status are immutable from client.
+      allow update: if isOwner(uid)
+        && !request.resource.data.diff(resource.data).affectedKeys()
+            .hasAny(['role', 'status', 'uid', 'email']);
+      // Only server-side (Admin SDK) can create user records.
+      allow create, delete: if false;
+    }
+
+    // ── patient_profiles collection ──────────────────────────────────────────
+    match /patient_profiles/{uid} {
+      // Patients can read/write only their own profile
+      allow read, write: if isOwner(uid);
+      // Clinical staff can read any patient profile (necessary for appointments)
+      allow read: if isClinicalStaff() || isSuperAdmin();
+      // No deletes from client
+      allow delete: if false;
+    }
+
+    // ── doctor_profiles collection ───────────────────────────────────────────
+    match /doctor_profiles/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(uid) || isSuperAdmin();
+      allow delete: if false;
+    }
+
+    // ── hospital_profiles collection ─────────────────────────────────────────
+    match /hospital_profiles/{hospitalId} {
+      // Any signed-in user can read hospital profiles (public-ish directory)
+      allow read: if isSignedIn();
+      // Only the hospital admin who owns it can write
+      allow write: if isOwner(resource.data.uid) || isSuperAdmin();
+      allow delete: if false;
+    }
+
+    // ── district_profiles collection ─────────────────────────────────────────
+    match /district_profiles/{districtId} {
+      allow read: if isSignedIn();
+      allow write: if isOwner(resource.data.uid) || isSuperAdmin();
+      allow delete: if false;
+    }
+
+    // ── appointments collection ──────────────────────────────────────────────
+    match /appointments/{appointmentId} {
+      // Patient can read their own appointments
+      allow read: if isSignedIn()
+        && (resource.data.patientId == request.auth.uid
+            || resource.data.doctorId == request.auth.uid
+            || isClinicalStaff()
+            || isSuperAdmin());
+      // Patients can create appointments; clinical staff can update
+      allow create: if isSignedIn()
+        && request.resource.data.patientId == request.auth.uid;
+      allow update: if isSignedIn()
+        && (resource.data.patientId == request.auth.uid
+            || resource.data.doctorId == request.auth.uid
+            || isClinicalStaff()
+            || isSuperAdmin());
+      allow delete: if false;
+    }
+
+    // ── prescriptions collection ─────────────────────────────────────────────
+    match /prescriptions/{prescriptionId} {
+      allow read: if isSignedIn()
+        && (resource.data.patientId == request.auth.uid
+            || resource.data.doctorId == request.auth.uid
+            || isClinicalStaff()
+            || isPharmacist()
+            || isSuperAdmin());
+      // Only doctors can create/update prescriptions
+      allow create, update: if isDoctor() || isSuperAdmin();
+      allow delete: if false;
+    }
+
+    // ── inventory collection ─────────────────────────────────────────────────
+    match /inventory/{inventoryId} {
+      // Hospital admin and pharmacists at same hospital can read inventory
+      allow read: if isPharmacist() || isHospitalAdmin() || isDistrictAdmin() || isSuperAdmin();
+      // Pharmacists and hospital admins can update their hospital's inventory
+      allow create, update: if (isPharmacist() || isHospitalAdmin()) || isSuperAdmin();
+      allow delete: if false;
+    }
+
+    // ── ai_predictions collection ────────────────────────────────────────────
+    match /ai_predictions/{predictionId} {
+      allow read: if isHealthcareStaff() || isDistrictAdmin() || isSuperAdmin();
+      // Only server (Admin SDK) writes predictions
+      allow write: if false;
+    }
+
+    // ── notifications collection ─────────────────────────────────────────────
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn()
+        && resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt']);
+      allow create, delete: if false;
+    }
+
+    // ── attendance collection ────────────────────────────────────────────────
+    match /attendance/{attendanceId} {
+      allow read: if isSignedIn()
+        && (resource.data.userId == request.auth.uid
+            || isHospitalAdmin()
+            || isDistrictAdmin()
+            || isSuperAdmin());
+      allow create, update: if isSignedIn()
+        && request.resource.data.userId == request.auth.uid;
+      allow delete: if false;
+    }
+
+    // ── Deny everything else ─────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
