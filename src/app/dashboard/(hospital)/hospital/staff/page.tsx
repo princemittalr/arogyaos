@@ -1,4 +1,4 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -8,8 +8,8 @@ import {
   useHospitalStaff,
   useHospitalDepartments,
   useSaveStaffMutation,
-  useDeleteStaffMutation,
-} from '@/features/hospital/hooks/useHospital';
+  useDeleteStaffMutation } from
+'@/features/hospital/hooks/useHospital';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Trash2, Edit2, X, BadgeCheck } from 'lucide-react';
@@ -21,12 +21,12 @@ const staffSchema = zod.object({
   role: zod.enum(['nurse', 'pharmacist', 'receptionist', 'lab_tech', 'admin']),
   departmentId: zod.string().min(1, 'Please select a department'),
   shift: zod.enum(['morning', 'evening', 'night']),
-  status: zod.enum(['active', 'inactive']),
+  status: zod.enum(['active', 'inactive'])
 });
 
 type StaffFormValues = zod.infer<typeof staffSchema>;
 
-export default function HospitalStaffPage() {
+export default function HospitalStaffPage() {const { t } = useLanguage();
   const hospitalId = 'hosp_city_gen';
   const { data: staff, isLoading: staffLoading } = useHospitalStaff(hospitalId);
   const { data: departments, isLoading: deptsLoading } = useHospitalDepartments(hospitalId);
@@ -42,7 +42,7 @@ export default function HospitalStaffPage() {
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors }
   } = useForm<StaffFormValues>({
     resolver: zodResolver(staffSchema),
     defaultValues: {
@@ -52,8 +52,8 @@ export default function HospitalStaffPage() {
       role: 'nurse',
       departmentId: '',
       shift: 'morning',
-      status: 'active',
-    },
+      status: 'active'
+    }
   });
 
   if (staffLoading || deptsLoading) {
@@ -81,7 +81,7 @@ export default function HospitalStaffPage() {
       role: 'nurse',
       departmentId: departments?.[0]?.departmentId || '',
       shift: 'morning',
-      status: 'active',
+      status: 'active'
     });
     setShowForm(true);
   };
@@ -90,8 +90,8 @@ export default function HospitalStaffPage() {
     await saveStaffMutation.mutateAsync({
       staff: {
         ...values,
-        hospitalId,
-      },
+        hospitalId
+      }
     });
     setShowForm(false);
     reset();
@@ -104,16 +104,16 @@ export default function HospitalStaffPage() {
   };
 
   const filtered = staff?.filter((s) =>
-    s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.role.toLowerCase().includes(searchTerm.toLowerCase())
+  s.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  s.role.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Staff Directory"
-        description="Oversee administrative officers, nurses, pharmacists, and lab technicians, assigning shift slots."
-      />
+        title={t("hospital.staff_directory")}
+        description={t("hospital.oversee_administrative_officers_nurses_pharmacists_and_lab_technicians_assigning_shift_slots")} />
+      
 
       {/* Action panel */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
@@ -121,39 +121,39 @@ export default function HospitalStaffPage() {
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <input
             type="text"
-            placeholder="Search staff by name or role..."
+            placeholder={t("hospital.search_staff_by_name_or_role")}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border border-slate-200 bg-transparent rounded-xl text-xs font-bold text-slate-750 dark:border-slate-800 focus:outline-none"
-          />
+            className="w-full pl-9 pr-4 py-2 border border-slate-200 bg-transparent rounded-xl text-xs font-bold text-slate-750 dark:border-slate-800 focus:outline-none" />
+          
         </div>
 
         <button
           onClick={handleAddNew}
-          className="w-full sm:w-auto rounded-xl bg-blue-600 hover:bg-blue-750 text-white font-bold text-xs px-4 py-2.5 flex items-center justify-center gap-2 cursor-pointer transition"
-        >
+          className="w-full sm:w-auto rounded-xl bg-blue-600 hover:bg-blue-750 text-white font-bold text-xs px-4 py-2.5 flex items-center justify-center gap-2 cursor-pointer transition">
+          
           <Plus className="h-4 w-4" />
-          <span>Add Staff Member</span>
+          <span>{t("hospital.add_staff_member")}</span>
         </button>
       </div>
 
       {/* Form Modal */}
       <AnimatePresence>
-        {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {showForm &&
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowForm(false)}
-              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"
-            />
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowForm(false)}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm" />
+          
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative z-10 w-full max-w-md rounded-2xl border border-slate-250 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
-            >
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="relative z-10 w-full max-w-md rounded-2xl border border-slate-250 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-3 mb-4">
                 <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-50">
                   {editingStaff ? 'Modify Staff Record' : 'Configure New Staff Member'}
@@ -165,111 +165,111 @@ export default function HospitalStaffPage() {
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Staff ID</label>
+                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.staff_id")}</label>
                   <input
-                    type="text"
-                    disabled={!!editingStaff}
-                    {...register('staffId')}
-                    className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 disabled:opacity-50"
-                  />
+                  type="text"
+                  disabled={!!editingStaff}
+                  {...register('staffId')}
+                  className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 disabled:opacity-50" />
+                
                   {errors.staffId && <p className="text-red-500 mt-1 font-bold">{errors.staffId.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Full Name</label>
+                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.full_name")}</label>
                   <input
-                    type="text"
-                    {...register('fullName')}
-                    className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100"
-                  />
+                  type="text"
+                  {...register('fullName')}
+                  className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
+                
                   {errors.fullName && <p className="text-red-500 mt-1 font-bold">{errors.fullName.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Email Address</label>
+                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.email_address")}</label>
                   <input
-                    type="email"
-                    {...register('email')}
-                    className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100"
-                  />
+                  type="email"
+                  {...register('email')}
+                  className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
+                
                   {errors.email && <p className="text-red-500 mt-1 font-bold">{errors.email.message}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Role</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.role")}</label>
                     <select
-                      {...register('role')}
-                      className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none"
-                    >
-                      <option value="nurse">Nurse</option>
-                      <option value="pharmacist">Pharmacist</option>
-                      <option value="receptionist">Receptionist</option>
-                      <option value="lab_tech">Lab Technician</option>
-                      <option value="admin">Administrator</option>
+                    {...register('role')}
+                    className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none">
+                    
+                      <option value="nurse">{t("hospital.nurse")}</option>
+                      <option value="pharmacist">{t("hospital.pharmacist")}</option>
+                      <option value="receptionist">{t("hospital.receptionist")}</option>
+                      <option value="lab_tech">{t("hospital.lab_technician")}</option>
+                      <option value="admin">{t("hospital.administrator")}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Department</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.department")}</label>
                     <select
-                      {...register('departmentId')}
-                      className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none"
-                    >
-                      {departments?.map((d) => (
-                        <option key={d.departmentId} value={d.departmentId}>
+                    {...register('departmentId')}
+                    className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none">
+                    
+                      {departments?.map((d) =>
+                    <option key={d.departmentId} value={d.departmentId}>
                           {d.departmentName}
                         </option>
-                      ))}
+                    )}
                     </select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Shift Slot</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.shift_slot")}</label>
                     <select
-                      {...register('shift')}
-                      className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none"
-                    >
-                      <option value="morning">Morning</option>
-                      <option value="evening">Evening</option>
-                      <option value="night">Night</option>
+                    {...register('shift')}
+                    className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none">
+                    
+                      <option value="morning">{t("hospital.morning")}</option>
+                      <option value="evening">{t("hospital.evening")}</option>
+                      <option value="night">{t("hospital.night")}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Status</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.status")}</label>
                     <select
-                      {...register('status')}
-                      className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none"
-                    >
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
+                    {...register('status')}
+                    className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none">
+                    
+                      <option value="active">{t("hospital.active")}</option>
+                      <option value="inactive">{t("hospital.inactive")}</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
                   <button
-                    type="button"
-                    onClick={() => setShowForm(false)}
-                    className="rounded-xl border border-slate-200 px-4 py-2 text-slate-500 font-bold hover:bg-slate-50 transition"
-                  >
-                    Cancel
-                  </button>
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-slate-500 font-bold hover:bg-slate-50 transition">{t("hospital.cancel")}
+
+
+                </button>
                   <button
-                    type="submit"
-                    disabled={saveStaffMutation.isPending}
-                    className="rounded-xl bg-blue-600 px-5 py-2 text-white font-bold hover:bg-blue-750 transition"
-                  >
+                  type="submit"
+                  disabled={saveStaffMutation.isPending}
+                  className="rounded-xl bg-blue-600 px-5 py-2 text-white font-bold hover:bg-blue-750 transition">
+                  
                     {saveStaffMutation.isPending ? 'Saving...' : 'Save Record'}
                   </button>
                 </div>
               </form>
             </motion.div>
           </div>
-        )}
+        }
       </AnimatePresence>
 
       {/* Grid listing */}
@@ -280,8 +280,8 @@ export default function HospitalStaffPage() {
             <motion.div
               key={s.staffId}
               layout
-              className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between"
-            >
+              className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between">
+              
               <div>
                 <div className="flex justify-between items-start">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400 font-extrabold text-sm uppercase">
@@ -290,14 +290,14 @@ export default function HospitalStaffPage() {
                   <div className="flex gap-1.5">
                     <button
                       onClick={() => handleEdit(s)}
-                      className="p-1.5 text-slate-500 hover:text-slate-850 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-xl transition"
-                    >
+                      className="p-1.5 text-slate-500 hover:text-slate-850 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-xl transition">
+                      
                       <Edit2 className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(s.staffId)}
-                      className="p-1.5 text-red-500 hover:text-red-750 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition"
-                    >
+                      className="p-1.5 text-red-500 hover:text-red-750 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition">
+                      
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -313,31 +313,31 @@ export default function HospitalStaffPage() {
 
                 <div className="mt-4 space-y-2 border-t border-slate-100 dark:border-slate-850 pt-3">
                   <div className="flex justify-between text-[10px] font-bold text-slate-500">
-                    <span>Department:</span>
+                    <span>{t("hospital.department")}</span>
                     <span className="text-slate-850 dark:text-slate-350">{deptMatch?.departmentName || 'General Medicine'}</span>
                   </div>
                   <div className="flex justify-between text-[10px] font-bold text-slate-500">
-                    <span>Shift Type:</span>
-                    <span className="text-slate-850 dark:text-slate-350 capitalize">{s.shift} Shift</span>
+                    <span>{t("hospital.shift_type")}</span>
+                    <span className="text-slate-850 dark:text-slate-350 capitalize">{s.shift}{t("hospital.shift")}</span>
                   </div>
                 </div>
               </div>
 
               <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-850 flex justify-between items-center">
                 <span className={`rounded-full px-2 py-0.5 text-[9px] font-extrabold flex items-center gap-1 ${
-                  s.status === 'active'
-                    ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400'
-                    : 'bg-slate-50 text-slate-500 dark:bg-slate-850'
-                }`}>
+                s.status === 'active' ?
+                'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400' :
+                'bg-slate-50 text-slate-500 dark:bg-slate-850'}`
+                }>
                   <BadgeCheck className="h-3 w-3" />
                   {s.status === 'active' ? 'Active' : 'Inactive'}
                 </span>
-                <span className="text-[9px] text-slate-400 font-bold">Staff ID: {s.staffId.split('_').pop()}</span>
+                <span className="text-[9px] text-slate-400 font-bold">{t("hospital.staff_id")}{s.staffId.split('_').pop()}</span>
               </div>
-            </motion.div>
-          );
+            </motion.div>);
+
         })}
       </div>
-    </div>
-  );
+    </div>);
+
 }

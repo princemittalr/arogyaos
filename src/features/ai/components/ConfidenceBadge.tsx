@@ -1,10 +1,10 @@
-import React from 'react';
+import { useLanguage } from "@/providers/LanguageProvider";import React from 'react';
 
 interface ConfidenceBadgeProps {
   confidence: number;
 }
 
-export function ConfidenceBadge({ confidence }: ConfidenceBadgeProps) {
+export function ConfidenceBadge({ confidence }: ConfidenceBadgeProps) {const { t } = useLanguage();
   let badgeColor = 'bg-red-50 text-red-650 dark:bg-red-950/20 dark:text-red-400';
   if (confidence >= 85) {
     badgeColor = 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-450';
@@ -14,9 +14,9 @@ export function ConfidenceBadge({ confidence }: ConfidenceBadgeProps) {
 
   return (
     <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold tracking-wide uppercase ${badgeColor}`}>
-      {confidence}% Confidence
-    </span>
-  );
+      {confidence}{t("common.confidence")}
+    </span>);
+
 }
 
 export default ConfidenceBadge;

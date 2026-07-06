@@ -1,4 +1,4 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React, { useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -6,8 +6,8 @@ import {
   usePharmacyInventory,
   usePharmacyPrescriptions,
   useDispenseMedicineMutation,
-  useDispenseHistory,
-} from '@/features/pharmacy/hooks/usePharmacy';
+  useDispenseHistory } from
+'@/features/pharmacy/hooks/usePharmacy';
 import { useDoctorPatients } from '@/features/doctor/hooks/useDoctor';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { Search, FileText, CheckCircle2, Layers } from 'lucide-react';
@@ -18,7 +18,7 @@ interface SelectedPrescription extends PrescriptionDocument {
   patientName: string;
 }
 
-export default function PharmacyDispensingPage() {
+export default function PharmacyDispensingPage() {const { t } = useLanguage();
   const { user } = useAuth();
   const hospitalId = user?.uid || 'hosp_city_gen';
   const dispensedBy = user?.uid || 'pharmacist_user_1';
@@ -40,7 +40,7 @@ export default function PharmacyDispensingPage() {
 
   const handleLookup = () => {
     if (!searchRxId.trim()) {
-      toast.error('Please enter a prescription reference number.');
+      toast.error(t("pharmacy.please_enter_a_prescription_reference_number"));
       return;
     }
 
@@ -52,12 +52,12 @@ export default function PharmacyDispensingPage() {
       const patient = patients?.find((p) => p.uid === rx.patientId);
       setSelectedRx({
         ...rx,
-        patientName: patient?.fullName || 'Patient Profile',
+        patientName: patient?.fullName || 'Patient Profile'
       });
-      toast.success('Prescription docket retrieved successfully.');
+      toast.success(t("pharmacy.prescription_docket_retrieved_successfully"));
     } else {
       setSelectedRx(null);
-      toast.error('No matching prescription reference docket found.');
+      toast.error(t("pharmacy.no_matching_prescription_reference_docket_found"));
     }
   };
 
@@ -69,13 +69,13 @@ export default function PharmacyDispensingPage() {
       // Find matching inventory item by matching names (or ID if aligned)
       const matchingStock = inventory?.find(
         (inv) => inv.medicineName.toLowerCase().includes(m.name.toLowerCase()) ||
-                 m.name.toLowerCase().includes(inv.medicineName.toLowerCase())
+        m.name.toLowerCase().includes(inv.medicineName.toLowerCase())
       );
 
       return {
         medicineId: matchingStock?.medicineId || m.medicineId,
         name: m.name,
-        quantity: m.duration * 2, // assume 2 tablets a day for simple dispensation quantity
+        quantity: m.duration * 2 // assume 2 tablets a day for simple dispensation quantity
       };
     });
 
@@ -99,30 +99,30 @@ export default function PharmacyDispensingPage() {
         patientName: selectedRx.patientName,
         hospitalId,
         dispensedBy,
-        medicines: medicinesToDispense,
+        medicines: medicinesToDispense
       });
 
       setSelectedRx(null);
       setSearchRxId('');
     } catch {
-      toast.error('Failed to commit dispensation transaction.');
+      toast.error(t("pharmacy.failed_to_commit_dispensation_transaction"));
     }
   };
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Prescription Dispensing Desk"
-        description="Verify doctor prescription dockets, validate inventory shelf quantities, and log dispensing updates."
-      />
+        title={t("pharmacy.prescription_dispensing_desk")}
+        description={t("pharmacy.verify_doctor_prescription_dockets_validate_inventory_shelf_quantities_and_log_dispensing_updates")} />
+      
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left Column: Lookup & Dispense Builder */}
         <div className="lg:col-span-2 space-y-6">
           {/* Lookup Card */}
           <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-850 dark:text-slate-100">
-              Prescription Docket Lookup
+            <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-850 dark:text-slate-100">{t("pharmacy.prescription_docket_lookup")}
+
             </h3>
 
             <div className="flex gap-2">
@@ -130,100 +130,100 @@ export default function PharmacyDispensingPage() {
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Enter Prescription ID (e.g. pres_...) or lookup index..."
+                  placeholder={t("pharmacy.enter_prescription_id_eg_pres__or_lookup_index")}
                   value={searchRxId}
                   onChange={(e) => setSearchRxId(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-transparent dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none font-semibold"
-                />
+                  className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 bg-transparent dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none font-semibold" />
+                
               </div>
               <button
                 onClick={handleLookup}
-                className="rounded-xl bg-slate-900 dark:bg-slate-100 dark:text-slate-950 hover:bg-slate-800 text-white px-5 py-2.5 text-xs font-bold transition"
-              >
-                Fetch Docket
+                className="rounded-xl bg-slate-900 dark:bg-slate-100 dark:text-slate-950 hover:bg-slate-800 text-white px-5 py-2.5 text-xs font-bold transition">{t("pharmacy.fetch_docket")}
+
+
               </button>
             </div>
           </div>
 
           {/* Prescription Details Card */}
-          {selectedRx ? (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 space-y-5">
+          {selectedRx ?
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 space-y-5">
               <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-850 pb-4">
                 <div>
                   <h4 className="font-bold text-sm text-slate-900 dark:text-slate-50">{selectedRx.patientName}</h4>
-                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">Docket ID: {selectedRx.prescriptionId}</p>
+                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{t("pharmacy.docket_id")}{selectedRx.prescriptionId}</p>
                 </div>
-                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
-                  Diagnosis: {selectedRx.diagnosis}
+                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">{t("pharmacy.diagnosis")}
+                {selectedRx.diagnosis}
                 </span>
               </div>
 
               {/* Medicines List to Dispense */}
               <div className="space-y-3">
-                <h5 className="text-[10px] font-extrabold text-slate-450 uppercase tracking-wider">Formula Stock Check</h5>
+                <h5 className="text-[10px] font-extrabold text-slate-450 uppercase tracking-wider">{t("pharmacy.formula_stock_check")}</h5>
 
                 <div className="divide-y divide-slate-100 dark:divide-slate-850">
                   {selectedRx.medicines.map((m, idx) => {
-                    const matchingStock = inventory?.find(
-                      (inv) => inv.medicineName.toLowerCase().includes(m.name.toLowerCase()) ||
-                               m.name.toLowerCase().includes(inv.medicineName.toLowerCase())
-                    );
-                    const qtyNeeded = m.duration * 2;
-                    const stockAvailable = matchingStock ? matchingStock.quantity : 0;
-                    const hasEnough = stockAvailable >= qtyNeeded;
+                  const matchingStock = inventory?.find(
+                    (inv) => inv.medicineName.toLowerCase().includes(m.name.toLowerCase()) ||
+                    m.name.toLowerCase().includes(inv.medicineName.toLowerCase())
+                  );
+                  const qtyNeeded = m.duration * 2;
+                  const stockAvailable = matchingStock ? matchingStock.quantity : 0;
+                  const hasEnough = stockAvailable >= qtyNeeded;
 
-                    return (
-                      <div key={idx} className="py-3.5 flex justify-between items-center text-xs">
+                  return (
+                    <div key={idx} className="py-3.5 flex justify-between items-center text-xs">
                         <div className="space-y-0.5">
                           <p className="font-bold text-slate-800 dark:text-slate-100">{m.name}</p>
-                          <p className="text-[10px] text-slate-400 font-semibold">Dosage: {m.dosage} &bull; Duration: {m.duration} days</p>
+                          <p className="text-[10px] text-slate-400 font-semibold">{t("pharmacy.dosage")}{m.dosage}{t("pharmacy.duration")}{m.duration}{t("pharmacy.days")}</p>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-slate-850 dark:text-slate-200">Required: {qtyNeeded} units</p>
+                          <p className="font-bold text-slate-850 dark:text-slate-200">{t("pharmacy.required")}{qtyNeeded}{t("pharmacy.units")}</p>
                           <p className={`text-[10px] font-semibold ${hasEnough ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
                             {matchingStock ? `In-stock: ${stockAvailable}` : 'Not registered'}
                           </p>
                         </div>
-                      </div>
-                    );
-                  })}
+                      </div>);
+
+                })}
                 </div>
               </div>
 
               {/* Dispense Trigger */}
               <div className="flex justify-end pt-4 border-t border-slate-150 dark:border-slate-800">
                 <button
-                  onClick={handleDispense}
-                  disabled={dispenseMutation.isPending}
-                  className="rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-5 py-2.5 text-xs font-bold transition flex items-center gap-1.5"
-                >
-                  <CheckCircle2 className="h-4 w-4" /> Confirm Dispensation & Print Label
-                </button>
+                onClick={handleDispense}
+                disabled={dispenseMutation.isPending}
+                className="rounded-xl bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-5 py-2.5 text-xs font-bold transition flex items-center gap-1.5">
+                
+                  <CheckCircle2 className="h-4 w-4" />{t("pharmacy.confirm_dispensation_print_label")}
+              </button>
               </div>
-            </div>
-          ) : (
-            <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
+            </div> :
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
               <FileText className="h-10 w-10 text-slate-350 mx-auto mb-3" />
-              <p className="text-sm font-bold text-slate-800 dark:text-slate-100">No active prescription retrieved</p>
-              <p className="text-xs text-slate-450 mt-1">Use the search box above to fetch a docket for validation.</p>
+              <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{t("pharmacy.no_active_prescription_retrieved")}</p>
+              <p className="text-xs text-slate-450 mt-1">{t("pharmacy.use_the_search_box_above_to_fetch_a_docket_for_validation")}</p>
             </div>
-          )}
+          }
         </div>
 
         {/* Right Column: Dispensing Log History */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 space-y-4">
           <h4 className="font-extrabold text-xs text-slate-900 dark:text-slate-50 uppercase tracking-wider flex items-center gap-2">
-            <Layers className="h-4.5 w-4.5 text-blue-500" /> Dispensing Audit Logs
+            <Layers className="h-4.5 w-4.5 text-blue-500" />{t("pharmacy.dispensing_audit_logs")}
           </h4>
 
-          {history && history.length > 0 ? (
-            <div className="divide-y divide-slate-100 dark:divide-slate-850 text-xs">
-              {history.map((log) => (
-                <div key={log.dispenseId} className="py-3 space-y-1.5 font-bold text-slate-700 dark:text-slate-400">
+          {history && history.length > 0 ?
+          <div className="divide-y divide-slate-100 dark:divide-slate-850 text-xs">
+              {history.map((log) =>
+            <div key={log.dispenseId} className="py-3 space-y-1.5 font-bold text-slate-700 dark:text-slate-400">
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-slate-900 dark:text-slate-50">{log.patientName}</p>
-                      <p className="text-[10px] text-slate-400">Rx: {log.prescriptionId}</p>
+                      <p className="text-[10px] text-slate-400">{t("pharmacy.rx")}{log.prescriptionId}</p>
                     </div>
                     <span className="text-[9px] text-slate-400">
                       {log.dispensedAt.split('T')[0]}
@@ -233,15 +233,15 @@ export default function PharmacyDispensingPage() {
                     {log.medicines.map((m) => `${m.name} (x${m.quantity})`).join(', ')}
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-[10px] text-slate-450 leading-relaxed text-center py-6">
-              No dispensing transaction logs found in this shift.
-            </p>
-          )}
+            )}
+            </div> :
+
+          <p className="text-[10px] text-slate-450 leading-relaxed text-center py-6">{t("pharmacy.no_dispensing_transaction_logs_found_in_this_shift")}
+
+          </p>
+          }
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }

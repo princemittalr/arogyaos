@@ -1,272 +1,263 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
-import React, { useState } from 'react';
-import { useHospitalProfile, useHospitalDoctors, useHospitalBeds, useHospitalInventory, useHospitalAppointments } from '@/features/hospital/hooks/useHospital';
+import React from 'react';
+import {
+  useHospitalProfile,
+  useHospitalDoctors,
+  useHospitalBeds,
+  useHospitalInventory,
+  useHospitalAppointments } from
+'@/features/hospital/hooks/useHospital';
 import { LoadingState } from '@/features/shared';
 import { motion } from 'framer-motion';
 import {
-  Building,
-  Users,
-  Bed,
-  Activity,
-  Package,
-  AlertTriangle,
-  TrendingUp,
-  ArrowRight,
-  Bot,
-  UserCheck,
-  Percent,
-  Settings,
-} from 'lucide-react';
+  Users, Bed, AlertTriangle, TrendingUp, TrendingDown,
+  UserCheck, ArrowRight, Bot, Building, Package, Activity,
+  CheckCircle2, Clock } from
+'lucide-react';
 import Link from 'next/link';
+import { cn } from '@/utils/cn';
 
-export default function HospitalDashboardPage() {
-  const hospitalId = 'hosp_city_gen'; // Standard hospital ID
+const MetricCard = ({
+  label, value, sub, icon: Icon, variant = 'default', trend, href
 
-  // Fetch all necessary telemetry metrics from queries
+
+
+
+}: {label: string;value: string | number;sub?: string;icon: React.ElementType;variant?: 'default' | 'success' | 'warning' | 'danger';trend?: {value: number;up: boolean;};href?: string;}) => {
+  const variants = {
+    default: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
+    success: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400',
+    warning: 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400',
+    danger: 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400'
+  };
+  const card =
+  <div className={cn('rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-5 transition-all duration-200', href && 'hover:border-slate-300 hover:shadow-sm dark:hover:border-slate-700')}>
+      <div className="flex items-start justify-between">
+        <div className={cn('rounded-lg p-2', variants[variant])}>
+          <Icon className="h-4 w-4" />
+        </div>
+        {trend &&
+      <div className={cn('flex items-center gap-1 text-[11px] font-semibold', trend.up ? 'text-emerald-600' : 'text-red-500')}>
+            {trend.up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+            {trend.value}%
+          </div>
+      }
+      </div>
+      <p className="mt-4 text-2xl font-bold text-slate-900 dark:text-slate-50">{value}</p>
+      <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5">{label}</p>
+      {sub && <p className="text-[11px] text-slate-400 mt-1">{sub}</p>}
+    </div>;
+
+  return href ? <Link href={href}>{card}</Link> : card;
+};
+
+export default function HospitalDashboardPage() {const { t } = useLanguage();
+  const ALERTS = [
+  { level: 'critical', title: t("hospital.amoxicillin_500mg_critical_stock"), desc: 'Only 85 units remaining. Below minimum threshold.', time: '10m ago' },
+  { level: 'warning', title: t("hospital.icu_capacity_notice"), desc: 'Ward Room 101 has only 2 vacant beds remaining.', time: '45m ago' },
+  { level: 'info', title: t("hospital.lab_report_ready"), desc: 'CBC results for Patient #4821 are ready for review.', time: '1h ago' }];
+
+
+  const AI_INSIGHTS = [
+  { text: t("hospital.bed_occupancy_likely_to_exceed_85_tonight_based_on_current_admission_rate"), confidence: 91, priority: 'High' },
+  { text: t("hospital.recommend_requesting_200_units_of_paracetamol_iv_from_district_supply_chain"), confidence: 87, priority: 'Medium' },
+  { text: t("hospital.dr_verma_has_3_uncompleted_discharge_summaries_pending_from_yesterday"), confidence: 95, priority: 'High' }];
+
+  const hospitalId = 'hosp_city_gen';
+
   const { data: profile, isLoading: profileLoading } = useHospitalProfile(hospitalId);
   const { data: doctors, isLoading: docsLoading } = useHospitalDoctors(hospitalId);
   const { data: beds, isLoading: bedsLoading } = useHospitalBeds(hospitalId);
   const { data: inventory, isLoading: invLoading } = useHospitalInventory(hospitalId);
   const { data: appointments, isLoading: apptsLoading } = useHospitalAppointments(hospitalId);
 
-  const [aiPrompt, setAiPrompt] = useState('');
-  const [aiResponse, setAiResponse] = useState('');
-
   if (profileLoading || docsLoading || bedsLoading || invLoading || apptsLoading) {
     return <LoadingState variant="card" />;
   }
 
-  // Derived telemetry metrics
-  const activeDocsCount = doctors?.filter(d => d.attendanceStatus === 'present').length || 0;
-  const totalBeds = beds?.length || 0;
-  const occupiedBeds = beds?.filter(b => b.status === 'occupied').length || 0;
-  const occupancyRate = totalBeds > 0 ? Math.round((occupiedBeds / totalBeds) * 100) : 0;
-  const lowStockMeds = inventory?.filter(i => i.status === 'low_stock' || i.status === 'expired').length || 0;
-  
-  // Today's appointments
-  const todayStr = new Date().toISOString().split('T')[0];
-  const todayAppointments = appointments?.filter(a => a.appointmentDate === todayStr) || [];
-  const pendingAppointments = todayAppointments.filter(a => a.status === 'scheduled') || [];
+  const today = new Date();
+  const todayStr = today.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
+  const todayApptStr = today.toISOString().split('T')[0];
 
-  const handleAiCommand = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!aiPrompt.trim()) return;
-    setAiResponse('Processing query through Gemini Healthcare Node... [Telemetry Analysis: Resource availability looks optimal. Recommended Action: Release Bed 101-A as patient Karan Sharma is marked for discharge today.]');
-  };
+  const activeDocCount = doctors?.filter((d) => d.attendanceStatus === 'present').length || 0;
+  const totalBeds = beds?.length || 0;
+  const occupiedBeds = beds?.filter((b) => b.status === 'occupied').length || 0;
+  const occupancyPct = totalBeds > 0 ? Math.round(occupiedBeds / totalBeds * 100) : 0;
+  const lowStockCount = inventory?.filter((i) => i.status === 'low_stock' || i.status === 'expired').length || 0;
+  const todayAppts = appointments?.filter((a) => a.appointmentDate === todayApptStr) || [];
+  const pendingAppts = todayAppts.filter((a) => a.status === 'scheduled');
 
   return (
-    <div className="space-y-8">
-      {/* 1. Welcome Hero */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-tr from-blue-650 to-indigo-600 p-8 text-white shadow-lg">
-        <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-white/10 blur-xl" />
-        <div className="relative z-10 max-w-2xl space-y-2">
-          <span className="rounded-full bg-white/20 px-3 py-1 text-[10px] font-bold uppercase tracking-wider">
-            Operational Hub
-          </span>
-          <h1 className="text-3xl font-extrabold tracking-tight">
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-50">
             {profile?.hospitalName || 'City General Hospital'}
           </h1>
-          <p className="text-sm text-blue-100 font-medium leading-relaxed">
-            Administrative Console. Monitoring critical patient flow, clinician status, and emergency resource quotas.
-          </p>
+          <p className="text-sm text-slate-500 mt-0.5">{todayStr}{t("hospital.operational_hub")}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link href="/dashboard/hospital/reports" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+            <Activity className="h-3.5 w-3.5" />{t("hospital.reports")}
+          </Link>
+          <Link href="/dashboard/hospital/ai-health-score" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition shadow-sm">
+            <Bot className="h-3.5 w-3.5" />{t("hospital.ai_insights")}
+          </Link>
         </div>
       </div>
 
-      {/* 2. Grid Dashboard Overview */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* Hospital Health Score */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Health Score</span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 dark:text-slate-50">94%</span>
-              <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-0.5">
-                <TrendingUp className="h-3 w-3" /> Excellent
-              </span>
-            </div>
-            <p className="text-[10px] text-slate-450 leading-relaxed mt-1">Weighted operational rating.</p>
-          </div>
-          <div className="relative h-16 w-16 flex items-center justify-center">
-            <svg className="absolute transform -rotate-95 h-16 w-16">
-              <circle cx="32" cy="32" r="28" className="stroke-slate-100 dark:stroke-slate-800 fill-none" strokeWidth="6" />
-              <circle cx="32" cy="32" r="28" className="stroke-emerald-500 fill-none" strokeWidth="6" strokeDasharray="176" strokeDashoffset="10" />
-            </svg>
-            <Percent className="h-5 w-5 text-emerald-500" />
-          </div>
-        </div>
-
-        {/* Staff Attendance */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Clinicians</span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 dark:text-slate-50">{activeDocsCount}</span>
-              <span className="text-xs text-slate-400">/ {doctors?.length || 0} active</span>
-            </div>
-            <p className="text-[10px] text-slate-450 leading-relaxed mt-1">Staff present for shifts.</p>
-          </div>
-          <div className="rounded-xl bg-blue-50 dark:bg-blue-950/40 p-3 text-blue-600 dark:text-blue-400">
-            <UserCheck className="h-6 w-6" />
-          </div>
-        </div>
-
-        {/* Bed Occupancy */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Bed Occupancy</span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 dark:text-slate-50">{occupancyRate}%</span>
-              <span className="text-xs text-slate-400">{occupiedBeds} occupied</span>
-            </div>
-            <p className="text-[10px] text-slate-450 leading-relaxed mt-1">Capacity: {totalBeds} total beds.</p>
-          </div>
-          <div className="rounded-xl bg-indigo-50 dark:bg-indigo-950/40 p-3 text-indigo-600 dark:text-indigo-400">
-            <Bed className="h-6 w-6" />
-          </div>
-        </div>
-
-        {/* Pharmacy Health */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Pharmacy Quota</span>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-slate-900 dark:text-slate-50">{lowStockMeds}</span>
-              <span className="text-xs text-slate-400">warnings</span>
-            </div>
-            <p className="text-[10px] text-slate-450 leading-relaxed mt-1">Critical stock levels.</p>
-          </div>
-          <div className="rounded-xl bg-red-50 dark:bg-red-950/40 p-3 text-red-650 dark:text-red-400">
-            <AlertTriangle className="h-6 w-6" />
-          </div>
-        </div>
+      {/* KPI Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <MetricCard label={t("hospital.doctors_on_duty")} value={`${activeDocCount}/${doctors?.length || 0}`} sub={t("hospital.staff_present")} icon={UserCheck} variant="success" trend={{ value: 5, up: true }} href="/dashboard/hospital/doctors" />
+        <MetricCard label={t("hospital.bed_occupancy")} value={`${occupancyPct}%`} sub={`${occupiedBeds} of ${totalBeds} beds`} icon={Bed} variant={occupancyPct > 80 ? 'danger' : occupancyPct > 60 ? 'warning' : 'default'} href="/dashboard/hospital/beds" />
+        <MetricCard label={t("hospital.todays_appointments")} value={todayAppts.length} sub={`${pendingAppts.length} pending`} icon={Clock} variant="default" href="/dashboard/hospital/appointments" />
+        <MetricCard label={t("hospital.inventory_alerts")} value={lowStockCount} sub={t("hospital.lowexpired_items")} icon={AlertTriangle} variant={lowStockCount > 0 ? 'danger' : 'success'} href="/dashboard/hospital/inventory" />
       </div>
 
-      {/* 3. Middle Section: Telemetry Analytics + AI Command */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left 2 Cols: AI Command Center & Details */}
+      {/* Main content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* Left 2 cols */}
         <div className="lg:col-span-2 space-y-6">
-          {/* AI Command Center */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex items-center gap-2 mb-4">
-              <Bot className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-50">Gemini AI Command Center</h3>
-            </div>
-            <form onSubmit={handleAiCommand} className="space-y-3">
-              <input
-                type="text"
-                placeholder="Ask Gemini to analyze bed availability, check low stock, or list active doctors..."
-                value={aiPrompt}
-                onChange={(e) => setAiPrompt(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-3 text-xs font-semibold text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none focus:border-blue-600"
-              />
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  className="rounded-xl bg-blue-600 hover:bg-blue-750 text-white font-bold text-xs px-5 py-2.5 transition flex items-center gap-2 cursor-pointer"
-                >
-                  <span>Execute Analysis</span>
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            </form>
-            {aiResponse && (
-              <motion.div
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mt-4 rounded-xl bg-slate-50 p-4 border border-slate-150 dark:bg-slate-950 dark:border-slate-850 text-xs font-semibold leading-relaxed text-slate-650 dark:text-slate-350"
-              >
-                {aiResponse}
-              </motion.div>
-            )}
-          </div>
 
-          {/* Quick Actions Panel */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-50 mb-4">Workspace Navigation</h3>
-            <div className="grid gap-3 grid-cols-2 sm:grid-cols-3">
-              <Link href="/dashboard/hospital/departments" className="rounded-xl border border-slate-150 p-3 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-850 text-center transition">
-                <Building className="h-5 w-5 mx-auto mb-2 text-slate-450" />
-                <span className="text-[10px] font-bold text-slate-650 dark:text-slate-350">Departments</span>
-              </Link>
-              <Link href="/dashboard/hospital/doctors" className="rounded-xl border border-slate-150 p-3 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-850 text-center transition">
-                <Users className="h-5 w-5 mx-auto mb-2 text-slate-450" />
-                <span className="text-[10px] font-bold text-slate-650 dark:text-slate-350">Doctor availability</span>
-              </Link>
-              <Link href="/dashboard/hospital/beds" className="rounded-xl border border-slate-150 p-3 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-850 text-center transition">
-                <Bed className="h-5 w-5 mx-auto mb-2 text-slate-450" />
-                <span className="text-[10px] font-bold text-slate-650 dark:text-slate-350">Bed occupancy</span>
-              </Link>
-              <Link href="/dashboard/hospital/inventory" className="rounded-xl border border-slate-150 p-3 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-850 text-center transition">
-                <Package className="h-5 w-5 mx-auto mb-2 text-slate-450" />
-                <span className="text-[10px] font-bold text-slate-650 dark:text-slate-350">Inventory stock</span>
-              </Link>
-              <Link href="/dashboard/hospital/laboratory" className="rounded-xl border border-slate-150 p-3 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-850 text-center transition">
-                <Activity className="h-5 w-5 mx-auto mb-2 text-slate-450" />
-                <span className="text-[10px] font-bold text-slate-650 dark:text-slate-350">Laboratory Overview</span>
-              </Link>
-              <Link href="/dashboard/hospital/settings" className="rounded-xl border border-slate-150 p-3 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-850 text-center transition">
-                <Settings className="h-5 w-5 mx-auto mb-2 text-slate-450" />
-                <span className="text-[10px] font-bold text-slate-650 dark:text-slate-350">Settings profile</span>
+          {/* Today's Queue */}
+          <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50">{t("hospital.todays_appointment_queue")}</h2>
+                <p className="text-xs text-slate-400 mt-0.5">{pendingAppts.length}{t("hospital.pending")}{todayAppts.filter((a) => a.status === 'completed').length}{t("hospital.completed")}</p>
+              </div>
+              <Link href="/dashboard/hospital/appointments" className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">{t("hospital.view_all")}
+
               </Link>
             </div>
-          </div>
-        </div>
+            {todayAppts.length === 0 ?
+            <div className="flex flex-col items-center py-10 text-center">
+                <CheckCircle2 className="h-8 w-8 text-emerald-300 mb-2" />
+                <p className="text-xs font-medium text-slate-500">{t("hospital.no_appointments_scheduled_for_today")}</p>
+              </div> :
 
-        {/* Right 1 Col: Critical Alerts & Active Staff */}
-        <div className="space-y-6">
-          {/* Critical Alerts */}
-          <div className="rounded-2xl border border-red-100 bg-red-50/20 p-6 dark:border-red-950/20 dark:bg-slate-900">
-            <h3 className="font-extrabold text-sm text-red-650 dark:text-red-400 mb-4 flex items-center gap-1.5">
-              <AlertTriangle className="h-5 w-5" />
-              <span>Critical Operations Sync</span>
-            </h3>
-            <div className="space-y-3.5">
-              <div className="flex gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0 animate-ping" />
-                <div>
-                  <p className="text-[11px] font-bold text-slate-900 dark:text-slate-200">Critical Stock Deficiency</p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Amoxicillin 500mg stock is below minimal threshold (85 units remaining).</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-orange-500 mt-1.5 flex-shrink-0" />
-                <div>
-                  <p className="text-[11px] font-bold text-slate-900 dark:text-slate-200">ICU Capacity Notice</p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">ICU Ward Room 101 currently has only 2 vacant bed allocations.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Today's appointments outline */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-50 mb-4 flex items-center justify-between">
-              <span>Shift Queue</span>
-              <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-[9px] font-extrabold text-blue-600 dark:bg-blue-950/20 dark:text-blue-400">
-                {pendingAppointments.length} scheduled
-              </span>
-            </h3>
-            {todayAppointments.length === 0 ? (
-              <p className="text-xs text-slate-500 text-center py-4">No appointments scheduled for today.</p>
-            ) : (
-              <div className="space-y-3">
-                {todayAppointments.map((appt) => (
-                  <div key={appt.appointmentId} className="flex justify-between items-center border-b border-slate-100 dark:border-slate-850 pb-2">
-                    <div>
-                      <p className="text-xs font-bold text-slate-900 dark:text-slate-200">Token #{appt.tokenNumber}</p>
-                      <p className="text-[10px] text-slate-450">{appt.appointmentTime} &bull; {appt.appointmentDate}</p>
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {todayAppts.slice(0, 5).map((appt) =>
+              <div key={appt.appointmentId} className="flex items-center justify-between py-3 first:pt-0 last:pb-0 gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-bold text-slate-600 dark:text-slate-300 flex-shrink-0">
+                        #{appt.tokenNumber}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">{doctors?.find((d) => d.uid === appt.doctorId)?.doctorName || 'Doctor'}</p>
+                        <p className="text-[11px] text-slate-400">{appt.appointmentTime}</p>
+                      </div>
                     </div>
-                    <span className="rounded-full bg-slate-50 px-2 py-0.5 text-[9px] font-extrabold text-slate-500 dark:bg-slate-850">
-                      {appt.status}
+                    <span className={cn('flex-shrink-0 rounded-md px-2 py-1 text-[10px] font-semibold capitalize',
+                appt.status === 'completed' ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400' :
+                appt.status === 'checked_in' ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400' :
+                'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+                )}>
+                      {appt.status.replace('_', ' ')}
                     </span>
                   </div>
-                ))}
+              )}
               </div>
-            )}
+            }
+          </div>
+
+          {/* Quick Access Grid */}
+          <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-5">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50 mb-4">{t("hospital.quick_access")}</h2>
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+              {[
+              { label: t("hospital.departments"), icon: Building, href: '/dashboard/hospital/departments' },
+              { label: t("hospital.doctors"), icon: Users, href: '/dashboard/hospital/doctors' },
+              { label: t("hospital.patients"), icon: UserCheck, href: '/dashboard/hospital/patients' },
+              { label: t("hospital.beds"), icon: Bed, href: '/dashboard/hospital/beds' },
+              { label: t("hospital.inventory"), icon: Package, href: '/dashboard/hospital/inventory' },
+              { label: t("hospital.lab"), icon: Activity, href: '/dashboard/hospital/laboratory' },
+              { label: t("hospital.pharmacy"), icon: Package, href: '/dashboard/hospital/pharmacy' },
+              { label: t("hospital.reports"), icon: Activity, href: '/dashboard/hospital/reports' }].
+              map((item) =>
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex flex-col items-center gap-2 rounded-lg border border-slate-100 dark:border-slate-800 p-3 text-center hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700 transition">
+                
+                  <item.icon className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                  <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-300">{item.label}</span>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right col */}
+        <div className="space-y-6">
+
+          {/* Critical Alerts */}
+          <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <AlertTriangle className="h-4 w-4 text-red-500" />
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50">{t("hospital.priority_alerts")}</h2>
+            </div>
+            <div className="space-y-3">
+              {ALERTS.map((alert, i) =>
+              <div key={i} className={cn('rounded-lg p-3',
+              alert.level === 'critical' ? 'bg-red-50 dark:bg-red-950/10 border border-red-100 dark:border-red-900/30' :
+              alert.level === 'warning' ? 'bg-amber-50 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900/30' :
+              'bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50'
+              )}>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className={cn('text-[11px] font-semibold',
+                  alert.level === 'critical' ? 'text-red-700 dark:text-red-400' :
+                  alert.level === 'warning' ? 'text-amber-700 dark:text-amber-400' :
+                  'text-slate-700 dark:text-slate-300'
+                  )}>
+                      {alert.title}
+                    </p>
+                    <span className="text-[10px] text-slate-400 flex-shrink-0">{alert.time}</span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">{alert.desc}</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* AI Insights */}
+          <div className="rounded-xl border border-blue-200/60 bg-gradient-to-br from-blue-50 to-indigo-50/50 dark:border-blue-900/30 dark:from-blue-950/20 dark:to-indigo-950/10 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Bot className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <h2 className="text-sm font-semibold text-blue-900 dark:text-blue-100">{t("hospital.ai_recommendations")}</h2>
+              </div>
+              <span className="rounded-full bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400">{t("hospital.gemini")}</span>
+            </div>
+            <div className="space-y-3">
+              {AI_INSIGHTS.map((insight, i) =>
+              <div key={i} className="rounded-lg bg-white/70 dark:bg-slate-900/50 p-3 border border-white/80 dark:border-slate-800/50">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className={cn('rounded-full px-2 py-0.5 text-[9px] font-bold uppercase',
+                  insight.priority === 'High' ? 'bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400' : 'bg-amber-100 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400'
+                  )}>
+                      {insight.priority}
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-400">{insight.confidence}{t("hospital.confidence")}</span>
+                  </div>
+                  <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">{insight.text}</p>
+                </div>
+              )}
+            </div>
+            <Link href="/dashboard/hospital/ai-health-score" className="mt-4 flex items-center justify-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline">{t("hospital.full_ai_analysis")}
+              <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </motion.div>);
+
 }

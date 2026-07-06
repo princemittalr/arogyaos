@@ -1,4 +1,4 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React, { useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -6,352 +6,277 @@ import {
   useDistrictFacilities,
   useDistrictRecommendations,
   useResolveRecommendationMutation,
-  useDistrictAlerts,
-} from '@/features/district/hooks/useDistrict';
-import { PageHeader, LoadingState } from '@/features/shared';
+  useDistrictAlerts } from
+'@/features/district/hooks/useDistrict';
+import { LoadingState } from '@/features/shared';
 import {
-  Activity,
-  AlertTriangle,
-  Building,
-  Heart,
-  Users,
-  MapPin,
-  Sparkles,
-  Info,
-} from 'lucide-react';
+  Activity, AlertTriangle, Building, Building2, Heart, Users, MapPin, Sparkles,
+  Info, ArrowLeftRight, Pill, Bed, UserCheck, CheckCircle2 } from
+'lucide-react';
 import { toast } from 'sonner';
 import { DistrictFacility } from '@/features/district/services/district.service';
+import { motion } from 'framer-motion';
+import { cn } from '@/utils/cn';
+import Link from 'next/link';
 
-export default function DistrictDashboardPage() {
+const MetricCard = ({
+  label, value, icon: Icon, color = 'blue'
+
+
+
+}: {label: string;value: string | number;icon: React.ElementType;color?: string;}) => {
+  const colors: Record<string, string> = {
+    blue: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
+    emerald: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400',
+    amber: 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400',
+    purple: 'bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400',
+    red: 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400',
+    indigo: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/30 dark:text-indigo-400'
+  };
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 transition-all duration-200">
+      <div className={cn('inline-flex rounded-lg p-2 mb-4', colors[color] || colors.blue)}>
+        <Icon className="h-4 w-4" />
+      </div>
+      <p className="text-2xl font-bold text-slate-900 dark:text-slate-50">{value}</p>
+      <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5">{label}</p>
+    </div>);
+
+};
+
+export default function DistrictDashboardPage() {const { t } = useLanguage();
   const { user } = useAuth();
   const districtId = user?.uid || 'dist_central_delhi';
 
   const { data: facilities, isLoading: facLoading } = useDistrictFacilities(districtId);
   const { data: recommendations, isLoading: recLoading } = useDistrictRecommendations(districtId);
   const { data: alerts, isLoading: alertsLoading } = useDistrictAlerts(districtId);
-
   const resolveRecMutation = useResolveRecommendationMutation();
 
   const [selectedFacility, setSelectedFacility] = useState<DistrictFacility | null>(null);
 
-  if (facLoading || recLoading || alertsLoading) {
-    return <LoadingState variant="card" />;
-  }
+  if (facLoading || recLoading || alertsLoading) return <LoadingState variant="card" />;
 
   const listFac = facilities || [];
   const listRecs = recommendations || [];
   const listAlerts = alerts || [];
 
-  // Metrics calculations
   const totalHospitals = listFac.filter((f) => f.type === 'hospital').length;
   const totalPHCs = listFac.filter((f) => f.type === 'phc').length;
   const totalCHCs = listFac.filter((f) => f.type === 'chc').length;
   const totalDoctors = listFac.reduce((acc, f) => acc + f.doctorsPresent, 0);
   const totalPatients = listFac.reduce((acc, f) => acc + f.patientsCount, 0);
-  const avgHealthScore = listFac.length
-    ? Math.round(listFac.reduce((acc, f) => acc + f.healthScore, 0) / listFac.length)
-    : 0;
+  const avgHealthScore = listFac.length ? Math.round(listFac.reduce((acc, f) => acc + f.healthScore, 0) / listFac.length) : 0;
 
-  const handleReviewRecommendation = async (recId: string) => {
+  const handleReviewRec = async (recId: string) => {
     try {
       await resolveRecMutation.mutateAsync({ recId, districtId });
     } catch {
-      toast.error('Failed to update recommendation status.');
+      toast.error(t("district.failed_to_update_recommendation"));
     }
   };
 
+  const today = new Date();
+  const todayStr = today.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="District AI Command Center"
-        description="Unified health dashboard for real-time facility resource tracking, AI predictions, and logistic redistribution."
-      />
-
-      {/* Executive Overview Grid */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-7">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-slate-450 uppercase">Hospitals</span>
-            <Building className="h-4 w-4 text-blue-500" />
-          </div>
-          <p className="text-2xl font-extrabold mt-2 text-slate-900 dark:text-slate-50">{totalHospitals}</p>
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="space-y-8">
+      
+      {/* 1. Welcome Header (Executive Summary) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-50">{t("district.district_command_center")}</h1>
+          <p className="text-sm text-slate-500 mt-0.5">{todayStr}{t("district.executive_overview")}</p>
         </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-slate-450 uppercase">PHCs</span>
-            <Building className="h-4 w-4 text-indigo-500" />
-          </div>
-          <p className="text-2xl font-extrabold mt-2 text-slate-900 dark:text-slate-50">{totalPHCs}</p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-slate-450 uppercase">CHCs</span>
-            <Building className="h-4 w-4 text-purple-500" />
-          </div>
-          <p className="text-2xl font-extrabold mt-2 text-slate-900 dark:text-slate-50">{totalCHCs}</p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-slate-450 uppercase">Doctors</span>
-            <Users className="h-4 w-4 text-emerald-500" />
-          </div>
-          <p className="text-2xl font-extrabold mt-2 text-slate-900 dark:text-slate-50">{totalDoctors}</p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-slate-450 uppercase">Admitted</span>
-            <Activity className="h-4 w-4 text-amber-500" />
-          </div>
-          <p className="text-2xl font-extrabold mt-2 text-slate-900 dark:text-slate-50">{totalPatients}</p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-slate-450 uppercase">Alerts</span>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-          </div>
-          <p className="text-2xl font-extrabold mt-2 text-slate-900 dark:text-slate-50">{listAlerts.length}</p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 col-span-2 lg:col-span-1">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-bold text-slate-450 uppercase">Health</span>
-            <Heart className="h-4 w-4 text-rose-500" />
-          </div>
-          <p className="text-2xl font-extrabold mt-2 text-slate-900 dark:text-slate-50">{avgHealthScore}%</p>
-        </div>
+        <Link href="/dashboard/district/reports" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition shadow-sm shadow-blue-600/20">
+          <Activity className="h-4 w-4" />{t("district.download_full_report")}
+        </Link>
       </div>
 
-      {/* Main Command Dashboard Layout */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        
-        {/* Left 2 Columns: Map & Drawer + AI recommendations */}
-        <div className="lg:col-span-2 space-y-6">
-          
-          {/* Interactive Map Visualizer */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-slate-50 flex items-center gap-1.5">
-                <MapPin className="h-4.5 w-4.5 text-blue-500" /> Interactive Facility GIS Map
-              </h3>
-              <p className="text-[9px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-850 px-2 py-0.5 rounded">
-                Click pin markers to query live resources
-              </p>
-            </div>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <MetricCard label={t("district.hospitals")} value={totalHospitals} icon={Building2} color="blue" />
+        <MetricCard label={t("district.phcs")} value={totalPHCs} icon={Building} color="indigo" />
+        <MetricCard label={t("district.chcs")} value={totalCHCs} icon={Building} color="purple" />
+        <MetricCard label={t("district.doctors_active")} value={totalDoctors} icon={Users} color="emerald" />
+        <MetricCard label={t("district.total_admitted")} value={totalPatients} icon={Activity} color="amber" />
+        <MetricCard label={t("district.health_score")} value={`${avgHealthScore}%`} icon={Heart} color={avgHealthScore > 80 ? 'emerald' : 'amber'} />
+      </div>
 
-            {/* Map Placeholder Graphic & Points of Interest */}
-            <div className="relative rounded-xl border border-slate-100 bg-slate-50 dark:border-slate-850 dark:bg-slate-950/40 h-80 overflow-hidden flex items-center justify-center">
-              
-              {/* Simulated Map Topography */}
-              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
-              
-              {/* GIS Markers */}
-              <div className="relative w-full h-full">
-                {listFac.map((fac) => {
-                  // Map coordinates to percentage positions for UI display
-                  const topPercent = fac.type === 'hospital' ? '30%' : fac.type === 'phc' ? '65%' : '48%';
-                  const leftPercent = fac.type === 'hospital' ? '40%' : fac.type === 'phc' ? '25%' : '75%';
-                  const colorClass = fac.status === 'green' ? 'bg-emerald-500' : fac.status === 'yellow' ? 'bg-amber-500' : 'bg-red-500';
-
-                  return (
-                    <button
-                      key={fac.facilityId}
-                      style={{ top: topPercent, left: leftPercent }}
-                      onClick={() => setSelectedFacility(fac)}
-                      className="absolute -translate-x-1/2 -translate-y-1/2 group focus:outline-none z-10"
-                    >
-                      <div className={`h-4.5 w-4.5 rounded-full ${colorClass} border-2 border-white dark:border-slate-900 flex items-center justify-center shadow-lg shadow-black/20 hover:scale-125 transition duration-200`}>
-                        <div className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
-                      </div>
-                      <span className="absolute left-6 top-1/2 -translate-y-1/2 bg-slate-900/90 text-white font-extrabold text-[9px] px-2 py-0.5 rounded shadow whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                        {fac.name} ({fac.healthScore}%)
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Legend overlay */}
-              <div className="absolute bottom-3 left-3 bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 text-[9px] font-bold text-slate-600 dark:text-slate-450 space-y-1">
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500" /> Operational / Healthy
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-amber-500" /> Capacity Warnings
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-red-500" /> Critical Intervention Needed
-                </div>
-              </div>
-            </div>
+      {/* 2. Critical Alerts */}
+      {listAlerts.length > 0 &&
+      <div className="rounded-xl border border-red-200 bg-red-50 p-5 dark:border-red-900/30 dark:bg-red-950/10">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertTriangle className="h-4 w-4 text-red-500 animate-pulse" />
+            <h2 className="text-sm font-semibold text-red-900 dark:text-red-100">{t("district.critical_district_alerts")}</h2>
           </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {listAlerts.map((alert) =>
+          <div key={alert.alertId} className="rounded-lg bg-white/70 dark:bg-slate-900/50 p-3.5 border border-red-100 dark:border-red-900/30">
+                <div className="flex justify-between items-start mb-2">
+                  <p className="text-[11px] font-bold text-slate-900 dark:text-slate-100">{alert.hospitalName}</p>
+                  <span className={cn('text-[9px] font-bold uppercase px-1.5 py-0.5 rounded', alert.severity === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400')}>
+                    {alert.severity}
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed">{alert.message}</p>
+              </div>
+          )}
+          </div>
+        </div>
+      }
 
-          {/* AI Command Recommendations Panel */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-slate-50 flex items-center gap-1.5">
-              <Sparkles className="h-4.5 w-4.5 text-blue-500" /> AI Logistical & Medical Forecasting
-            </h3>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              {listRecs.filter(r => r.status === 'pending').map((rec) => {
-                const isHigh = rec.priority === 'high';
+      {/* 3. District Map & 4. Hospital Status */}
+      <div className="grid lg:grid-cols-3 gap-6">
+        
+        {/* District Map */}
+        <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50 flex items-center gap-1.5">
+              <MapPin className="h-4 w-4 text-blue-500" />{t("district.interactive_facility_map")}
+            </h2>
+          </div>
+          <div className="relative rounded-lg border border-slate-100 bg-slate-50 dark:border-slate-850 dark:bg-slate-950 h-[350px] overflow-hidden flex items-center justify-center">
+            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
+            <div className="relative w-full h-full">
+              {listFac.map((fac) => {
+                const topPercent = fac.type === 'hospital' ? '30%' : fac.type === 'phc' ? '65%' : '48%';
+                const leftPercent = fac.type === 'hospital' ? '40%' : fac.type === 'phc' ? '25%' : '75%';
+                const colorClass = fac.status === 'green' ? 'bg-emerald-500' : fac.status === 'yellow' ? 'bg-amber-500' : 'bg-red-500';
                 return (
-                  <div
-                    key={rec.recId}
-                    className="rounded-xl border border-slate-150 bg-slate-50/50 p-4 dark:border-slate-850 dark:bg-slate-950/20 flex flex-col justify-between gap-4 hover:border-slate-300 dark:hover:border-slate-750 transition"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className={`text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md ${
-                          isHigh ? 'bg-red-50 text-red-650 dark:bg-red-950/20 dark:text-red-400' : 'bg-amber-50 text-amber-650 dark:bg-amber-950/20 dark:text-amber-400'
-                        }`}>
-                          {rec.priority} Priority
-                        </span>
-                        <span className="text-[10px] font-bold text-slate-400">
-                          Confidence: {rec.confidence}%
-                        </span>
-                      </div>
+                  <button
+                    key={fac.facilityId}
+                    style={{ top: topPercent, left: leftPercent }}
+                    onClick={() => setSelectedFacility(fac)}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 group z-10">
+                    
+                    <div className={cn(`h-4 w-4 rounded-full ${colorClass} border-2 border-white dark:border-slate-900 shadow-md transition-transform duration-200`, selectedFacility?.facilityId === fac.facilityId && 'scale-150 ring-2 ring-blue-500 ring-offset-2')} />
+                    <span className="absolute left-6 top-1/2 -translate-y-1/2 bg-slate-900/90 text-white font-semibold text-[10px] px-2 py-0.5 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      {fac.name}
+                    </span>
+                  </button>);
 
-                      <h4 className="font-bold text-xs text-slate-900 dark:text-slate-50">{rec.title}</h4>
-                      <p className="text-[10px] text-slate-500 leading-relaxed font-semibold">{rec.description}</p>
-                    </div>
-
-                    <div className="space-y-3 pt-2 border-t border-slate-150 dark:border-slate-850">
-                      <div className="text-[10px] text-blue-650 dark:text-blue-400 font-bold flex items-start gap-1">
-                        <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-                        <span>Suggested Action: {rec.suggestedAction}</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <span className="text-[8px] text-slate-400 font-semibold">{new Date(rec.timestamp).toLocaleTimeString()}</span>
-                        <button
-                          onClick={() => handleReviewRecommendation(rec.recId)}
-                          disabled={resolveRecMutation.isPending}
-                          className="rounded-lg bg-slate-900 dark:bg-slate-100 dark:text-slate-950 hover:bg-slate-800 px-3.5 py-1.5 text-[9px] font-bold transition"
-                        >
-                          Mark Reviewed
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
               })}
             </div>
           </div>
         </div>
 
-        {/* Right Column: Selected Facility Drawer / Facility Stats */}
+        {/* Hospital Status Details */}
         <div className="space-y-6">
-          {selectedFacility ? (
-            <div className="rounded-2xl border-2 border-blue-500 bg-white p-5 dark:bg-slate-900 space-y-5 shadow-lg transition-all duration-300">
-              <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-850 pb-3">
+          {selectedFacility ?
+          <div className="rounded-xl border-2 border-blue-500 bg-white p-5 dark:bg-slate-900 shadow-lg">
+              <div className="flex justify-between items-start mb-4">
                 <div>
-                  <span className="text-[8px] font-extrabold uppercase px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">
-                    {selectedFacility.type}
-                  </span>
-                  <h4 className="font-extrabold text-sm text-slate-900 dark:text-slate-50 mt-1.5">{selectedFacility.name}</h4>
+                  <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">{selectedFacility.type}</span>
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-slate-50 mt-1">{selectedFacility.name}</h3>
                 </div>
-                <button
-                  onClick={() => setSelectedFacility(null)}
-                  className="text-slate-400 hover:text-slate-650 text-xs font-bold"
-                >
-                  Close
-                </button>
+                <button onClick={() => setSelectedFacility(null)} className="text-[10px] font-semibold text-slate-400 hover:text-slate-600 transition">{t("district.close")}</button>
               </div>
-
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="bg-slate-50 dark:bg-slate-950/30 p-3 rounded-xl border border-slate-150 dark:border-slate-850">
-                  <p className="text-[10px] text-slate-400 font-semibold">Health Score</p>
-                  <p className="text-lg font-black mt-1 text-slate-900 dark:text-slate-50">{selectedFacility.healthScore}%</p>
+              <div className="grid grid-cols-2 gap-3 mb-4 text-center">
+                <div className="rounded-lg bg-slate-50 dark:bg-slate-800/50 p-2 border border-slate-100 dark:border-slate-800">
+                  <p className="text-[10px] font-semibold text-slate-500">{t("district.health_score")}</p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-slate-100">{selectedFacility.healthScore}%</p>
                 </div>
-                <div className="bg-slate-50 dark:bg-slate-950/30 p-3 rounded-xl border border-slate-150 dark:border-slate-850">
-                  <p className="text-[10px] text-slate-400 font-semibold">Status Indicator</p>
-                  <span className={`inline-block mt-2 h-2.5 w-2.5 rounded-full ${
-                    selectedFacility.status === 'green' ? 'bg-emerald-500' : selectedFacility.status === 'yellow' ? 'bg-amber-500' : 'bg-red-500'
-                  }`} />
+                <div className="rounded-lg bg-slate-50 dark:bg-slate-800/50 p-2 border border-slate-100 dark:border-slate-800">
+                  <p className="text-[10px] font-semibold text-slate-500">{t("district.status")}</p>
+                  <div className="flex justify-center mt-2">
+                    <span className={cn('h-3 w-3 rounded-full', selectedFacility.status === 'green' ? 'bg-emerald-500' : selectedFacility.status === 'yellow' ? 'bg-amber-500' : 'bg-red-500')} />
+                  </div>
                 </div>
               </div>
-
               <div className="space-y-3">
-                <h5 className="text-[10px] font-extrabold text-slate-450 uppercase tracking-wider">Live Capacity Audit</h5>
-                
-                <div className="space-y-2">
-                  <div>
-                    <div className="flex justify-between text-[10px] font-bold text-slate-650 dark:text-slate-350 mb-1">
-                      <span>Beds Available: {selectedFacility.bedsAvailable}</span>
-                      <span>Total: {selectedFacility.bedsTotal}</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div
-                        style={{ width: `${(selectedFacility.bedsAvailable / selectedFacility.bedsTotal) * 100}%` }}
-                        className="h-full bg-blue-500 rounded-full"
-                      />
-                    </div>
+                <div>
+                  <div className="flex justify-between text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    <span>{t("district.beds")}{selectedFacility.bedsAvailable} / {selectedFacility.bedsTotal}</span>
                   </div>
-
-                  <div>
-                    <div className="flex justify-between text-[10px] font-bold text-slate-650 dark:text-slate-350 mb-1">
-                      <span>Doctors Present: {selectedFacility.doctorsPresent}</span>
-                      <span>Total: {selectedFacility.doctorsTotal}</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div
-                        style={{ width: `${(selectedFacility.doctorsPresent / selectedFacility.doctorsTotal) * 100}%` }}
-                        className="h-full bg-emerald-500 rounded-full"
-                      />
-                    </div>
+                  <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div style={{ width: `${selectedFacility.bedsAvailable / selectedFacility.bedsTotal * 100}%` }} className="h-full bg-blue-500" />
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
+                    <span>{t("district.doctors")}{selectedFacility.doctorsPresent} / {selectedFacility.doctorsTotal}</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div style={{ width: `${selectedFacility.doctorsPresent / selectedFacility.doctorsTotal * 100}%` }} className="h-full bg-emerald-500" />
                   </div>
                 </div>
               </div>
+            </div> :
+
+          <div className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 h-full flex flex-col items-center justify-center text-center">
+              <MapPin className="h-8 w-8 text-slate-300 mb-3" />
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">{t("district.select_a_facility")}</p>
+              <p className="text-[11px] text-slate-400 mt-1 max-w-[200px]">{t("district.click_a_pin_on_the_map_to_view_detailed_real_time_statistics")}</p>
             </div>
-          ) : (
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center dark:border-slate-800 dark:bg-slate-900">
-              <Building className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-              <h4 className="font-bold text-xs text-slate-700 dark:text-slate-300">Live Facility Node Inspector</h4>
-              <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
-                Interact with the GIS health map or click a location pin to pull real-time parameters.
-              </p>
+          }
+        </div>
+      </div>
+
+      {/* 5, 6, 7, 8. Quick Navigation (Medicine, Beds, Doctors, Redistribution) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+        { label: t("district.medicine_monitor"), desc: 'Track low stock & expiry', icon: Pill, href: '/dashboard/district/medicine-monitoring', color: 'text-indigo-600' },
+        { label: t("district.bed_occupancy"), desc: 'Manage ward capacities', icon: Bed, href: '/dashboard/district/bed-monitoring', color: 'text-blue-600' },
+        { label: t("district.doctor_attendance"), desc: 'View staff availability', icon: UserCheck, href: '/dashboard/district/doctor-attendance', color: 'text-emerald-600' },
+        { label: t("district.redistribution"), desc: 'Shift resources', icon: ArrowLeftRight, href: '/dashboard/district/resource-redistribution', color: 'text-amber-600' }].
+        map((item) =>
+        <Link key={item.href} href={item.href} className="flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 transition text-center">
+            <item.icon className={cn('h-6 w-6', item.color)} />
+            <div>
+              <p className="text-xs font-bold text-slate-900 dark:text-slate-100">{item.label}</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">{item.desc}</p>
+            </div>
+          </Link>
+        )}
+      </div>
+
+      {/* 9. AI Recommendations */}
+      <div className="rounded-xl border border-blue-200/60 bg-gradient-to-br from-blue-50 to-indigo-50/50 dark:border-blue-900/30 dark:from-blue-950/20 dark:to-indigo-950/10 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <h2 className="text-sm font-semibold text-blue-900 dark:text-blue-100">{t("district.ai_recommendations_forecasting")}</h2>
+          </div>
+          <span className="rounded-full bg-blue-100 dark:bg-blue-900/50 px-2.5 py-1 text-[10px] font-bold text-blue-600 dark:text-blue-400">{t("district.gemini_active")}</span>
+        </div>
+        
+        <div className="grid md:grid-cols-2 gap-4">
+          {listRecs.filter((r) => r.status === 'pending').map((rec) =>
+          <div key={rec.recId} className="rounded-xl bg-white/80 dark:bg-slate-900/60 p-4 border border-white/50 dark:border-slate-800/50 flex flex-col justify-between shadow-sm">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={cn('text-[9px] font-bold uppercase px-2 py-0.5 rounded', rec.priority === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400')}>
+                    {rec.priority}
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-500">{rec.confidence}{t("district.confidence")}</span>
+                </div>
+                <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100 mb-1">{rec.title}</h3>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed mb-3">{rec.description}</p>
+                <div className="flex items-start gap-1.5 text-[10px] text-blue-600 dark:text-blue-400 font-semibold mb-4 bg-blue-50/50 dark:bg-blue-900/20 p-2 rounded-lg">
+                  <Info className="h-3.5 w-3.5 shrink-0 mt-0.5" /> {rec.suggestedAction}
+                </div>
+              </div>
+              <div className="flex items-center justify-between border-t border-slate-100 dark:border-slate-800 pt-3">
+                <span className="text-[9px] text-slate-400 font-medium">{new Date(rec.timestamp).toLocaleTimeString()}</span>
+                <button
+                onClick={() => handleReviewRec(rec.recId)}
+                disabled={resolveRecMutation.isPending}
+                className="rounded-lg bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 text-[10px] font-semibold transition">{t("district.mark_reviewed")}
+
+
+              </button>
+              </div>
             </div>
           )}
-
-          {/* Live Alerts Stream */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-900 dark:text-slate-50 flex items-center gap-1.5">
-              <AlertTriangle className="h-4.5 w-4.5 text-red-500 animate-pulse" /> Live Critical Alerts
-            </h3>
-
-            {listAlerts.length > 0 ? (
-              <div className="divide-y divide-slate-100 dark:divide-slate-850 text-xs">
-                {listAlerts.map((alert) => (
-                  <div key={alert.alertId} className="py-3.5 space-y-1.5 font-bold text-slate-805">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-slate-900 dark:text-slate-50 text-[11px]">{alert.hospitalName}</p>
-                        <p className="text-[9px] text-slate-400 uppercase font-semibold">{alert.type.replace('_', ' ')}</p>
-                      </div>
-                      <span className={`text-[8px] uppercase px-1.5 py-0.5 rounded font-extrabold ${
-                        alert.severity === 'critical' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'
-                      }`}>
-                        {alert.severity}
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 font-semibold leading-relaxed">
-                      {alert.message}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-slate-450 italic py-6 text-center">No active alerts triggered.</p>
-            )}
-          </div>
+          {listRecs.filter((r) => r.status === 'pending').length === 0 &&
+          <div className="col-span-2 py-8 flex flex-col items-center justify-center text-center">
+              <CheckCircle2 className="h-8 w-8 text-emerald-400 mb-2" />
+              <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">{t("district.all_recommendations_reviewed")}</p>
+            </div>
+          }
         </div>
-
       </div>
-    </div>
-  );
+
+    </motion.div>);
+
 }

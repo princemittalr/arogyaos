@@ -1,4 +1,4 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { Download } from 'lucide-react';
 
-export default function CitizenPrescriptionsPage() {
+export default function CitizenPrescriptionsPage() {const { t } = useLanguage();
   const { user } = useAuth();
   const uid = user?.uid || '';
 
@@ -29,14 +29,14 @@ export default function CitizenPrescriptionsPage() {
     const patientName = user?.fullName || 'Patient';
     const doctorName = doctorMatch?.doctorName || 'Healthcare Specialist';
     const hospitalName = doctorMatch?.hospitalName || 'ArogyaOS Medical Center';
-    const date = typeof rx.createdAt === 'string'
-      ? rx.createdAt
-      : (rx.createdAt as { toDate?: () => Date })?.toDate
-      ? (rx.createdAt as { toDate: () => Date }).toDate().toLocaleDateString()
-      : new Date().toLocaleDateString();
+    const date = typeof rx.createdAt === 'string' ?
+    rx.createdAt :
+    (rx.createdAt as {toDate?: () => Date;})?.toDate ?
+    (rx.createdAt as {toDate: () => Date;}).toDate().toLocaleDateString() :
+    new Date().toLocaleDateString();
 
     const medicineRows = rx.medicines.map((m) =>
-      `<tr style="border-bottom:1px solid #e2e8f0">
+    `<tr style="border-bottom:1px solid #e2e8f0">
         <td style="padding:10px 14px;font-weight:600">${m.name}</td>
         <td style="padding:10px 14px">${m.dosage}</td>
         <td style="padding:10px 14px">${m.frequency}</td>
@@ -82,8 +82,8 @@ export default function CitizenPrescriptionsPage() {
       win.document.write(html);
       win.document.close();
       win.focus();
-      setTimeout(() => { win.print(); }, 500);
-      toast.success('Prescription PDF ready — printing dialog opened.');
+      setTimeout(() => {win.print();}, 500);
+      toast.success(t("citizen.prescription_pdf_ready_printing_dialog_opened"));
     }
   };
 
@@ -92,74 +92,74 @@ export default function CitizenPrescriptionsPage() {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-4xl mx-auto space-y-8"
-    >
+      className="max-w-4xl mx-auto space-y-8">
+      
       <PageHeader
-        title="Active Prescriptions"
-        description="Verify medication dosages, course schedules, and practitioner advice."
-      />
+        title={t("citizen.active_prescriptions")}
+        description={t("citizen.verify_medication_dosages_course_schedules_and_practitioner_advice")} />
+      
 
-      {prescriptions && prescriptions.length > 0 ? (
-        <div className="space-y-6">
+      {prescriptions && prescriptions.length > 0 ?
+      <div className="space-y-6">
           {prescriptions.map((rx) => {
-            const doctorMatch = doctors?.find((d) => d.uid === rx.doctorId);
+          const doctorMatch = doctors?.find((d) => d.uid === rx.doctorId);
 
-            return (
-              <motion.div
-                key={rx.prescriptionId}
-                whileHover={{ y: -1 }}
-                className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 space-y-6"
-              >
+          return (
+            <motion.div
+              key={rx.prescriptionId}
+              whileHover={{ y: -1 }}
+              className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 space-y-6">
+              
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-4 gap-3">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-650 dark:text-blue-400">
-                      Diagnosis: {rx.diagnosis}
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-650 dark:text-blue-400">{t("citizen.diagnosis")}
+                    {rx.diagnosis}
                     </span>
                     <h4 className="font-bold text-base text-slate-900 dark:text-slate-55">
                       {doctorMatch ? doctorMatch.doctorName : 'Healthcare Specialist'}
                     </h4>
                     <p className="text-xs text-slate-500">
                       {doctorMatch ? doctorMatch.hospitalName : 'Medical Center'} &bull;{' '}
-                      {typeof rx.createdAt === 'string'
-                        ? rx.createdAt
-                        : (rx.createdAt as { toDate?: () => Date })?.toDate
-                        ? (rx.createdAt as { toDate: () => Date }).toDate().toLocaleDateString()
-                        : 'Recent'}
+                      {typeof rx.createdAt === 'string' ?
+                    rx.createdAt :
+                    (rx.createdAt as {toDate?: () => Date;})?.toDate ?
+                    (rx.createdAt as {toDate: () => Date;}).toDate().toLocaleDateString() :
+                    'Recent'}
                     </p>
                   </div>
 
                   <button
-                    onClick={() => handleDownloadPDF(rx)}
-                    className={`${componentStyles.button.base} ${componentStyles.button.outline} px-3.5 py-2 text-xs flex items-center gap-1.5 self-start sm:self-center`}
-                  >
+                  onClick={() => handleDownloadPDF(rx)}
+                  className={`${componentStyles.button.base} ${componentStyles.button.outline} px-3.5 py-2 text-xs flex items-center gap-1.5 self-start sm:self-center`}>
+                  
                     <Download className="h-4 w-4" />
-                    <span>Download PDF</span>
+                    <span>{t("citizen.download_pdf")}</span>
                   </button>
                 </div>
 
                 {/* Medicines List */}
                 <div className="space-y-3">
-                  <h5 className="font-bold text-xs text-slate-500 uppercase tracking-wide">
-                    Medication Guidelines
-                  </h5>
+                  <h5 className="font-bold text-xs text-slate-500 uppercase tracking-wide">{t("citizen.medication_guidelines")}
+
+                </h5>
 
                   <div className="overflow-x-auto border border-slate-100 dark:border-slate-850 rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
                         <tr className="bg-slate-50 dark:bg-slate-950 font-bold text-slate-500 border-b border-slate-150 dark:border-slate-850">
-                          <th className="px-4 py-3">Medicine Name</th>
-                          <th className="px-4 py-3">Dosage Instruction</th>
-                          <th className="px-4 py-3">Frequency</th>
-                          <th className="px-4 py-3">Duration (Days)</th>
+                          <th className="px-4 py-3">{t("citizen.medicine_name")}</th>
+                          <th className="px-4 py-3">{t("citizen.dosage_instruction")}</th>
+                          <th className="px-4 py-3">{t("citizen.frequency")}</th>
+                          <th className="px-4 py-3">{t("citizen.duration_days")}</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {rx.medicines.map((med, idx) => (
-                          <tr
-                            key={idx}
-                            className="border-b border-slate-100 dark:border-slate-850 last:border-b-0 text-slate-800 dark:text-slate-300 font-semibold"
-                          >
+                        {rx.medicines.map((med, idx) =>
+                      <tr
+                        key={idx}
+                        className="border-b border-slate-100 dark:border-slate-850 last:border-b-0 text-slate-800 dark:text-slate-300 font-semibold">
+                        
                             <td className="px-4 py-3 text-slate-900 dark:text-slate-100">
                               {med.name}
                             </td>
@@ -169,43 +169,43 @@ export default function CitizenPrescriptionsPage() {
                               </span>
                             </td>
                             <td className="px-4 py-3">{med.frequency}</td>
-                            <td className="px-4 py-3">{med.duration} Days</td>
+                            <td className="px-4 py-3">{med.duration}{t("citizen.days")}</td>
                           </tr>
-                        ))}
+                      )}
                       </tbody>
                     </table>
                   </div>
                 </div>
 
                 {/* Lab tests requested */}
-                {rx.labTests && rx.labTests.length > 0 && (
-                  <div className="space-y-2.5 border-t border-slate-100 dark:border-slate-850 pt-4">
-                    <h5 className="font-bold text-xs text-slate-500 uppercase tracking-wide">
-                      Recommended Lab Investigations
-                    </h5>
+                {rx.labTests && rx.labTests.length > 0 &&
+              <div className="space-y-2.5 border-t border-slate-100 dark:border-slate-850 pt-4">
+                    <h5 className="font-bold text-xs text-slate-500 uppercase tracking-wide">{t("citizen.recommended_lab_investigations")}
+
+                </h5>
                     <div className="flex flex-wrap gap-2">
-                      {rx.labTests.map((test, idx) => (
-                        <span
-                          key={idx}
-                          className="rounded-lg border border-slate-200 dark:border-slate-850 bg-slate-50/50 px-3 py-1.5 text-xs text-slate-650 dark:bg-slate-950/40 dark:text-slate-350 font-semibold"
-                        >
+                      {rx.labTests.map((test, idx) =>
+                  <span
+                    key={idx}
+                    className="rounded-lg border border-slate-200 dark:border-slate-850 bg-slate-50/50 px-3 py-1.5 text-xs text-slate-650 dark:bg-slate-950/40 dark:text-slate-350 font-semibold">
+                    
                           {test}
                         </span>
-                      ))}
+                  )}
                     </div>
                   </div>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
-      ) : (
-        <EmptyState
-          title="No active prescriptions"
-          description="Your medical prescriptions will appear here once consult visits are recorded by doctors."
-          icon={icons.FileText || icons.Home}
-        />
-      )}
-    </motion.div>
-  );
+              }
+              </motion.div>);
+
+        })}
+        </div> :
+
+      <EmptyState
+        title={t("citizen.no_active_prescriptions")}
+        description={t("citizen.your_medical_prescriptions_will_appear_here_once_consult_visits_are_recorded_by_doctors")}
+        icon={icons.FileText || icons.Home} />
+
+      }
+    </motion.div>);
+
 }

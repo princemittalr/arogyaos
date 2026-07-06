@@ -1,4 +1,4 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React from 'react';
 import { useForm } from 'react-hook-form';
@@ -19,12 +19,12 @@ const profileSchema = zod.object({
   gender: zod.enum(['male', 'female', 'other']),
   bloodGroup: zod.string().min(1, 'Please select your blood group.'),
   allergies: zod.string(), // comma separated
-  emergencyContact: zod.string().min(10, 'Emergency contact should be a valid phone number.'),
+  emergencyContact: zod.string().min(10, 'Emergency contact should be a valid phone number.')
 });
 
 type ProfileFormValues = zod.infer<typeof profileSchema>;
 
-export default function CitizenProfilePage() {
+export default function CitizenProfilePage() {const { t } = useLanguage();
   const { user } = useAuth();
   const uid = user?.uid || '';
 
@@ -36,7 +36,7 @@ export default function CitizenProfilePage() {
     register,
     handleSubmit,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting }
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -45,8 +45,8 @@ export default function CitizenProfilePage() {
       gender: 'other',
       bloodGroup: '',
       allergies: '',
-      emergencyContact: '',
-    },
+      emergencyContact: ''
+    }
   });
 
   // Sync data to react-hook-form on load
@@ -63,10 +63,10 @@ export default function CitizenProfilePage() {
 
   const onSubmit = async (values: ProfileFormValues) => {
     // Split allergies by comma
-    const allergiesList = values.allergies
-      .split(',')
-      .map((a) => a.trim())
-      .filter(Boolean);
+    const allergiesList = values.allergies.
+    split(',').
+    map((a) => a.trim()).
+    filter(Boolean);
 
     await updateProfileMutation.mutateAsync({
       uid,
@@ -76,8 +76,8 @@ export default function CitizenProfilePage() {
         gender: values.gender,
         bloodGroup: values.bloodGroup,
         allergies: allergiesList,
-        emergencyContact: values.emergencyContact,
-      },
+        emergencyContact: values.emergencyContact
+      }
     });
   };
 
@@ -89,12 +89,12 @@ export default function CitizenProfilePage() {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-8"
-    >
+      className="space-y-8">
+      
       <PageHeader
-        title="Medical Identity Card"
-        description="Keep your personal, medical, and emergency contact details synced to Firestore."
-      />
+        title={t("citizen.medical_identity_card")}
+        description={t("citizen.keep_your_personal_medical_and_emergency_contact_details_synced_to_firestore")} />
+      
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Profile Card Placeholder */}
@@ -111,8 +111,8 @@ export default function CitizenProfilePage() {
             {/* Photo upload placeholder */}
             <div className="border border-dashed border-slate-250 dark:border-slate-850 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-950/20 text-center cursor-pointer hover:bg-slate-100/50 transition">
               <icons.UploadCloud className="h-5 w-5 text-slate-400 mx-auto mb-2" />
-              <p className="text-[10px] font-bold text-slate-500">Upload Identity Photo</p>
-              <p className="text-[9px] text-slate-400">Max size 2MB, JPG/PNG format</p>
+              <p className="text-[10px] font-bold text-slate-500">{t("citizen.upload_identity_photo")}</p>
+              <p className="text-[9px] text-slate-400">{t("citizen.max_size_2mb_jpgpng_format")}</p>
             </div>
           </div>
         </div>
@@ -121,120 +121,120 @@ export default function CitizenProfilePage() {
         <div className="lg:col-span-2">
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 space-y-6"
-          >
-            <h3 className="font-bold text-base text-slate-900 dark:text-slate-50 border-b border-slate-100 dark:border-slate-850 pb-3">
-              Personal & Medical Details
+            className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 space-y-6">
+            
+            <h3 className="font-bold text-base text-slate-900 dark:text-slate-50 border-b border-slate-100 dark:border-slate-850 pb-3">{t("citizen.personal_medical_details")}
+
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Full Name */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-500">Full Name</label>
+                <label className="text-xs font-semibold text-slate-500">{t("citizen.full_name")}</label>
                 <input
                   type="text"
                   {...register('fullName')}
                   className={cn(
                     componentStyles.input.base,
                     errors.fullName ? 'border-red-500 focus:ring-red-200' : ''
-                  )}
-                />
-                {errors.fullName && (
-                  <p className="text-[10px] text-red-500 font-bold">{errors.fullName.message}</p>
-                )}
+                  )} />
+                
+                {errors.fullName &&
+                <p className="text-[10px] text-red-500 font-bold">{errors.fullName.message}</p>
+                }
               </div>
 
               {/* Age */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-500">Age</label>
+                <label className="text-xs font-semibold text-slate-500">{t("citizen.age")}</label>
                 <input
                   type="number"
                   {...register('age', { valueAsNumber: true })}
                   className={cn(
                     componentStyles.input.base,
                     errors.age ? 'border-red-500 focus:ring-red-200' : ''
-                  )}
-                />
-                {errors.age && (
-                  <p className="text-[10px] text-red-500 font-bold">{errors.age.message}</p>
-                )}
+                  )} />
+                
+                {errors.age &&
+                <p className="text-[10px] text-red-500 font-bold">{errors.age.message}</p>
+                }
               </div>
 
               {/* Gender */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-500">Gender</label>
+                <label className="text-xs font-semibold text-slate-500">{t("citizen.gender")}</label>
                 <select
                   {...register('gender')}
                   className={cn(
                     componentStyles.input.base,
                     errors.gender ? 'border-red-500 focus:ring-red-200' : ''
-                  )}
-                >
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
+                  )}>
+                  
+                  <option value="male">{t("citizen.male")}</option>
+                  <option value="female">{t("citizen.female")}</option>
+                  <option value="other">{t("citizen.other")}</option>
                 </select>
-                {errors.gender && (
-                  <p className="text-[10px] text-red-500 font-bold">{errors.gender.message}</p>
-                )}
+                {errors.gender &&
+                <p className="text-[10px] text-red-500 font-bold">{errors.gender.message}</p>
+                }
               </div>
 
               {/* Blood Group */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-500">Blood Group</label>
+                <label className="text-xs font-semibold text-slate-500">{t("citizen.blood_group")}</label>
                 <select
                   {...register('bloodGroup')}
                   className={cn(
                     componentStyles.input.base,
                     errors.bloodGroup ? 'border-red-500 focus:ring-red-200' : ''
-                  )}
-                >
-                  <option value="">Select Blood Group</option>
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
+                  )}>
+                  
+                  <option value="">{t("citizen.select_blood_group")}</option>
+                  <option value="A+">{t("citizen.a")}</option>
+                  <option value="A-">{t("citizen.a_")}</option>
+                  <option value="B+">{t("citizen.b")}</option>
+                  <option value="B-">{t("citizen.b_")}</option>
+                  <option value="AB+">{t("citizen.ab")}</option>
+                  <option value="AB-">{t("citizen.ab_")}</option>
+                  <option value="O+">{t("citizen.o")}</option>
+                  <option value="O-">{t("citizen.o_")}</option>
                 </select>
-                {errors.bloodGroup && (
-                  <p className="text-[10px] text-red-500 font-bold">{errors.bloodGroup.message}</p>
-                )}
+                {errors.bloodGroup &&
+                <p className="text-[10px] text-red-500 font-bold">{errors.bloodGroup.message}</p>
+                }
               </div>
 
               {/* Allergies */}
               <div className="space-y-1.5 md:col-span-2">
-                <label className="text-xs font-semibold text-slate-500">Allergies (comma-separated)</label>
+                <label className="text-xs font-semibold text-slate-500">{t("citizen.allergies_comma_separated")}</label>
                 <input
                   type="text"
-                  placeholder="e.g. Penicillin, Pollen, Peanuts"
+                  placeholder={t("citizen.eg_penicillin_pollen_peanuts")}
                   {...register('allergies')}
                   className={cn(
                     componentStyles.input.base,
                     errors.allergies ? 'border-red-500 focus:ring-red-200' : ''
-                  )}
-                />
-                {errors.allergies && (
-                  <p className="text-[10px] text-red-500 font-bold">{errors.allergies.message}</p>
-                )}
+                  )} />
+                
+                {errors.allergies &&
+                <p className="text-[10px] text-red-500 font-bold">{errors.allergies.message}</p>
+                }
               </div>
 
               {/* Emergency Contact */}
               <div className="space-y-1.5 md:col-span-2">
-                <label className="text-xs font-semibold text-slate-500">Emergency Contact Phone</label>
+                <label className="text-xs font-semibold text-slate-500">{t("citizen.emergency_contact_phone")}</label>
                 <input
                   type="tel"
                   {...register('emergencyContact')}
                   className={cn(
                     componentStyles.input.base,
                     errors.emergencyContact ? 'border-red-500 focus:ring-red-200' : ''
-                  )}
-                />
-                {errors.emergencyContact && (
-                  <p className="text-[10px] text-red-500 font-bold">{errors.emergencyContact.message}</p>
-                )}
+                  )} />
+                
+                {errors.emergencyContact &&
+                <p className="text-[10px] text-red-500 font-bold">{errors.emergencyContact.message}</p>
+                }
               </div>
             </div>
 
@@ -246,14 +246,14 @@ export default function CitizenProfilePage() {
                   componentStyles.button.base,
                   componentStyles.button.primary,
                   'px-6 py-2.5 disabled:opacity-50'
-                )}
-              >
+                )}>
+                
                 {updateProfileMutation.isPending ? 'Saving...' : 'Save Profile Details'}
               </button>
             </div>
           </form>
         </div>
       </div>
-    </motion.div>
-  );
+    </motion.div>);
+
 }

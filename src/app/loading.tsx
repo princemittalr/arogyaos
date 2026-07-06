@@ -1,10 +1,10 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React from 'react';
 import { motion } from 'framer-motion';
 import { icons } from '@/design-system/icons';
 
-export default function Loading() {
+export default function Loading() {const { t } = useLanguage();
   const Spinner = icons.Loader2;
 
   return (
@@ -13,14 +13,14 @@ export default function Loading() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          className="mb-4 text-blue-600 dark:text-blue-400"
-        >
+          className="mb-4 text-blue-600 dark:text-blue-400">
+          
           <Spinner className="h-10 w-10" />
         </motion.div>
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-          Loading ArogyaOS...
+        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{t("common.loading_arogyaos")}
+
         </p>
       </div>
-    </div>
-  );
+    </div>);
+
 }

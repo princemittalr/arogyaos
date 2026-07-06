@@ -1,4 +1,4 @@
-import React from 'react';
+import { useLanguage } from "@/providers/LanguageProvider";import React from 'react';
 import { X, ArrowRightLeft, Sparkles } from 'lucide-react';
 
 interface RecommendationDrawerProps {
@@ -28,8 +28,8 @@ export function RecommendationDrawer({
   reason,
   onApprove,
   onReject,
-  isPending = false,
-}: RecommendationDrawerProps) {
+  isPending = false
+}: RecommendationDrawerProps) {const { t } = useLanguage();
   if (!isOpen) return null;
 
   return (
@@ -45,7 +45,7 @@ export function RecommendationDrawer({
             <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-850 pb-4">
               <div>
                 <span className="text-[9px] font-black uppercase text-blue-500 bg-blue-50 dark:bg-blue-950/20 px-2 py-0.5 rounded flex items-center gap-1 w-fit">
-                  <Sparkles className="h-3 w-3" /> AI Proposal
+                  <Sparkles className="h-3 w-3" />{t("common.ai_proposal")}
                 </span>
                 <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-50 mt-2">{title}</h3>
               </div>
@@ -57,15 +57,15 @@ export function RecommendationDrawer({
             {/* Content Details */}
             <div className="space-y-4 text-xs font-bold">
               <div>
-                <p className="text-[10px] text-slate-450 uppercase mb-1">Transfer Route</p>
+                <p className="text-[10px] text-slate-450 uppercase mb-1">{t("common.transfer_route")}</p>
                 <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-xl border border-slate-150 dark:border-slate-850 flex items-center justify-between text-[11px] font-bold text-slate-700 dark:text-slate-350">
                   <div className="space-y-0.5">
-                    <p className="text-[8px] text-slate-400 uppercase font-semibold">Source Facility</p>
+                    <p className="text-[8px] text-slate-400 uppercase font-semibold">{t("common.source_facility")}</p>
                     <p className="text-slate-900 dark:text-slate-50">{sourceName}</p>
                   </div>
                   <ArrowRightLeft className="h-4 w-4 text-blue-500 shrink-0" />
                   <div className="space-y-0.5 text-right">
-                    <p className="text-[8px] text-slate-400 uppercase font-semibold">Target Facility</p>
+                    <p className="text-[8px] text-slate-400 uppercase font-semibold">{t("common.target_facility")}</p>
                     <p className="text-slate-900 dark:text-slate-50">{targetName}</p>
                   </div>
                 </div>
@@ -73,22 +73,22 @@ export function RecommendationDrawer({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-slate-50 dark:bg-slate-950/20 p-3 rounded-xl border border-slate-150 dark:border-slate-850">
-                  <p className="text-[9px] text-slate-400">Item Name</p>
+                  <p className="text-[9px] text-slate-400">{t("common.item_name")}</p>
                   <p className="text-xs font-black text-slate-900 dark:text-slate-50 mt-1">{itemName}</p>
                 </div>
                 <div className="bg-slate-50 dark:bg-slate-950/20 p-3 rounded-xl border border-slate-150 dark:border-slate-850">
-                  <p className="text-[9px] text-slate-400">Transfer Quantity</p>
-                  <p className="text-xs font-black text-slate-900 dark:text-slate-50 mt-1">{quantity} units</p>
+                  <p className="text-[9px] text-slate-400">{t("common.transfer_quantity")}</p>
+                  <p className="text-xs font-black text-slate-900 dark:text-slate-50 mt-1">{quantity}{t("common.units")}</p>
                 </div>
               </div>
 
               <div className="space-y-1 bg-blue-50/25 dark:bg-blue-950/5 p-4 rounded-xl border border-blue-100/50 dark:border-blue-950/15">
-                <p className="text-[9px] text-blue-500 uppercase font-semibold">Expected Impact</p>
+                <p className="text-[9px] text-blue-500 uppercase font-semibold">{t("common.expected_impact")}</p>
                 <p className="text-[10px] text-slate-600 dark:text-slate-350 leading-relaxed font-semibold">{expectedImpact}</p>
               </div>
 
               <div className="space-y-1">
-                <p className="text-[10px] text-slate-450 uppercase mb-1">Reasoning & Analysis</p>
+                <p className="text-[10px] text-slate-450 uppercase mb-1">{t("common.reasoning_analysis")}</p>
                 <p className="text-[11px] text-slate-500 leading-relaxed font-semibold">{reason}</p>
               </div>
             </div>
@@ -96,30 +96,30 @@ export function RecommendationDrawer({
 
           {/* Action buttons */}
           <div className="p-6 border-t border-slate-100 dark:border-slate-850 bg-slate-50/50 dark:bg-slate-950/10 flex gap-3">
-            {onReject && (
-              <button
-                onClick={onReject}
-                disabled={isPending}
-                className="flex-1 rounded-xl border border-slate-200 hover:bg-red-50 hover:text-red-650 hover:border-red-200 py-3 text-[11px] font-extrabold text-slate-650 transition disabled:opacity-50"
-              >
-                Reject Route
-              </button>
-            )}
-            {onApprove && (
-              <button
-                onClick={onApprove}
-                disabled={isPending}
-                className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-750 text-white py-3 text-[11px] font-extrabold transition disabled:opacity-50"
-              >
+            {onReject &&
+            <button
+              onClick={onReject}
+              disabled={isPending}
+              className="flex-1 rounded-xl border border-slate-200 hover:bg-red-50 hover:text-red-650 hover:border-red-200 py-3 text-[11px] font-extrabold text-slate-650 transition disabled:opacity-50">{t("common.reject_route")}
+
+
+            </button>
+            }
+            {onApprove &&
+            <button
+              onClick={onApprove}
+              disabled={isPending}
+              className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-750 text-white py-3 text-[11px] font-extrabold transition disabled:opacity-50">
+              
                 {isPending ? 'Executing...' : 'Approve Transfer'}
               </button>
-            )}
+            }
           </div>
 
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 export default RecommendationDrawer;

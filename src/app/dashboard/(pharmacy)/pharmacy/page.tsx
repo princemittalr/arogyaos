@@ -1,264 +1,278 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import { usePharmacyInventory, useDispenseHistory } from '@/features/pharmacy/hooks/usePharmacy';
-import { LoadingState, PageHeader } from '@/features/shared';
+import { LoadingState } from '@/features/shared';
 import {
-  Package,
-  AlertTriangle,
-  Flame,
-  CheckCircle2,
-  TrendingUp,
-  History,
-  Sparkles,
-  ClipboardList,
-  Calendar,
-  Layers,
-  ArrowRight,
-} from 'lucide-react';
+  Package, AlertTriangle, CheckCircle2, TrendingUp, Bot, ArrowRight,
+  Clock, Flame, BarChart2 } from
+'lucide-react';
 import Link from 'next/link';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import { motion } from 'framer-motion';
+import { cn } from '@/utils/cn';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-export default function PharmacyDashboardPage() {
+const TREND_DATA = [
+{ month: 'Jan', stock: 2400, dispensed: 400 },
+{ month: 'Feb', stock: 2200, dispensed: 300 },
+{ month: 'Mar', stock: 2600, dispensed: 500 },
+{ month: 'Apr', stock: 2300, dispensed: 450 },
+{ month: 'May', stock: 2800, dispensed: 600 },
+{ month: 'Jun', stock: 3100, dispensed: 550 }];
+
+
+export default function PharmacyDashboardPage() {const { t } = useLanguage();
   const { user } = useAuth();
-  const hospitalId = user?.uid || 'hosp_city_gen'; // fallback or shared doc
+  const hospitalId = user?.uid || 'hosp_city_gen';
 
   const { data: inventory, isLoading: isInvLoading } = usePharmacyInventory(hospitalId);
   const { data: history, isLoading: isHistLoading } = useDispenseHistory(hospitalId);
 
-  if (isInvLoading || isHistLoading) {
-    return <LoadingState variant="card" />;
-  }
+  if (isInvLoading || isHistLoading) return <LoadingState variant="card" />;
 
   const items = inventory || [];
   const logs = history || [];
+  const today = new Date();
+  const in30Days = new Date();in30Days.setDate(today.getDate() + 30);
 
-  // Metrics calculations
   const totalMeds = items.length;
   const outOfStock = items.filter((i) => i.quantity <= 0).length;
   const lowStock = items.filter((i) => i.quantity > 0 && i.quantity <= i.minimumStock).length;
+  const expiringSoon = items.filter((i) => {const d = new Date(i.expiryDate);return d > today && d <= in30Days;}).length;
+  const expired = items.filter((i) => new Date(i.expiryDate) <= today).length;
+  const healthy = items.filter((i) => i.quantity > i.minimumStock && new Date(i.expiryDate) > today).length;
+  const healthScore = totalMeds > 0 ? Math.round(healthy / totalMeds * 100) : 100;
 
-  // Expiring soon: within 30 days
-  const today = new Date();
-  const thirtyDaysLater = new Date();
-  thirtyDaysLater.setDate(today.getDate() + 30);
-
-  const expiringSoon = items.filter((i) => {
-    const expDate = new Date(i.expiryDate);
-    return expDate > today && expDate <= thirtyDaysLater;
-  }).length;
-
-  const expiredCount = items.filter((i) => new Date(i.expiryDate) <= today).length;
-
-  // Inventory Health Score: % of active items that are neither expired, out of stock, nor low stock
-  const healthyCount = items.filter((i) => i.quantity > i.minimumStock && new Date(i.expiryDate) > today).length;
-  const healthScore = totalMeds > 0 ? Math.round((healthyCount / totalMeds) * 100) : 100;
-
-  // Chart data: Mocking some monthly inventory transaction trends
-  const trendData = [
-    { name: 'Jan', stockLevel: 2400, dispensed: 400 },
-    { name: 'Feb', stockLevel: 2200, dispensed: 300 },
-    { name: 'Mar', stockLevel: 2600, dispensed: 500 },
-    { name: 'Apr', stockLevel: 2300, dispensed: 450 },
-    { name: 'May', stockLevel: 2800, dispensed: 600 },
-    { name: 'Jun', stockLevel: 3100, dispensed: 550 },
-  ];
+  const todayStr = today.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Pharmacy Control Center"
-        description={`Logged in as Pharmacist. Monitor stock limits, dispense medications, and analyze stock health scores.`}
-      />
-
-      {/* Analytics Row */}
-      <div className="grid gap-6 md:grid-cols-4">
-        {/* Health Score */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex justify-between items-start">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Health Score</span>
-            <CheckCircle2 className="h-5 w-5 text-emerald-500" />
-          </div>
-          <p className="text-3xl font-extrabold text-slate-900 dark:text-slate-50 mt-2">{healthScore}%</p>
-          <p className="text-[10px] text-slate-450 font-semibold mt-1">active healthy stock level ratio</p>
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-50">{t("pharmacy.pharmacy_control_center")}</h1>
+          <p className="text-sm text-slate-500 mt-0.5">{todayStr}</p>
         </div>
-
-        {/* Total Medicines */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex justify-between items-start">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Medicines</span>
-            <Package className="h-5 w-5 text-blue-500" />
-          </div>
-          <p className="text-3xl font-extrabold text-slate-900 dark:text-slate-50 mt-2">{totalMeds}</p>
-          <p className="text-[10px] text-slate-450 font-semibold mt-1">unique medical formulas active</p>
-        </div>
-
-        {/* Stock Alerts */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex justify-between items-start">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Stock Warnings</span>
-            <AlertTriangle className="h-5 w-5 text-amber-500" />
-          </div>
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-extrabold text-slate-900 dark:text-slate-50">{lowStock}</span>
-            <span className="text-xs text-slate-450 font-bold">low</span>
-            <span className="text-3xl font-extrabold text-red-500 ml-2">{outOfStock}</span>
-            <span className="text-xs text-slate-450 font-bold">empty</span>
-          </div>
-          <p className="text-[10px] text-slate-450 font-semibold mt-1">require immediate procurement replenishment</p>
-        </div>
-
-        {/* Expiring Soon */}
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex justify-between items-start">
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Expiring / Expired</span>
-            <Flame className="h-5 w-5 text-indigo-500" />
-          </div>
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-extrabold text-indigo-650 dark:text-indigo-400">{expiringSoon}</span>
-            <span className="text-xs text-slate-450 font-bold">soon</span>
-            <span className="text-3xl font-extrabold text-red-650 dark:text-red-400 ml-2">{expiredCount}</span>
-            <span className="text-xs text-slate-450 font-bold">expired</span>
-          </div>
-          <p className="text-[10px] text-slate-450 font-semibold mt-1">flagged for shelf disposal registry</p>
+        <div className="flex gap-2">
+          <Link href="/dashboard/pharmacy/dispense" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition shadow-sm">
+            <Clock className="h-3.5 w-3.5" />{t("pharmacy.dispense_queue")}
+          </Link>
+          <Link href="/dashboard/pharmacy/ai-forecast" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+            <Bot className="h-3.5 w-3.5" />{t("pharmacy.ai_forecast")}
+          </Link>
         </div>
       </div>
 
-      {/* Main Grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left Columns: Trend Graph & Recent Logs */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Trend Chart */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-50 uppercase tracking-wider">Dispensing vs Stock Level</h3>
-                <p className="text-[10px] text-slate-450 font-semibold">Monthly metrics tracking stock rotation</p>
+      {/* KPI Strip */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+        {
+          label: t("pharmacy.inventory_health"), value: `${healthScore}%`, sub: `${healthy} healthy items`, icon: CheckCircle2,
+          variant: healthScore > 80 ? 'success' : healthScore > 60 ? 'warning' : 'danger', href: '/dashboard/pharmacy/inventory'
+        },
+        {
+          label: t("pharmacy.total_medicines"), value: totalMeds, sub: t("pharmacy.unique_skus_tracked"), icon: Package,
+          variant: 'default', href: '/dashboard/pharmacy/medicines'
+        },
+        {
+          label: t("pharmacy.stock_warnings"), value: lowStock + outOfStock, sub: `${lowStock} low · ${outOfStock} empty`, icon: AlertTriangle,
+          variant: lowStock + outOfStock > 0 ? 'danger' : 'success', href: '/dashboard/pharmacy/inventory'
+        },
+        {
+          label: t("pharmacy.expiry_alerts"), value: expiringSoon + expired, sub: `${expiringSoon} expiring · ${expired} expired`, icon: Flame,
+          variant: expiringSoon + expired > 0 ? 'warning' : 'success', href: '/dashboard/pharmacy/expiry'
+        }].
+        map((kpi, i) => {
+          const colors: Record<string, string> = {
+            success: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400',
+            warning: 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400',
+            danger: 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400',
+            default: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400'
+          };
+          const card =
+          <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-5 hover:border-slate-300 hover:shadow-sm dark:hover:border-slate-700 transition">
+              <div className={cn('inline-flex rounded-lg p-2', colors[kpi.variant])}>
+                <kpi.icon className="h-4 w-4" />
               </div>
-              <TrendingUp className="h-5 w-5 text-slate-400" />
-            </div>
+              <p className="mt-4 text-2xl font-bold text-slate-900 dark:text-slate-50">{kpi.value}</p>
+              <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mt-0.5">{kpi.label}</p>
+              <p className="text-[11px] text-slate-400 mt-1">{kpi.sub}</p>
+            </div>;
 
-            <div className="h-64">
+          return <Link key={i} href={kpi.href}>{card}</Link>;
+        })}
+      </div>
+
+      {/* Main grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* Left 2 cols */}
+        <div className="lg:col-span-2 space-y-6">
+
+          {/* Stock Trend Chart */}
+          <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-5">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50">{t("pharmacy.stock_vs_dispensing_trend")}</h2>
+                <p className="text-xs text-slate-400 mt-0.5">{t("pharmacy.monthly_inventory_rotation_overview")}</p>
+              </div>
+              <TrendingUp className="h-4 w-4 text-slate-400" />
+            </div>
+            <div className="h-52">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={trendData}>
+                <AreaChart data={TREND_DATA} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                   <defs>
-                    <linearGradient id="colorStock" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
+                    <linearGradient id="stockGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.15} />
                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
                     </linearGradient>
+                    <linearGradient id="dispGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                    </linearGradient>
                   </defs>
-                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={10} tickLine={false} />
-                  <YAxis stroke="#94a3b8" fontSize={10} tickLine={false} />
-                  <Tooltip />
-                  <Area type="monotone" dataKey="stockLevel" stroke="#3b82f6" fillOpacity={1} fill="url(#colorStock)" strokeWidth={2} />
-                  <Area type="monotone" dataKey="dispensed" stroke="#10b981" fillOpacity={0} strokeWidth={2} />
+                  <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--color-bg, #fff)', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 12 }}
+                    itemStyle={{ color: '#334155' }} />
+                  
+                  <Area type="monotone" dataKey="stock" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#stockGrad)" name="Stock Level" />
+                  <Area type="monotone" dataKey="dispensed" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#dispGrad)" name="Dispensed" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+            <div className="flex items-center gap-4 mt-3">
+              <div className="flex items-center gap-1.5"><div className="h-2 w-4 rounded-full bg-blue-500 opacity-80" /><span className="text-[11px] text-slate-500">{t("pharmacy.stock_level")}</span></div>
+              <div className="flex items-center gap-1.5"><div className="h-2 w-4 rounded-full bg-emerald-500 opacity-80" /><span className="text-[11px] text-slate-500">{t("pharmacy.dispensed")}</span></div>
+            </div>
           </div>
 
-          {/* Recent dispensing history */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-            <div className="flex justify-between items-center mb-6">
+          {/* Recent Dispensing */}
+          <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-5">
+            <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-50 uppercase tracking-wider">Recent Dispensing Activity</h3>
-                <p className="text-[10px] text-slate-450 font-semibold">Track audit trail of outgoing prescription packages</p>
+                <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50">{t("pharmacy.recent_dispensing_activity")}</h2>
+                <p className="text-xs text-slate-400 mt-0.5">{t("pharmacy.audit_trail_of_outgoing_medications")}</p>
               </div>
-              <History className="h-5 w-5 text-slate-400" />
+              <Link href="/dashboard/pharmacy/dispense" className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">{t("pharmacy.see_all")}</Link>
             </div>
+            {logs.length === 0 ?
+            <div className="flex flex-col items-center py-8 text-center">
+                <Package className="h-8 w-8 text-slate-200 dark:text-slate-700 mb-2" />
+                <p className="text-xs text-slate-500">{t("pharmacy.no_dispensing_logs_recorded_yet")}</p>
+              </div> :
 
-            {logs.length === 0 ? (
-              <div className="text-center py-6 text-xs text-slate-550">
-                No recent dispensing logs recorded.
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-850">
-                {logs.slice(0, 4).map((log) => (
-                  <div key={log.dispenseId} className="py-3 flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-350">
-                    <div>
-                      <p className="text-slate-900 dark:text-slate-100">{log.patientName}</p>
-                      <p className="text-[9px] text-slate-400 font-semibold mt-0.5">
-                        {log.medicines.map((m) => `${m.name} (x${m.quantity})`).join(', ')}
-                      </p>
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                {logs.slice(0, 5).map((log) =>
+              <div key={log.dispenseId} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0 gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-8 w-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center flex-shrink-0">
+                        <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">{log.patientName}</p>
+                        <p className="text-[10px] text-slate-400 truncate">
+                          {log.medicines.slice(0, 2).map((m) => `${m.name} ×${m.quantity}`).join(', ')}
+                          {log.medicines.length > 2 && ` +${log.medicines.length - 2} more`}
+                        </p>
+                      </div>
                     </div>
-                    <span className="text-[10px] text-slate-400">
-                      {log.dispensedAt.split('T')[1].slice(0, 5)}
+                    <span className="text-[11px] font-medium text-slate-400 flex-shrink-0">
+                      {log.dispensedAt.split('T')[1]?.slice(0, 5)}
                     </span>
                   </div>
-                ))}
+              )}
               </div>
-            )}
+            }
           </div>
         </div>
 
-        {/* Right Column: AI Insights, Quick Actions */}
+        {/* Right col */}
         <div className="space-y-6">
-          {/* AI Predictor Placeholder */}
-          <div className="rounded-2xl border border-blue-150 bg-blue-50/50 p-5 dark:border-blue-900/30 dark:bg-blue-950/10 space-y-4">
-            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400">
-              <Sparkles className="h-5 w-5 animate-pulse" />
-              <h4 className="font-extrabold text-xs uppercase tracking-wider">Gemini Stock replenishment Forecast</h4>
+
+          {/* AI Forecast */}
+          <div className="rounded-xl border border-blue-200/60 bg-gradient-to-br from-blue-50 to-indigo-50/30 dark:border-blue-900/30 dark:from-blue-950/20 dark:to-indigo-950/10 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Bot className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <h2 className="text-sm font-semibold text-blue-900 dark:text-blue-100">{t("pharmacy.ai_stock_forecast")}</h2>
+              </div>
+              <span className="rounded-full bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 text-[10px] font-bold text-blue-600 dark:text-blue-400">{t("pharmacy.gemini")}</span>
             </div>
-            <p className="text-[11px] font-semibold text-slate-650 dark:text-slate-350 leading-relaxed">
-              &quot;Based on the historical prescribing frequency and seasonal monsoon damp conditions, Metformin 500mg is forecasted to run completely out within 3 days. Recommend initiating procurement order of 5,000 tablets today.&quot;
-            </p>
-            <div className="border-t border-blue-150 dark:border-blue-900/30 pt-3">
+            <div className="rounded-lg bg-white/70 dark:bg-slate-900/50 p-3.5 border border-white dark:border-slate-800/50">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="rounded-full bg-red-100 text-red-600 dark:bg-red-950/30 dark:text-red-400 px-2 py-0.5 text-[9px] font-bold uppercase">{t("pharmacy.critical")}</span>
+                <span className="text-[10px] font-semibold text-slate-400">{t("pharmacy.87_confidence")}</span>
+              </div>
+              <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">{t("pharmacy.metformin_500mg_forecasted_to_deplete_within_3_days_based_on_monsoon_season_prescription_trends_recommend_procurement_of_5000_tablets_immediately")}
+
+              </p>
+            </div>
+            <Link href="/dashboard/pharmacy/ai-forecast" className="mt-4 flex items-center justify-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline">{t("pharmacy.full_ai_forecast_report")}
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+
+          {/* Quick Operations */}
+          <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-5">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50 mb-4">{t("pharmacy.operations_panel")}</h2>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+              { label: t("pharmacy.dispense_rx"), icon: Clock, href: '/dashboard/pharmacy/dispense', primary: true },
+              { label: t("pharmacy.manage_stock"), icon: Package, href: '/dashboard/pharmacy/inventory', primary: false },
+              { label: t("pharmacy.expiry_check"), icon: Flame, href: '/dashboard/pharmacy/expiry', primary: false },
+              { label: t("pharmacy.reports"), icon: BarChart2, href: '/dashboard/pharmacy/reports', primary: false }].
+              map((item) =>
               <Link
-                href="/dashboard/pharmacy/inventory"
-                className="text-[10px] font-black uppercase text-blue-650 hover:underline flex items-center gap-1"
-              >
-                Go to stock replenishment desk <ArrowRight className="h-3 w-3" />
-              </Link>
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex flex-col items-center gap-2 rounded-lg p-3.5 text-center transition text-xs font-semibold',
+                  item.primary ?
+                  'bg-blue-600 hover:bg-blue-700 text-white' :
+                  'border border-slate-100 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700'
+                )}>
+                
+                  <item.icon className="h-5 w-5" />
+                  {item.label}
+                </Link>
+              )}
             </div>
           </div>
 
-          {/* Quick Actions Panel */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 space-y-4">
-            <h4 className="font-extrabold text-xs text-slate-900 dark:text-slate-50 uppercase tracking-wider">Operations Panel</h4>
-            <div className="grid grid-cols-2 gap-2">
-              <Link
-                href="/dashboard/pharmacy/dispense"
-                className="rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800 p-3 text-center transition"
-              >
-                <ClipboardList className="h-5 w-5 text-blue-500 mx-auto mb-1.5" />
-                <span className="text-[10px] font-bold text-slate-750 dark:text-slate-300 block">Dispense Rx</span>
-              </Link>
-
-              <Link
-                href="/dashboard/pharmacy/inventory"
-                className="rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800 p-3 text-center transition"
-              >
-                <Layers className="h-5 w-5 text-indigo-500 mx-auto mb-1.5" />
-                <span className="text-[10px] font-bold text-slate-750 dark:text-slate-300 block">Manage Stock</span>
-              </Link>
-
-              <Link
-                href="/dashboard/pharmacy/expiry"
-                className="rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800 p-3 text-center transition"
-              >
-                <Calendar className="h-5 w-5 text-amber-500 mx-auto mb-1.5" />
-                <span className="text-[10px] font-bold text-slate-750 dark:text-slate-300 block">Expiry Check</span>
-              </Link>
-
-              <Link
-                href="/dashboard/pharmacy/reports"
-                className="rounded-xl border border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800 p-3 text-center transition"
-              >
-                <History className="h-5 w-5 text-emerald-500 mx-auto mb-1.5" />
-                <span className="text-[10px] font-bold text-slate-750 dark:text-slate-300 block">Reports</span>
-              </Link>
+          {/* Inventory Breakdown */}
+          <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 p-5">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50 mb-4">{t("pharmacy.inventory_breakdown")}</h2>
+            <div className="space-y-3">
+              {[
+              { label: t("pharmacy.healthy_stock"), value: healthy, total: totalMeds, color: 'bg-emerald-500' },
+              { label: t("pharmacy.low_stock"), value: lowStock, total: totalMeds, color: 'bg-amber-500' },
+              { label: t("pharmacy.out_of_stock"), value: outOfStock, total: totalMeds, color: 'bg-red-500' }].
+              map((item) =>
+              <div key={item.label}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{item.label}</span>
+                    <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{item.value}</span>
+                  </div>
+                  <div className="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div
+                    className={cn('h-1.5 rounded-full', item.color)}
+                    style={{ width: `${totalMeds > 0 ? item.value / totalMeds * 100 : 0}%` }} />
+                  
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </motion.div>);
+
 }

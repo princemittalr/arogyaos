@@ -1,4 +1,4 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React, { useState } from 'react';
 import { cn } from '@/utils/cn';
@@ -31,8 +31,8 @@ export function DataTable<T extends Record<string, any>>({ // eslint-disable-lin
   loading,
   emptyMessage = 'No matching records found in this view.',
   pagination,
-  className,
-}: DataTableProps<T>) {
+  className
+}: DataTableProps<T>) {const { t } = useLanguage();
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
@@ -69,88 +69,88 @@ export function DataTable<T extends Record<string, any>>({ // eslint-disable-lin
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {columns.map((col) => (
-                <th
-                  key={col.key}
-                  onClick={() => col.sortable && handleSort(col.key)}
-                  className={cn(
-                    'px-6 py-4 select-none',
-                    col.sortable ? 'cursor-pointer hover:text-slate-700 dark:hover:text-slate-200' : ''
-                  )}
-                >
+              {columns.map((col) =>
+              <th
+                key={col.key}
+                onClick={() => col.sortable && handleSort(col.key)}
+                className={cn(
+                  'px-6 py-4 select-none',
+                  col.sortable ? 'cursor-pointer hover:text-slate-700 dark:hover:text-slate-200' : ''
+                )}>
+                
                   <div className="flex items-center gap-1.5">
                     {col.header}
-                    {col.sortable && sortKey === col.key && (
-                      <ChevronDownIcon
-                        className={cn(
-                          'h-3.5 w-3.5 transition-transform duration-200',
-                          sortOrder === 'desc' ? 'rotate-180' : ''
-                        )}
-                      />
-                    )}
+                    {col.sortable && sortKey === col.key &&
+                  <ChevronDownIcon
+                    className={cn(
+                      'h-3.5 w-3.5 transition-transform duration-200',
+                      sortOrder === 'desc' ? 'rotate-180' : ''
+                    )} />
+
+                  }
                   </div>
                 </th>
-              ))}
+              )}
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr>
+            {loading ?
+            <tr>
                 <td colSpan={columns.length} className="px-6 py-8">
                   <LoadingState variant="table" rows={4} className="border-none p-0 bg-transparent" />
                 </td>
-              </tr>
-            ) : sortedData.length === 0 ? (
-              <tr>
+              </tr> :
+            sortedData.length === 0 ?
+            <tr>
                 <td colSpan={columns.length} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
                   {emptyMessage}
                 </td>
-              </tr>
-            ) : (
-              sortedData.map((row, rowIdx) => (
-                <tr
-                  key={row.id || rowIdx}
-                  className="border-b border-slate-100 dark:border-slate-850 hover:bg-slate-50/50 dark:hover:bg-slate-950/20 last:border-b-0 transition-colors"
-                >
+              </tr> :
+
+            sortedData.map((row, rowIdx) =>
+            <tr
+              key={row.id || rowIdx}
+              className="border-b border-slate-100 dark:border-slate-850 hover:bg-slate-50/50 dark:hover:bg-slate-950/20 last:border-b-0 transition-colors">
+              
                   {columns.map((col) => {
-                    const cellVal = row[col.key];
-                    return (
-                      <td key={col.key} className="px-6 py-4 text-slate-700 dark:text-slate-350 font-medium">
+                const cellVal = row[col.key];
+                return (
+                  <td key={col.key} className="px-6 py-4 text-slate-700 dark:text-slate-350 font-medium">
                         {col.render ? col.render(cellVal, row) : cellVal}
-                      </td>
-                    );
-                  })}
+                      </td>);
+
+              })}
                 </tr>
-              ))
-            )}
+            )
+            }
           </tbody>
         </table>
       </div>
 
-      {pagination && (
-        <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 px-6 py-4 bg-slate-50 dark:bg-slate-950/40">
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            Page {pagination.currentPage} of {pagination.totalPages}
+      {pagination &&
+      <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 px-6 py-4 bg-slate-50 dark:bg-slate-950/40">
+          <span className="text-xs text-slate-500 dark:text-slate-400">{t("common.page")}
+          {pagination.currentPage}{t("common.of")}{pagination.totalPages}
           </span>
           <div className="flex items-center gap-2">
             <button
-              disabled={pagination.currentPage <= 1 || loading}
-              onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
-              className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 disabled:opacity-50 transition"
-            >
-              Previous
-            </button>
+            disabled={pagination.currentPage <= 1 || loading}
+            onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
+            className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 disabled:opacity-50 transition">{t("common.previous")}
+
+
+          </button>
             <button
-              disabled={pagination.currentPage >= pagination.totalPages || loading}
-              onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
-              className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 disabled:opacity-50 transition"
-            >
-              Next
-            </button>
+            disabled={pagination.currentPage >= pagination.totalPages || loading}
+            onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
+            className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-850 disabled:opacity-50 transition">{t("common.next")}
+
+
+          </button>
           </div>
         </div>
-      )}
-    </div>
-  );
+      }
+    </div>);
+
 }
 export default DataTable;

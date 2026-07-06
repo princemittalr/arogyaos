@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LucideIcon } from 'lucide-react';
+import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { componentStyles } from '@/design-system/components';
+import Link from 'next/link';
 
 interface StatCardProps {
   title: string;
@@ -16,6 +17,8 @@ interface StatCardProps {
   };
   description?: string;
   className?: string;
+  variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'purple';
+  href?: string;
 }
 
 export function StatCard({
@@ -25,48 +28,53 @@ export function StatCard({
   trend,
   description,
   className,
+  variant = 'default',
+  href,
 }: StatCardProps) {
-  return (
+  const variants = {
+    default: 'bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+    success: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400',
+    warning: 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400',
+    danger: 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400',
+    info: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
+    purple: 'bg-purple-50 text-purple-600 dark:bg-purple-950/30 dark:text-purple-400',
+  };
+
+  const card = (
     <motion.div
-      whileHover={{ y: -4 }}
+      whileHover={href ? { y: -4 } : {}}
       transition={{ duration: 0.2 }}
-      className={cn(componentStyles.card.base, 'p-6 flex flex-col justify-between', className)}
+      className={cn(
+        componentStyles.card.base,
+        'p-5 flex flex-col justify-between transition-all duration-200',
+        href && 'hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-sm cursor-pointer',
+        className
+      )}
     >
       <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-            {title}
-          </p>
-          <h3 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            {value}
-          </h3>
+        <div className={cn('rounded-lg p-2', variants[variant])}>
+          <Icon className="h-4 w-4" />
         </div>
-        <div className="rounded-xl bg-slate-50 p-3 text-slate-600 dark:bg-slate-950 dark:text-slate-350">
-          <Icon className="h-5 w-5" />
-        </div>
+        {trend && (
+          <div className={cn('flex items-center gap-1 text-[11px] font-semibold', trend.isPositive ? 'text-emerald-600' : 'text-red-500')}>
+            {trend.isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+            {trend.value}%
+          </div>
+        )}
       </div>
 
-      {(trend || description) && (
-        <div className="mt-4 flex items-center gap-2 text-xs">
-          {trend && (
-            <span
-              className={cn(
-                'font-bold inline-flex items-center rounded-full px-2 py-0.5',
-                trend.isPositive
-                  ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'
-                  : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
-              )}
-            >
-              {trend.isPositive ? '+' : ''}
-              {trend.value}%
-            </span>
-          )}
-          {description && (
-            <span className="text-slate-500 dark:text-slate-450">{description}</span>
-          )}
-        </div>
+      <p className="mt-4 text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+        {value}
+      </p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-1">
+        {title}
+      </p>
+      {description && (
+        <span className="text-[11px] text-slate-400 mt-1">{description}</span>
       )}
     </motion.div>
   );
+
+  return href ? <Link href={href}>{card}</Link> : card;
 }
 export default StatCard;

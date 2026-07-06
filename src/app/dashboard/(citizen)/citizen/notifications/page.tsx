@@ -1,4 +1,4 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React, { useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
@@ -8,7 +8,7 @@ import { cn } from '@/utils/cn';
 import { icons } from '@/design-system/icons';
 import { motion } from 'framer-motion';
 
-export default function CitizenNotificationsPage() {
+export default function CitizenNotificationsPage() {const { t } = useLanguage();
   const { user } = useAuth();
   const uid = user?.uid || '';
 
@@ -34,7 +34,7 @@ export default function CitizenNotificationsPage() {
     if (read) return; // already read
     await markReadMutation.mutateAsync({
       notificationId: id,
-      patientId: uid,
+      patientId: uid
     });
   };
 
@@ -42,51 +42,51 @@ export default function CitizenNotificationsPage() {
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="max-w-3xl mx-auto space-y-8"
-    >
+      className="max-w-3xl mx-auto space-y-8">
+      
       <PageHeader
-        title="Notifications Inbox"
-        description="Check status alerts, clinic OPD schedule updates, and system messages."
-      />
+        title={t("citizen.notifications_inbox")}
+        description={t("citizen.check_status_alerts_clinic_opd_schedule_updates_and_system_messages")} />
+      
 
       {/* Filter Row */}
       <div className="flex border-b border-slate-200 dark:border-slate-800 gap-6 text-sm font-semibold select-none">
-        {(['all', 'unread', 'read'] as const).map((opt) => (
-          <button
-            key={opt}
-            onClick={() => setFilter(opt)}
-            className={cn(
-              'pb-3.5 capitalize relative transition',
-              filter === opt ? 'text-blue-650 dark:text-blue-400 font-bold' : 'text-slate-500 hover:text-slate-850'
-            )}
-          >
+        {(['all', 'unread', 'read'] as const).map((opt) =>
+        <button
+          key={opt}
+          onClick={() => setFilter(opt)}
+          className={cn(
+            'pb-3.5 capitalize relative transition',
+            filter === opt ? 'text-blue-650 dark:text-blue-400 font-bold' : 'text-slate-500 hover:text-slate-850'
+          )}>
+          
             {opt}
           </button>
-        ))}
+        )}
       </div>
 
       {/* Notification items */}
-      {filteredNotifications && filteredNotifications.length > 0 ? (
-        <div className="space-y-4">
-          {filteredNotifications.map((notif) => (
-            <div
-              key={notif.id}
-              onClick={() => handleMarkRead(notif.id, notif.read)}
-              className={cn(
-                'rounded-2xl border p-5 flex gap-4 items-start transition cursor-pointer',
-                notif.read
-                  ? 'bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 opacity-75'
-                  : 'bg-blue-50/20 border-blue-200/50 dark:bg-blue-950/10 dark:border-blue-900/40 ring-2 ring-blue-50/10'
-              )}
-            >
+      {filteredNotifications && filteredNotifications.length > 0 ?
+      <div className="space-y-4">
+          {filteredNotifications.map((notif) =>
+        <div
+          key={notif.id}
+          onClick={() => handleMarkRead(notif.id, notif.read)}
+          className={cn(
+            'rounded-2xl border p-5 flex gap-4 items-start transition cursor-pointer',
+            notif.read ?
+            'bg-white border-slate-200 dark:bg-slate-900 dark:border-slate-800 opacity-75' :
+            'bg-blue-50/20 border-blue-200/50 dark:bg-blue-950/10 dark:border-blue-900/40 ring-2 ring-blue-50/10'
+          )}>
+          
               <div
-                className={cn(
-                  'rounded-xl p-2.5 flex-shrink-0',
-                  notif.read
-                    ? 'bg-slate-50 text-slate-400 dark:bg-slate-955'
-                    : 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400'
-                )}
-              >
+            className={cn(
+              'rounded-xl p-2.5 flex-shrink-0',
+              notif.read ?
+              'bg-slate-50 text-slate-400 dark:bg-slate-955' :
+              'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400'
+            )}>
+            
                 <icons.Bell className="h-5 w-5" />
               </div>
 
@@ -98,19 +98,19 @@ export default function CitizenNotificationsPage() {
                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{notif.message}</p>
               </div>
 
-              {!notif.read && (
-                <span className="h-2.5 w-2.5 rounded-full bg-blue-600 dark:bg-blue-400 flex-shrink-0 self-center" />
-              )}
+              {!notif.read &&
+          <span className="h-2.5 w-2.5 rounded-full bg-blue-600 dark:bg-blue-400 flex-shrink-0 self-center" />
+          }
             </div>
-          ))}
-        </div>
-      ) : (
-        <EmptyState
-          title={`No ${filter} notifications`}
-          description="We will notify you here when critical changes occur on your health record."
-          icon={icons.Bell || icons.Home}
-        />
-      )}
-    </motion.div>
-  );
+        )}
+        </div> :
+
+      <EmptyState
+        title={`No ${filter} notifications`}
+        description={t("citizen.we_will_notify_you_here_when_critical_changes_occur_on_your_health_record")}
+        icon={icons.Bell || icons.Home} />
+
+      }
+    </motion.div>);
+
 }

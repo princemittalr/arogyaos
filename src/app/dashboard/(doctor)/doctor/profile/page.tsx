@@ -1,4 +1,4 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React from 'react';
 import { useForm } from 'react-hook-form';
@@ -14,12 +14,12 @@ const profileSchema = zod.object({
   fullName: zod.string().min(3, 'Full name is required'),
   specialization: zod.string().min(2, 'Specialization is required'),
   qualification: zod.string().min(2, 'Qualification details are required'),
-  consultationFee: zod.number().min(0, 'Consultation fee must be positive'),
+  consultationFee: zod.number().min(0, 'Consultation fee must be positive')
 });
 
 type ProfileFormValues = zod.infer<typeof profileSchema>;
 
-export default function DoctorProfilePage() {
+export default function DoctorProfilePage() {const { t } = useLanguage();
   const { user } = useAuth();
   const doctorId = user?.uid || 'doc_arav_mehta';
 
@@ -29,15 +29,15 @@ export default function DoctorProfilePage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting }
   } = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     values: {
       fullName: profile?.fullName || '',
       specialization: profile?.specialization || '',
       qualification: profile?.qualification || '',
-      consultationFee: profile?.consultationFee || 500,
-    },
+      consultationFee: profile?.consultationFee || 500
+    }
   });
 
   if (isLoading) {
@@ -48,19 +48,19 @@ export default function DoctorProfilePage() {
     try {
       await updateMutation.mutateAsync({
         doctorId,
-        data: values,
+        data: values
       });
     } catch {
-      toast.error('Failed to commit profile updates.');
+      toast.error(t("doctor.failed_to_commit_profile_updates"));
     }
   };
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Doctor Professional Profile"
-        description="Verify your clinical credentials, specialization registry, and outpatient consultation fees."
-      />
+        title={t("doctor.doctor_professional_profile")}
+        description={t("doctor.verify_your_clinical_credentials_specialization_registry_and_outpatient_consultation_fees")} />
+      
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Profile Card Summary */}
@@ -70,18 +70,18 @@ export default function DoctorProfilePage() {
               {profile?.fullName.split(' ').map((n) => n[0]).join('')}
             </div>
             <div>
-              <h3 className="font-black text-base text-slate-900 dark:text-slate-50">Dr. {profile?.fullName}</h3>
+              <h3 className="font-black text-base text-slate-900 dark:text-slate-50">{t("doctor.dr")}{profile?.fullName}</h3>
               <p className="text-[11px] font-bold text-slate-450 uppercase tracking-wider mt-0.5">{profile?.specialization}</p>
             </div>
           </div>
 
           <div className="divide-y divide-slate-100 dark:divide-slate-850 text-xs font-semibold text-slate-650 dark:text-slate-400 space-y-2.5 pt-3">
             <div className="flex justify-between py-1.5 first:pt-0">
-              <span>Department ID</span>
+              <span>{t("doctor.department_id")}</span>
               <span className="text-slate-850 dark:text-slate-100">{profile?.departmentId}</span>
             </div>
             <div className="flex justify-between py-1.5">
-              <span>Hospital ID</span>
+              <span>{t("doctor.hospital_id")}</span>
               <span className="text-slate-850 dark:text-slate-100">{profile?.hospitalId}</span>
             </div>
           </div>
@@ -89,61 +89,61 @@ export default function DoctorProfilePage() {
 
         {/* Edit Credentials Form */}
         <div className="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-          <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-50 border-b border-slate-100 dark:border-slate-850 pb-3 mb-6 uppercase tracking-wider">
-            Edit Credentials Details
+          <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-50 border-b border-slate-100 dark:border-slate-850 pb-3 mb-6 uppercase tracking-wider">{t("doctor.edit_credentials_details")}
+
           </h3>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 block uppercase">Full Name</label>
+                <label className="text-[10px] font-bold text-slate-400 block uppercase">{t("doctor.full_name")}</label>
                 <input
                   type="text"
                   {...register('fullName')}
-                  className="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none"
-                />
-                {errors.fullName && (
-                  <p className="text-[10px] text-red-500 font-semibold">{errors.fullName.message}</p>
-                )}
+                  className="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none" />
+                
+                {errors.fullName &&
+                <p className="text-[10px] text-red-500 font-semibold">{errors.fullName.message}</p>
+                }
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 block uppercase">Specialization</label>
+                <label className="text-[10px] font-bold text-slate-400 block uppercase">{t("doctor.specialization")}</label>
                 <input
                   type="text"
                   {...register('specialization')}
-                  className="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none"
-                />
-                {errors.specialization && (
-                  <p className="text-[10px] text-red-500 font-semibold">{errors.specialization.message}</p>
-                )}
+                  className="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none" />
+                
+                {errors.specialization &&
+                <p className="text-[10px] text-red-500 font-semibold">{errors.specialization.message}</p>
+                }
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 block uppercase">Qualifications</label>
+                <label className="text-[10px] font-bold text-slate-400 block uppercase">{t("doctor.qualifications")}</label>
                 <input
                   type="text"
                   {...register('qualification')}
-                  placeholder="MBBS, MD"
-                  className="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none"
-                />
-                {errors.qualification && (
-                  <p className="text-[10px] text-red-500 font-semibold">{errors.qualification.message}</p>
-                )}
+                  placeholder={t("doctor.mbbs_md")}
+                  className="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none" />
+                
+                {errors.qualification &&
+                <p className="text-[10px] text-red-500 font-semibold">{errors.qualification.message}</p>
+                }
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-400 block uppercase">Consultation Fee (₹)</label>
+                <label className="text-[10px] font-bold text-slate-400 block uppercase">{t("doctor.consultation_fee")}</label>
                 <input
                   type="number"
                   {...register('consultationFee', { valueAsNumber: true })}
-                  className="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none"
-                />
-                {errors.consultationFee && (
-                  <p className="text-[10px] text-red-500 font-semibold">{errors.consultationFee.message}</p>
-                )}
+                  className="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none" />
+                
+                {errors.consultationFee &&
+                <p className="text-[10px] text-red-500 font-semibold">{errors.consultationFee.message}</p>
+                }
               </div>
             </div>
 
@@ -151,14 +151,14 @@ export default function DoctorProfilePage() {
               <button
                 type="submit"
                 disabled={isSubmitting || updateMutation.isPending}
-                className="rounded-xl bg-slate-900 dark:bg-slate-100 dark:text-slate-950 hover:bg-slate-800 text-white px-5 py-2.5 text-xs font-bold transition flex items-center gap-1.5"
-              >
-                <Save className="h-4 w-4" /> Save Professional Changes
+                className="rounded-xl bg-slate-900 dark:bg-slate-100 dark:text-slate-950 hover:bg-slate-800 text-white px-5 py-2.5 text-xs font-bold transition flex items-center gap-1.5">
+                
+                <Save className="h-4 w-4" />{t("doctor.save_professional_changes")}
               </button>
             </div>
           </form>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }

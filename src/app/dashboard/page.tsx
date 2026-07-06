@@ -1,4 +1,4 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -6,7 +6,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { getHomeRouteForRole } from '@/config/permissions';
 import { icons } from '@/design-system/icons';
 
-export default function DashboardRedirectPage() {
+export default function DashboardRedirectPage() {const { t } = useLanguage();
   const router = useRouter();
   const { user, loading } = useAuth();
   const Spinner = icons.Loader2;
@@ -25,9 +25,9 @@ export default function DashboardRedirectPage() {
   return (
     <div className="flex h-[60vh] flex-col items-center justify-center">
       <Spinner className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-      <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
-        Verifying security access credentials...
+      <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">{t("common.verifying_security_access_credentials")}
+
       </p>
-    </div>
-  );
+    </div>);
+
 }

@@ -12,8 +12,9 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     <NextThemesProvider
       attribute="class"
       defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
+      enableSystem={true}
+      disableTransitionOnChange={true}
+      storageKey="arogyaos-theme"
     >
       {children}
     </NextThemesProvider>

@@ -22,9 +22,8 @@ export const ROLE_NAVIGATION: Record<UserRole, NavItem[]> = {
   ],
   doctor: [
     { title: 'Dashboard', href: ROUTES.DASHBOARD.DOCTOR.HOME, icon: 'LayoutDashboard' },
-    { title: 'Appointments', href: '/dashboard/doctor/calendar', icon: 'Calendar' },
+    { title: 'Calendar', href: '/dashboard/doctor/calendar', icon: 'Calendar' },
     { title: 'Patients', href: ROUTES.DASHBOARD.DOCTOR.PATIENTS, icon: 'UserSquare2' },
-    { title: 'Consultations', href: '/dashboard/doctor/patients', icon: 'Stethoscope' },
     { title: 'Prescriptions', href: '/dashboard/doctor/prescriptions', icon: 'FileText' },
     { title: 'Lab Orders', href: '/dashboard/doctor/lab-orders', icon: 'FlaskConical' },
     { title: 'Follow Ups', href: '/dashboard/doctor/follow-ups', icon: 'RefreshCw' },

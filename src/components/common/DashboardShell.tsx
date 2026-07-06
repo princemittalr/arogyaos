@@ -26,640 +26,464 @@ interface DashboardShellProps {
   children: React.ReactNode;
 }
 
+const ROLE_COLORS: Record<UserRole, string> = {
+  citizen: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400',
+  doctor: 'text-blue-600 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-400',
+  hospital_admin: 'text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400',
+  district_admin: 'text-amber-600 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-400',
+  nurse: 'text-teal-600 bg-teal-50 dark:bg-teal-950/30 dark:text-teal-400',
+  pharmacist: 'text-pink-600 bg-pink-50 dark:bg-pink-950/30 dark:text-pink-400',
+  lab_technician: 'text-cyan-600 bg-cyan-50 dark:bg-cyan-950/30 dark:text-cyan-400',
+  super_admin: 'text-red-600 bg-red-50 dark:bg-red-950/30 dark:text-red-400'
+};
+
 export function DashboardShell({ children }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
   const { t, currentLanguage, setLanguage } = useLanguage();
-  const { theme, setTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   const { logout } = useAuthActions();
-  
-  // Theme hydration guard
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
 
-  // Responsive States
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {setMounted(true);}, []);
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  
-  // Interactive Panels
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
-  const [aiOpen, setAiOpen] = useState(false);
-
-  // Command Palette states
   const [cmdSearch, setCmdSearch] = useState('');
   const [cmdSelectedIndex, setCmdSelectedIndex] = useState(0);
 
-  // Stateful notifications (allows Clear All / Mark Read to work)
   const [notifications, setNotifications] = useState<Notification[]>([
-    { id: '1', title: 'Low Stock Alert', desc: 'Paracetamol stock is below 15% at Main Pharmacy.', time: '2h ago', unread: true },
-    { id: '2', title: 'Schedule Updated', desc: 'Dr. Sharma updated OPD consultation availability.', time: '4h ago', unread: true },
-    { id: '3', title: 'System Sync', desc: 'Role permissions check successfully synced.', time: '1d ago', unread: false },
-  ]);
+  { id: '1', title: t("common.low_stock_alert"), desc: 'Paracetamol stock below 15% at Main Pharmacy.', time: '2h ago', unread: true },
+  { id: '2', title: t("common.schedule_updated"), desc: 'Dr. Sharma updated OPD consultation availability.', time: '4h ago', unread: true },
+  { id: '3', title: t("common.system_sync"), desc: 'Role permissions check successfully synced.', time: '1d ago', unread: false }]
+  );
 
-  const unreadCount = notifications.filter(n => n.unread).length;
-
-  const handleClearAll = () => {
-    setNotifications([]);
-    toast.success('All notifications cleared.');
-  };
-
-  const handleMarkRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
-  };
-
-  // Refs for clicking outside
+  const unreadCount = notifications.filter((n) => n.unread).length;
   const notificationsRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
   const role = user?.role || 'citizen';
   const navItems = getNavigationForRole(role);
 
-
-  // Check viewport width
   useEffect(() => {
     const handleResize = () => {
-      const isLowWidth = window.innerWidth < 1024;
-      setIsMobile(isLowWidth);
-      if (isLowWidth) {
-        setSidebarOpen(false);
-      } else {
-        setSidebarOpen(true);
-      }
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      setSidebarOpen(!mobile);
     };
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Close dropdowns on outside click
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (notificationsRef.current && !notificationsRef.current.contains(e.target as Node)) {
-        setNotificationsOpen(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setProfileOpen(false);
-      }
+    const handler = (e: MouseEvent) => {
+      if (notificationsRef.current && !notificationsRef.current.contains(e.target as Node)) setNotificationsOpen(false);
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) setProfileOpen(false);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Keyboard shortcut listener for Command Palette (Ctrl+K or Cmd+K)
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        setCommandPaletteOpen((prev) => !prev);
-      }
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {e.preventDefault();setCommandPaletteOpen((p) => !p);}
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, []);
 
   const handleLogout = async () => {
-    try {
-      await logout();
-    } catch {
-      toast.error('Sign out operation failed.');
-    }
+    try {await logout();} catch {toast.error(t('toast.logout_failed', 'Sign out failed.'));}
   };
 
-  // Build breadcrumbs
-  const breadcrumbs = pathname
-    .split('/')
-    .filter(Boolean)
-    .map((chunk, index, arr) => {
-      const href = '/' + arr.slice(0, index + 1).join('/');
-      return {
-        label: chunk.replace('-', ' '),
-        href,
-        isLast: index === arr.length - 1,
-      };
-    });
+  const handleClearAll = () => {setNotifications([]);toast.success(t('toast.clear_notifs', 'All notifications cleared.'));};
+  const handleMarkRead = (id: string) => setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, unread: false } : n));
 
-  // Role Badge Styling
-  const roleBadgeStyles: Record<UserRole, string> = {
-    citizen: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400',
-    doctor: 'bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400',
-    hospital_admin: 'bg-purple-50 text-purple-600 dark:bg-purple-950/20 dark:text-purple-400',
-    district_admin: 'bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400',
-    nurse: 'bg-teal-50 text-teal-600 dark:bg-teal-950/20 dark:text-teal-400',
-    pharmacist: 'bg-pink-50 text-pink-600 dark:bg-pink-950/20 dark:text-pink-400',
-    lab_technician: 'bg-cyan-50 text-cyan-600 dark:bg-cyan-950/20 dark:text-cyan-400',
-    super_admin: 'bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400',
-  };
-
-  const currentRoleStyle = roleBadgeStyles[role] || 'bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-400';
-
-
-
-  // Command Palette Items
   const commandItems = [
-    { label: 'Go to Overview', action: () => router.push(`/dashboard/${role}`) },
-    ...navItems.map((item) => ({ label: `Navigate to ${item.title}`, action: () => router.push(item.href) })),
-    { label: 'Toggle Theme', action: () => setTheme(theme === 'dark' ? 'light' : 'dark') },
-    { label: 'Toggle Sidebar Layout', action: () => setSidebarOpen(!sidebarOpen) },
-    { label: 'Switch Language to English', action: () => setLanguage('en') },
-    { label: 'Switch Language to Hindi', action: () => setLanguage('hi') },
-    { label: 'Logout session', action: handleLogout },
+    { label: t('cmd.go_to_dashboard', 'Go to Dashboard'), action: () => router.push(`/dashboard/${role}`) },
+    ...navItems.map((item) => ({ label: t(`nav.${item.title.toLowerCase().replace(/ /g, '_')}`, item.title), action: () => router.push(item.href) })),
+    { label: t('cmd.toggle_theme', 'Toggle Theme'), action: () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark') },
+    { label: t('common.logout', 'Sign Out'), action: handleLogout }
   ];
 
-  const filteredCommandItems = commandItems.filter((item) =>
-    item.label.toLowerCase().includes(cmdSearch.toLowerCase())
-  );
+  const filteredCmds = commandItems.filter((i) => i.label.toLowerCase().includes(cmdSearch.toLowerCase()));
 
-  // Command palette keyboard navigation
   useEffect(() => {
     if (!commandPaletteOpen) return;
-    const handleCmdKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setCmdSelectedIndex((prev) => (prev + 1) % filteredCommandItems.length);
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setCmdSelectedIndex((prev) => (prev - 1 + filteredCommandItems.length) % filteredCommandItems.length);
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (filteredCommandItems[cmdSelectedIndex]) {
-          filteredCommandItems[cmdSelectedIndex].action();
-          setCommandPaletteOpen(false);
-          setCmdSearch('');
-        }
-      } else if (e.key === 'Escape') {
-        setCommandPaletteOpen(false);
-      }
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowDown') {e.preventDefault();setCmdSelectedIndex((p) => (p + 1) % filteredCmds.length);} else
+      if (e.key === 'ArrowUp') {e.preventDefault();setCmdSelectedIndex((p) => (p - 1 + filteredCmds.length) % filteredCmds.length);} else
+      if (e.key === 'Enter') {e.preventDefault();filteredCmds[cmdSelectedIndex]?.action();setCommandPaletteOpen(false);setCmdSearch('');} else
+      if (e.key === 'Escape') setCommandPaletteOpen(false);
     };
-    window.addEventListener('keydown', handleCmdKeyDown);
-    return () => window.removeEventListener('keydown', handleCmdKeyDown);
-  }, [commandPaletteOpen, cmdSelectedIndex, filteredCommandItems]);
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [commandPaletteOpen, cmdSelectedIndex, filteredCmds]);
 
-  const sidebarVariants = {
-    expanded: { width: 256 },
-    collapsed: { width: 80 },
+  // Sidebar link component
+  const SidebarLink = ({ item, onClick }: {item: typeof navItems[0];onClick?: () => void;}) => {const { t } = useLanguage();
+    const Icon = icons[item.icon as keyof typeof icons] || icons.Home;
+    const isActive = pathname === item.href || item.href !== `/dashboard/${role}` && pathname.startsWith(item.href);
+    return (
+      <Link
+        href={item.href}
+        onClick={onClick}
+        className={cn(
+          'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150',
+          isActive ?
+          'bg-blue-600 text-white shadow-sm shadow-blue-600/20' :
+          'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
+        )}>
+        
+        <Icon className={cn('h-4 w-4 flex-shrink-0', isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300')} />
+        {sidebarOpen && <span className="truncate">{t(`nav.${item.title.toLowerCase().replace(/ /g, '_')}`, item.title)}</span>}
+      </Link>);
+
   };
 
+  const SidebarContent = ({ onLinkClick }: {onLinkClick?: () => void;}) => {const { t } = useLanguage();
+    // Group: first item is Dashboard, last 2 are Profile+Settings, rest are core
+    const dashItem = navItems[0];
+    const coreItems = navItems.slice(1, -2);
+    const tailItems = navItems.slice(-2);
+    const hasTail = navItems.length > 3;
+
+    return (
+      <div className="flex h-full flex-col">
+        {/* Brand */}
+        <div className={cn('flex h-14 items-center border-b border-slate-100 dark:border-slate-800', sidebarOpen ? 'px-4 gap-2.5' : 'justify-center px-0')}>
+          <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+            <icons.Activity className="h-4.5 w-4.5" />
+          </div>
+          {sidebarOpen &&
+          <div>
+              <p className="text-sm font-bold text-slate-900 dark:text-slate-50 leading-none">{t("common.arogyaos")}</p>
+              <p className="text-[10px] text-slate-400 mt-0.5 capitalize">{role.replace('_', ' ')}</p>
+            </div>
+          }
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 overflow-y-auto p-3 space-y-0.5">
+          {/* Dashboard */}
+          {dashItem && <SidebarLink item={dashItem} onClick={onLinkClick} />}
+
+          {/* Core */}
+          {coreItems.length > 0 &&
+          <div className="pt-3">
+              {sidebarOpen && <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{t('common.operations', 'Operations')}</p>}
+              <div className="space-y-0.5">
+                {coreItems.map((item) => <SidebarLink key={item.href} item={item} onClick={onLinkClick} />)}
+              </div>
+            </div>
+          }
+
+          {/* Profile + Settings */}
+          {hasTail &&
+          <div className="pt-3">
+              {sidebarOpen && <p className="mb-1 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{t('common.account', 'Account')}</p>}
+              <div className="space-y-0.5">
+                {tailItems.map((item) => <SidebarLink key={item.href} item={item} onClick={onLinkClick} />)}
+              </div>
+            </div>
+          }
+        </nav>
+
+        {/* Footer */}
+        <div className="border-t border-slate-100 dark:border-slate-800 p-3">
+          <button
+            onClick={handleLogout}
+            className={cn(
+              'flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/20 dark:hover:text-red-400 transition-all',
+              !sidebarOpen && 'justify-center'
+            )}>
+            
+            <icons.LogOut className="h-4 w-4 flex-shrink-0" />
+            {sidebarOpen && <span>{t('common.logout', 'Sign Out')}</span>}
+          </button>
+        </div>
+      </div>);
+
+  };
+
+  const roleStyle = ROLE_COLORS[role] || 'text-slate-600 bg-slate-50';
+
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300">
-      
-      {/* ================= 1. DESKTOP/LAPTOP SIDEBAR ================= */}
-      {!isMobile && (
-        <motion.aside
-          initial={sidebarOpen ? 'expanded' : 'collapsed'}
-          animate={sidebarOpen ? 'expanded' : 'collapsed'}
-          variants={sidebarVariants}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className="fixed inset-y-0 left-0 z-40 flex flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
-        >
-          {/* Brand Header */}
-          <div className="flex h-16 items-center justify-between px-6 border-b border-slate-200 dark:border-slate-800">
-            <Link href={`/dashboard/${role}`} className="flex items-center gap-2 font-extrabold text-lg text-blue-600 dark:text-blue-400 select-none">
-              <icons.Activity className="h-6 w-6" />
-              {sidebarOpen && (
-                <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="tracking-tight">
-                  ArogyaOS
-                </motion.span>
-              )}
-            </Link>
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              aria-label="Toggle Sidebar"
-              className="rounded-lg p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition"
-            >
-              <icons.Menu className="h-5 w-5" />
-            </button>
-          </div>
+    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100">
 
-          {/* Sidebar Nav Items */}
-          <nav className="flex-1 space-y-1.5 p-4 overflow-y-auto">
-            {navItems.map((item) => {
-              const ItemIcon = icons[item.icon as keyof typeof icons] || icons.Home;
-              const isActive = pathname === item.href;
-
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 select-none group',
-                    isActive
-                      ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/35 dark:text-blue-400'
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
-                  )}
-                >
-                  <ItemIcon className="h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-105" />
-                  {sidebarOpen && (
-                    <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                      {item.title}
-                    </motion.span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Logout Footer Section */}
-          <div className="border-t border-slate-200 p-4 dark:border-slate-800">
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-650 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 transition-all duration-200 select-none"
-            >
-              <icons.LogOut className="h-5 w-5 flex-shrink-0" />
-              {sidebarOpen && <span>{t('common.logout', 'Sign Out')}</span>}
-            </button>
-          </div>
+      {/* Desktop Sidebar */}
+      {!isMobile &&
+      <motion.aside
+        animate={{ width: sidebarOpen ? 224 : 64 }}
+        transition={{ duration: 0.25, ease: 'easeInOut' }}
+        className="fixed inset-y-0 left-0 z-40 flex flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+        
+          <SidebarContent />
         </motion.aside>
-      )}
+      }
 
-      {/* ================= 2. MOBILE DRAWER SIDEBAR ================= */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
-        {isMobile && mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 flex">
-            {/* Backdrop */}
+        {isMobile && mobileMenuOpen &&
+        <div className="fixed inset-0 z-50 flex">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm"
-            />
-            {/* Drawer Content */}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" />
+          
             <motion.aside
-              initial={{ x: '-100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-              className="relative flex w-full max-w-xs flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 h-full p-6 shadow-2xl"
-            >
-              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-4">
-                <Link href={`/dashboard/${role}`} className="flex items-center gap-2 font-extrabold text-lg text-blue-600 dark:text-blue-400">
-                  <icons.Activity className="h-6 w-6" />
-                  <span>ArogyaOS</span>
-                </Link>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="rounded-lg p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800"
-                >
-                  <icons.X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <nav className="flex-1 space-y-2 py-6 overflow-y-auto">
-                {navItems.map((item) => {
-                  const ItemIcon = icons[item.icon as keyof typeof icons] || icons.Home;
-                  const isActive = pathname === item.href;
-
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition',
-                        isActive
-                          ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/35 dark:text-blue-400'
-                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100'
-                      )}
-                    >
-                      <ItemIcon className="h-5 w-5 flex-shrink-0" />
-                      <span>{item.title}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
-
-              <div className="border-t border-slate-150 pt-4 dark:border-slate-800">
-                <button
-                  onClick={handleLogout}
-                  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-650 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 transition"
-                >
-                  <icons.LogOut className="h-5 w-5 flex-shrink-0" />
-                  <span>{t('common.logout', 'Sign Out')}</span>
-                </button>
-              </div>
+            initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
+            transition={{ type: 'spring', damping: 28, stiffness: 240 }}
+            className="relative w-64 bg-white dark:bg-slate-900 h-full shadow-2xl">
+            
+              <SidebarContent onLinkClick={() => setMobileMenuOpen(false)} />
             </motion.aside>
           </div>
-        )}
+        }
       </AnimatePresence>
 
-      {/* ================= 3. MAIN APP VIEWPORT CONTAINER ================= */}
-      <div
-        className={cn(
-          'flex flex-1 flex-col transition-all duration-300 min-w-0',
-          isMobile ? 'pl-0' : sidebarOpen ? 'pl-64' : 'pl-20'
-        )}
-      >
-        {/* Sticky Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200/80 bg-white/80 px-6 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80">
-          
-          {/* Left Block: Mobile Menu Trigger + Breadcrumbs */}
-          <div className="flex items-center gap-4">
-            {isMobile && (
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className="rounded-lg p-1.5 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-350"
-              >
-                <icons.Menu className="h-5 w-5" />
-              </button>
-            )}
+      {/* Main content */}
+      <div className={cn('flex flex-1 flex-col min-w-0 transition-all duration-250', isMobile ? 'pl-0' : sidebarOpen ? 'pl-56' : 'pl-16')}>
 
-            {/* Breadcrumbs Navigation */}
-            <nav className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-slate-500 select-none">
-              <Link href={`/dashboard/${role}`} className="hover:text-slate-900 dark:hover:text-slate-100 transition">
-                Home
+        {/* Top Header */}
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-200/80 bg-white/90 px-4 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90">
+
+          <div className="flex items-center gap-3">
+            {/* Mobile menu + sidebar toggle */}
+            <button
+              onClick={() => isMobile ? setMobileMenuOpen(true) : setSidebarOpen(!sidebarOpen)}
+              className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              aria-label="Toggle sidebar">
+              
+              <icons.Menu className="h-4 w-4" />
+            </button>
+
+            {/* Breadcrumb */}
+            <nav className="hidden sm:flex items-center gap-1 text-xs text-slate-500">
+              <Link href={`/dashboard/${role}`} className="hover:text-slate-900 dark:hover:text-slate-100 transition font-medium">
+                {t('nav.home', 'Home')}
               </Link>
-              {breadcrumbs.map((bc) => (
-                <React.Fragment key={bc.href}>
-                  <span className="text-slate-350">/</span>
-                  {bc.isLast ? (
-                    <span className="font-bold text-slate-900 dark:text-slate-200 capitalize">
-                      {bc.label}
-                    </span>
-                  ) : (
-                    <Link href={bc.href} className="hover:text-slate-900 dark:hover:text-slate-100 transition capitalize">
-                      {bc.label}
-                    </Link>
-                  )}
+              {pathname.split('/').filter(Boolean).slice(2).map((chunk, i, arr) =>
+              <React.Fragment key={i}>
+                  <span className="text-slate-300 dark:text-slate-700">/</span>
+                  <span className={cn('capitalize font-medium', i === arr.length - 1 ? 'text-slate-900 dark:text-slate-100' : 'text-slate-500')}>
+                    {t(`nav.${chunk.replace(/-/g, '_')}`, chunk.replace(/-/g, ' '))}
+                  </span>
                 </React.Fragment>
-              ))}
+              )}
             </nav>
           </div>
 
-          {/* Right Block: Core Toolbar items */}
-          <div className="flex items-center gap-3">
-            {/* Search Box Trigger */}
+          <div className="flex items-center gap-1">
+            {/* Search */}
             <button
               onClick={() => setCommandPaletteOpen(true)}
-              className="flex items-center gap-3 rounded-xl border border-slate-200/80 bg-slate-50/50 px-3.5 py-1.5 text-slate-450 hover:bg-slate-100 hover:border-slate-300 dark:border-slate-800 dark:bg-slate-950/40 dark:hover:bg-slate-950 dark:hover:border-slate-700 transition"
-            >
-              <icons.Search className="h-4 w-4" />
-              <span className="text-xs font-medium hidden md:inline">Search...</span>
-              <kbd className="hidden md:inline-flex h-5 select-none items-center gap-0.5 rounded border border-slate-200 bg-white px-1.5 font-mono text-[9px] font-bold text-slate-400 dark:border-slate-800 dark:bg-slate-900">
-                ⌘K
-              </kbd>
+              className="hidden sm:flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-500 hover:border-slate-300 hover:bg-white dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 transition mr-2">
+              
+              <icons.Search className="h-3.5 w-3.5" />
+              <span>{t('common.search', 'Search...')}</span>
+              <kbd className="hidden md:inline-flex rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-1 font-mono text-[10px] text-slate-400">{t("common.k")}</kbd>
             </button>
 
-            {/* Language Selector */}
+            {/* Language */}
             <select
               value={currentLanguage.code}
               onChange={(e) => setLanguage(e.target.value)}
-              className="rounded-xl border border-slate-200/80 bg-transparent px-2.5 py-1.5 text-xs font-bold text-slate-600 dark:border-slate-800 dark:text-slate-300 focus:outline-none"
-            >
-              <option value="en">EN</option>
-              <option value="hi">HI</option>
-              <option value="ta">TA</option>
-              <option value="te">TE</option>
-              <option value="kn">KN</option>
-              <option value="ml">ML</option>
+              className="rounded-lg border border-slate-200 bg-transparent px-2 py-1.5 text-xs font-medium text-slate-600 dark:border-slate-700 dark:text-slate-300 focus:outline-none cursor-pointer">
+              
+              <option value="en">{t("common.en")}</option>
+              <option value="hi">{t("common.hi")}</option>
+              <option value="ta">{t("common.ta")}</option>
+              <option value="te">{t("common.te")}</option>
+              <option value="kn">{t("common.kn")}</option>
+              <option value="ml">{t("common.ml")}</option>
             </select>
 
-            {/* Notifications Dropdown */}
+            {/* Notifications */}
             <div className="relative" ref={notificationsRef}>
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className={cn(
-                  'relative rounded-xl p-2.5 transition text-slate-500 hover:text-slate-700 dark:hover:text-slate-300',
-                  notificationsOpen ? 'bg-slate-100 dark:bg-slate-800' : 'hover:bg-slate-50 dark:hover:bg-slate-900'
-                )}
-              >
-                <icons.Bell className="h-5 w-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center">
+                className="relative rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                aria-label="Notifications">
+                
+                <icons.Bell className="h-4.5 w-4.5" />
+                {unreadCount > 0 &&
+                <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center">
                     {unreadCount}
                   </span>
-                )}
+                }
               </button>
 
               <AnimatePresence>
-                {notificationsOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 5 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 z-30 mt-2 w-80 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xl dark:border-slate-800 dark:bg-slate-900"
-                  >
-                    <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2.5">
-                      <h4 className="font-bold text-sm text-slate-900 dark:text-slate-50">
-                        Notifications {unreadCount > 0 && <span className="ml-1.5 rounded-full bg-blue-100 dark:bg-blue-900/40 px-1.5 text-[9px] text-blue-600 dark:text-blue-400">{unreadCount} new</span>}
-                      </h4>
-                      <button
-                        onClick={handleClearAll}
-                        className="text-[10px] font-bold text-blue-600 hover:underline dark:text-blue-400"
-                      >
-                        Clear All
+                {notificationsOpen &&
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 4 }}
+                  transition={{ duration: 0.12 }}
+                  className="absolute right-0 mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
+                  
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold text-slate-900 dark:text-slate-50">{t('nav.notifications', 'Notifications')}</span>
+                        {unreadCount > 0 &&
+                      <span className="rounded-full bg-blue-100 dark:bg-blue-900/50 px-1.5 text-[10px] font-bold text-blue-600 dark:text-blue-400">{unreadCount}</span>
+                      }
+                      </div>
+                      <button onClick={handleClearAll} className="text-[11px] font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 transition">
+                        {t('common.clear_all', 'Clear all')}
                       </button>
                     </div>
-                    <div className="mt-2.5 space-y-2 max-h-60 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <p className="py-6 text-center text-xs text-slate-400">All caught up!</p>
-                      ) : (
-                        notifications.map((notif) => (
-                          <div
-                            key={notif.id}
-                            onClick={() => handleMarkRead(notif.id)}
-                            className={cn(
-                              'rounded-xl p-2.5 text-xs transition border border-transparent cursor-pointer',
-                              notif.unread
-                                ? 'bg-blue-50/40 border-blue-100/40 dark:bg-blue-900/10 hover:bg-blue-50/60'
-                                : 'hover:bg-slate-50 dark:hover:bg-slate-800 opacity-70'
-                            )}
-                          >
-                            <div className="flex items-center justify-between font-bold text-slate-900 dark:text-slate-200">
-                              <span className="flex items-center gap-1.5">
-                                {notif.unread && <span className="h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />}
-                                {notif.title}
-                              </span>
-                              <span className="text-[9px] font-medium text-slate-400">{notif.time}</span>
+                    <div className="max-h-64 overflow-y-auto divide-y divide-slate-50 dark:divide-slate-800">
+                      {notifications.length === 0 ?
+                    <p className="py-8 text-center text-xs text-slate-400">{t('common.no_notifications', "You're all caught up!")}</p> :
+                    notifications.map((n) =>
+                    <div
+                      key={n.id}
+                      onClick={() => handleMarkRead(n.id)}
+                      className={cn('px-4 py-3 cursor-pointer transition', n.unread ? 'bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-50 dark:hover:bg-blue-950/20' : 'hover:bg-slate-50 dark:hover:bg-slate-800/50')}>
+                      
+                          <div className="flex items-start gap-2.5">
+                            {n.unread && <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-blue-500 flex-shrink-0" />}
+                            <div className={cn('flex-1 min-w-0', !n.unread && 'pl-4')}>
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">{n.title}</p>
+                                <span className="text-[10px] text-slate-400 flex-shrink-0">{n.time}</span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">{n.desc}</p>
                             </div>
-                            <p className="mt-1 text-slate-500 dark:text-slate-400 leading-normal">{notif.desc}</p>
                           </div>
-                        ))
-                      )}
+                        </div>
+                    )}
                     </div>
                   </motion.div>
-                )}
+                }
               </AnimatePresence>
             </div>
 
-            {/* Theme Toggle Trigger - mounted guard prevents hydration mismatch */}
+            {/* Theme toggle */}
             <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
               aria-label="Toggle theme"
-              className="rounded-xl p-2.5 hover:bg-slate-50 dark:hover:bg-slate-900 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition"
-            >
-              {!mounted ? (
-                <icons.Moon className="h-5 w-5" />
-              ) : theme === 'dark' ? (
-                <icons.Sun className="h-5 w-5 text-yellow-500" />
-              ) : (
-                <icons.Moon className="h-5 w-5" />
-              )}
+              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+              
+              {!mounted ? <div className="h-4.5 w-4.5" /> : resolvedTheme === 'dark' ? <icons.Sun className="h-4.5 w-4.5 text-amber-400" /> : <icons.Moon className="h-4.5 w-4.5 text-slate-500" />}
             </button>
 
-            {/* User Profile Avatar Dropdown */}
-            <div className="relative" ref={profileRef}>
+            {/* Profile */}
+            <div className="relative ml-1" ref={profileRef}>
               <button
                 onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2 rounded-xl p-1 hover:bg-slate-50 dark:hover:bg-slate-900 transition"
-              >
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white font-bold text-sm uppercase">
+                className="flex items-center gap-2 rounded-lg p-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-[11px] font-bold uppercase">
                   {user?.fullName?.slice(0, 2) || 'US'}
                 </div>
+                <icons.ChevronDown className="h-3 w-3 text-slate-400 hidden sm:block" />
               </button>
 
               <AnimatePresence>
-                {profileOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 5 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 z-30 mt-2 w-56 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-xl dark:border-slate-800 dark:bg-slate-900"
-                  >
-                    <div className="border-b border-slate-100 dark:border-slate-850 pb-2.5 mb-2 px-1">
-                      <p className="font-extrabold text-xs text-slate-900 dark:text-slate-55">{user?.fullName || 'Healthcare User'}</p>
-                      <p className="text-[10px] text-slate-450 truncate mt-0.5">{user?.email || 'user@arogya.in'}</p>
-                      <span className={cn('inline-block rounded-full px-2 py-0.5 text-[9px] font-bold mt-2 uppercase tracking-wide', currentRoleStyle)}>
+                {profileOpen &&
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 4 }}
+                  transition={{ duration: 0.12 }}
+                  className="absolute right-0 mt-2 w-52 rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
+                  
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-slate-50 truncate">{user?.fullName || 'Healthcare User'}</p>
+                      <p className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email}</p>
+                      <span className={cn('mt-2 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize', roleStyle)}>
                         {role.replace('_', ' ')}
                       </span>
                     </div>
-
-                    <div className="flex flex-col gap-0.5 text-xs font-semibold">
+                    <div className="p-1.5">
                       <Link
-                        href={`/dashboard/${role}`}
-                        onClick={() => setProfileOpen(false)}
-                        className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-slate-700 hover:bg-slate-150 dark:text-slate-350 dark:hover:bg-slate-850 transition"
-                      >
-                        <icons.UserSquare2 className="h-4 w-4" />
-                        <span>Workspace Area</span>
+                      href={`/dashboard/${role}`}
+                      onClick={() => setProfileOpen(false)}
+                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 transition">
+                      
+                        <icons.UserCircle className="h-3.5 w-3.5" />
+                        {t('nav.dashboard', 'Dashboard')}
                       </Link>
                       <button
-                        onClick={handleLogout}
-                        className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 transition text-left"
-                      >
-                        <icons.LogOut className="h-4 w-4" />
-                        <span>Sign Out</span>
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/20 transition">
+                      
+                        <icons.LogOut className="h-3.5 w-3.5" />
+                        {t('common.logout', 'Sign Out')}
                       </button>
                     </div>
                   </motion.div>
-                )}
+                }
               </AnimatePresence>
             </div>
-
           </div>
         </header>
 
-        {/* Content Viewport */}
-        <main className="flex-1 p-6 max-w-7xl w-full mx-auto">{children}</main>
+        {/* Page content */}
+        <main className="flex-1 p-6 max-w-7xl w-full mx-auto">
+          {children}
+        </main>
       </div>
 
-      {/* ================= 4. COMMAND PALETTE (CTRL/CMD + K) ================= */}
+      {/* Command Palette */}
       <AnimatePresence>
-        {commandPaletteOpen && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 px-4">
+        {commandPaletteOpen &&
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] px-4">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setCommandPaletteOpen(false)}
-              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"
-            />
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setCommandPaletteOpen(false)}
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" />
+          
+            <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: -8 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: -8 }}
+            transition={{ duration: 0.18 }}
+            className="relative z-10 w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
             
-            <motion.div
-              initial={{ opacity: 0, scale: 0.97, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.97, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="relative z-10 w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-2.5 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
-            >
-              <div className="flex items-center gap-2 px-3 pb-2 border-b border-slate-100 dark:border-slate-850">
-                <icons.Search className="h-4 w-4 text-slate-400" />
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                <icons.Search className="h-4 w-4 text-slate-400 flex-shrink-0" />
                 <input
-                  type="text"
-                  placeholder="Type a command or path..."
-                  value={cmdSearch}
-                  onChange={(e) => {
-                    setCmdSearch(e.target.value);
-                    setCmdSelectedIndex(0);
-                  }}
-                  className="w-full bg-transparent py-2.5 text-sm outline-none placeholder-slate-400 text-slate-800 dark:text-slate-100"
-                  autoFocus
-                />
-                <button
-                  onClick={() => setCommandPaletteOpen(false)}
-                  className="rounded px-1.5 py-0.5 border border-slate-200 dark:border-slate-800 text-[10px] font-semibold text-slate-400"
-                >
-                  ESC
-                </button>
+                autoFocus
+                type="text"
+                placeholder={t('common.search_placeholder', 'Search or jump to...')}
+                value={cmdSearch}
+                onChange={(e) => {setCmdSearch(e.target.value);setCmdSelectedIndex(0);}}
+                className="flex-1 bg-transparent text-sm outline-none placeholder-slate-400 text-slate-900 dark:text-slate-100" />
+              
+                <button onClick={() => setCommandPaletteOpen(false)} className="rounded-md border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 text-[10px] font-mono text-slate-400">{t("common.esc")}</button>
               </div>
-
-              <div className="mt-2 max-h-72 overflow-y-auto space-y-0.5">
-                {filteredCommandItems.length === 0 ? (
-                  <p className="p-4 text-center text-xs text-slate-500">No operations matched your search.</p>
-                ) : (
-                  filteredCommandItems.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        item.action();
-                        setCommandPaletteOpen(false);
-                        setCmdSearch('');
-                      }}
-                      className={cn(
-                        'flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-xs font-semibold transition-colors',
-                        idx === cmdSelectedIndex
-                          ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
-                          : 'text-slate-700 hover:bg-slate-50 dark:text-slate-350 dark:hover:bg-slate-850'
-                      )}
-                    >
-                      <span>{item.label}</span>
-                      <span className="text-[9px] text-slate-400 uppercase">Action</span>
-                    </button>
-                  ))
-                )}
+              <div className="max-h-64 overflow-y-auto p-1.5">
+                {filteredCmds.length === 0 ?
+              <p className="py-6 text-center text-xs text-slate-400">{t('common.no_results', 'No results found')}</p> :
+              filteredCmds.map((item, idx) =>
+              <button
+                key={idx}
+                onClick={() => {item.action();setCommandPaletteOpen(false);setCmdSearch('');}}
+                className={cn(
+                  'flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm transition',
+                  idx === cmdSelectedIndex ? 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300' : 'text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800'
+                )}>
+                
+                    {item.label}
+                  </button>
+              )}
               </div>
             </motion.div>
           </div>
-        )}
+        }
       </AnimatePresence>
+    </div>);
 
-      {/* ================= 5. FLOATING AI ASSISTANT PANEL ================= */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <button
-          onClick={() => setAiOpen(!aiOpen)}
-          aria-label="Arogya AI Helper"
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-xl hover:scale-105 hover:shadow-2xl transition-all duration-300 cursor-pointer"
-        >
-          <icons.Bot className="h-6 w-6 animate-pulse" />
-        </button>
-
-        <AnimatePresence>
-          {aiOpen && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 15 }}
-              transition={{ type: 'spring', damping: 20, stiffness: 300 }}
-              className="absolute bottom-16 right-0 w-80 rounded-2xl border border-slate-200 bg-white p-4 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
-            >
-              <h4 className="flex items-center gap-2 font-bold text-sm text-blue-600 dark:text-blue-400 border-b border-slate-100 dark:border-slate-850 pb-2">
-                <icons.Bot className="h-5 w-5" />
-                <span>Operational Intelligence</span>
-              </h4>
-              <div className="mt-3 rounded-xl bg-slate-50 p-3.5 text-xs text-slate-500 dark:bg-slate-950 dark:text-slate-400 leading-relaxed border border-slate-100 dark:border-slate-900">
-                Greetings! I am the ArogyaOS Assistant. In this version, I monitor dashboard views and help users search operations. You can press <kbd className="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded text-[10px] font-mono">⌘K</kbd> to explore operational shortcuts.
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-    </div>
-  );
 }
+
 export default DashboardShell;

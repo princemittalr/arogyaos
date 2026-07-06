@@ -1,4 +1,4 @@
-'use client';
+'use client';import { useLanguage } from "@/providers/LanguageProvider";
 
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -9,8 +9,8 @@ import {
   useHospitalDepartments,
   useSaveDoctorMutation,
   useDeleteDoctorMutation,
-  DetailedDoctorWithUser,
-} from '@/features/hospital/hooks/useHospital';
+  DetailedDoctorWithUser } from
+'@/features/hospital/hooks/useHospital';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Trash2, Edit2, X, UserCheck } from 'lucide-react';
@@ -22,12 +22,12 @@ const doctorSchema = zod.object({
   departmentId: zod.string().min(1, 'Please select a department'),
   specialization: zod.string().min(2, 'Specialization is required'),
   qualification: zod.string().min(2, 'Qualification is required'),
-  consultationFee: zod.number().min(0, 'Fee cannot be negative'),
+  consultationFee: zod.number().min(0, 'Fee cannot be negative')
 });
 
 type DoctorFormValues = zod.infer<typeof doctorSchema>;
 
-export default function HospitalDoctorsPage() {
+export default function HospitalDoctorsPage() {const { t } = useLanguage();
   const hospitalId = 'hosp_city_gen';
   const { data: doctors, isLoading: docsLoading } = useHospitalDoctors(hospitalId);
   const { data: departments, isLoading: deptsLoading } = useHospitalDepartments(hospitalId);
@@ -44,7 +44,7 @@ export default function HospitalDoctorsPage() {
     handleSubmit,
     reset,
     setValue,
-    formState: { errors },
+    formState: { errors }
   } = useForm<DoctorFormValues>({
     resolver: zodResolver(doctorSchema),
     defaultValues: {
@@ -54,8 +54,8 @@ export default function HospitalDoctorsPage() {
       departmentId: '',
       specialization: '',
       qualification: '',
-      consultationFee: 500,
-    },
+      consultationFee: 500
+    }
   });
 
   if (docsLoading || deptsLoading) {
@@ -70,7 +70,7 @@ export default function HospitalDoctorsPage() {
       departmentId: docItem.departmentId,
       specialization: docItem.specialization,
       qualification: docItem.qualification,
-      consultationFee: docItem.consultationFee,
+      consultationFee: docItem.consultationFee
     });
     setValue('uid', docItem.uid);
     setValue('doctorName', docItem.doctorName);
@@ -91,7 +91,7 @@ export default function HospitalDoctorsPage() {
       departmentId: departments?.[0]?.departmentId || '',
       specialization: '',
       qualification: '',
-      consultationFee: 500,
+      consultationFee: 500
     });
     setShowForm(true);
   };
@@ -101,8 +101,8 @@ export default function HospitalDoctorsPage() {
       hospitalId,
       docObj: {
         ...values,
-        hospitalId,
-      },
+        hospitalId
+      }
     });
     setShowForm(false);
     reset();
@@ -116,8 +116,8 @@ export default function HospitalDoctorsPage() {
 
   const filtered = doctors?.filter((docObj) => {
     const matchesSearch =
-      docObj.doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      docObj.specialization.toLowerCase().includes(searchTerm.toLowerCase());
+    docObj.doctorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    docObj.specialization.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDept = selectedDept ? docObj.departmentId === selectedDept : true;
     return matchesSearch && matchesDept;
   }) || [];
@@ -125,9 +125,9 @@ export default function HospitalDoctorsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Clinician Registry"
-        description="Verify active medical consultants, shifts schedules, consultations fees and attendance thresholds."
-      />
+        title={t("hospital.clinician_registry")}
+        description={t("hospital.verify_active_medical_consultants_shifts_schedules_consultations_fees_and_attendance_thresholds")} />
+      
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
@@ -136,53 +136,53 @@ export default function HospitalDoctorsPage() {
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search doctors / specialties..."
+              placeholder={t("hospital.search_doctors_specialties")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 bg-transparent rounded-xl text-xs font-bold text-slate-750 dark:border-slate-800 focus:outline-none"
-            />
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 bg-transparent rounded-xl text-xs font-bold text-slate-750 dark:border-slate-800 focus:outline-none" />
+            
           </div>
 
           <select
             value={selectedDept}
             onChange={(e) => setSelectedDept(e.target.value)}
-            className="w-full sm:w-auto rounded-xl border border-slate-200 bg-transparent px-3 py-2 text-xs font-bold text-slate-650 dark:border-slate-800 dark:text-slate-350 focus:outline-none"
-          >
-            <option value="">All Departments</option>
-            {departments?.map((d) => (
-              <option key={d.departmentId} value={d.departmentId}>
+            className="w-full sm:w-auto rounded-xl border border-slate-200 bg-transparent px-3 py-2 text-xs font-bold text-slate-650 dark:border-slate-800 dark:text-slate-350 focus:outline-none">
+            
+            <option value="">{t("hospital.all_departments")}</option>
+            {departments?.map((d) =>
+            <option key={d.departmentId} value={d.departmentId}>
                 {d.departmentName}
               </option>
-            ))}
+            )}
           </select>
         </div>
 
         <button
           onClick={handleAddNew}
-          className="w-full sm:w-auto rounded-xl bg-blue-600 hover:bg-blue-750 text-white font-bold text-xs px-4 py-2.5 flex items-center justify-center gap-2 cursor-pointer transition"
-        >
+          className="w-full sm:w-auto rounded-xl bg-blue-600 hover:bg-blue-750 text-white font-bold text-xs px-4 py-2.5 flex items-center justify-center gap-2 cursor-pointer transition">
+          
           <Plus className="h-4 w-4" />
-          <span>Add Doctor</span>
+          <span>{t("hospital.add_doctor")}</span>
         </button>
       </div>
 
       {/* Form modal */}
       <AnimatePresence>
-        {showForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {showForm &&
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowForm(false)}
-              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm"
-            />
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowForm(false)}
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm" />
+          
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative z-10 w-full max-w-md rounded-2xl border border-slate-250 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
-            >
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="relative z-10 w-full max-w-md rounded-2xl border border-slate-250 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-850 pb-3 mb-4">
                 <h3 className="font-extrabold text-sm text-slate-900 dark:text-slate-50">
                   {editingDoc ? 'Modify Clinician Profile' : 'Configure New Clinician'}
@@ -194,114 +194,114 @@ export default function HospitalDoctorsPage() {
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Doctor ID / UID</label>
+                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.doctor_id_uid")}</label>
                   <input
-                    type="text"
-                    disabled={!!editingDoc}
-                    {...register('uid')}
-                    className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 disabled:opacity-50"
-                  />
+                  type="text"
+                  disabled={!!editingDoc}
+                  {...register('uid')}
+                  className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 disabled:opacity-50" />
+                
                   {errors.uid && <p className="text-red-500 mt-1 font-bold">{errors.uid.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Full Name</label>
+                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.full_name")}</label>
                   <input
-                    type="text"
-                    {...register('doctorName')}
-                    placeholder="e.g. Dr. Satish Nair"
-                    className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100"
-                  />
+                  type="text"
+                  {...register('doctorName')}
+                  placeholder={t("hospital.eg_dr_satish_nair")}
+                  className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
+                
                   {errors.doctorName && <p className="text-red-500 mt-1 font-bold">{errors.doctorName.message}</p>}
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Email Address</label>
+                  <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.email_address")}</label>
                   <input
-                    type="email"
-                    {...register('email')}
-                    className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100"
-                  />
+                  type="email"
+                  {...register('email')}
+                  className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
+                
                   {errors.email && <p className="text-red-500 mt-1 font-bold">{errors.email.message}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Department</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.department")}</label>
                     <select
-                      {...register('departmentId')}
-                      className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none"
-                    >
-                      {departments?.map((d) => (
-                        <option key={d.departmentId} value={d.departmentId}>
+                    {...register('departmentId')}
+                    className="w-full border border-slate-200 bg-white dark:bg-slate-900 rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none">
+                    
+                      {departments?.map((d) =>
+                    <option key={d.departmentId} value={d.departmentId}>
                           {d.departmentName}
                         </option>
-                      ))}
+                    )}
                     </select>
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Consult Fee (₹)</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.consult_fee")}</label>
                     <input
-                      type="number"
-                      {...register('consultationFee', { valueAsNumber: true })}
-                      className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100"
-                    />
+                    type="number"
+                    {...register('consultationFee', { valueAsNumber: true })}
+                    className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
+                  
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Specialization</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.specialization")}</label>
                     <input
-                      type="text"
-                      {...register('specialization')}
-                      placeholder="e.g. Cardiosurgeon"
-                      className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100"
-                    />
+                    type="text"
+                    {...register('specialization')}
+                    placeholder={t("hospital.eg_cardiosurgeon")}
+                    className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
+                  
                     {errors.specialization && <p className="text-red-500 mt-1 font-bold">{errors.specialization.message}</p>}
                   </div>
                   <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">Qualification</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.qualification")}</label>
                     <input
-                      type="text"
-                      {...register('qualification')}
-                      placeholder="e.g. MBBS, M.Ch"
-                      className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100"
-                    />
+                    type="text"
+                    {...register('qualification')}
+                    placeholder={t("hospital.eg_mbbs_mch")}
+                    className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
+                  
                     {errors.qualification && <p className="text-red-500 mt-1 font-bold">{errors.qualification.message}</p>}
                   </div>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4">
                   <button
-                    type="button"
-                    onClick={() => setShowForm(false)}
-                    className="rounded-xl border border-slate-200 px-4 py-2 text-slate-500 font-bold hover:bg-slate-50 transition"
-                  >
-                    Cancel
-                  </button>
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="rounded-xl border border-slate-200 px-4 py-2 text-slate-500 font-bold hover:bg-slate-50 transition">{t("hospital.cancel")}
+
+
+                </button>
                   <button
-                    type="submit"
-                    disabled={saveDoctorMutation.isPending}
-                    className="rounded-xl bg-blue-600 px-5 py-2 text-white font-bold hover:bg-blue-750 transition"
-                  >
+                  type="submit"
+                  disabled={saveDoctorMutation.isPending}
+                  className="rounded-xl bg-blue-600 px-5 py-2 text-white font-bold hover:bg-blue-750 transition">
+                  
                     {saveDoctorMutation.isPending ? 'Saving...' : 'Save Profile'}
                   </button>
                 </div>
               </form>
             </motion.div>
           </div>
-        )}
+        }
       </AnimatePresence>
 
       {/* Grid of Doctor profiles */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((docObj) => (
-          <motion.div
-            key={docObj.uid}
-            layout
-            className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between"
-          >
+        {filtered.map((docObj) =>
+        <motion.div
+          key={docObj.uid}
+          layout
+          className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between">
+          
             <div>
               <div className="flex justify-between items-start">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-950/20 dark:text-blue-400 font-extrabold text-sm uppercase">
@@ -309,15 +309,15 @@ export default function HospitalDoctorsPage() {
                 </div>
                 <div className="flex gap-1.5">
                   <button
-                    onClick={() => handleEdit(docObj)}
-                    className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-xl transition"
-                  >
+                  onClick={() => handleEdit(docObj)}
+                  className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-xl transition">
+                  
                     <Edit2 className="h-3.5 w-3.5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(docObj.uid)}
-                    className="p-1.5 text-red-500 hover:text-red-750 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition"
-                  >
+                  onClick={() => handleDelete(docObj.uid)}
+                  className="p-1.5 text-red-500 hover:text-red-750 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition">
+                  
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
@@ -333,15 +333,15 @@ export default function HospitalDoctorsPage() {
 
               <div className="mt-4 space-y-2 border-t border-slate-100 dark:border-slate-850 pt-3">
                 <div className="flex justify-between text-[10px] font-bold text-slate-500">
-                  <span>Department:</span>
+                  <span>{t("hospital.department")}</span>
                   <span className="text-slate-850 dark:text-slate-350">{docObj.departmentName}</span>
                 </div>
                 <div className="flex justify-between text-[10px] font-bold text-slate-500">
-                  <span>Shift Availability:</span>
+                  <span>{t("hospital.shift_availability")}</span>
                   <span className="text-slate-850 dark:text-slate-350">{docObj.workingHours}</span>
                 </div>
                 <div className="flex justify-between text-[10px] font-bold text-slate-500">
-                  <span>Consultation Fee:</span>
+                  <span>{t("hospital.consultation_fee")}</span>
                   <span className="text-blue-600 dark:text-blue-400">₹{docObj.consultationFee}</span>
                 </div>
               </div>
@@ -349,14 +349,14 @@ export default function HospitalDoctorsPage() {
 
             <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-850 flex justify-between items-center">
               <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-extrabold text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 flex items-center gap-1">
-                <UserCheck className="h-3 w-3" />
-                Present
-              </span>
-              <span className="text-[9px] text-slate-400 font-bold">Attendance: Present</span>
+                <UserCheck className="h-3 w-3" />{t("hospital.present")}
+
+            </span>
+              <span className="text-[9px] text-slate-400 font-bold">{t("hospital.attendance_present")}</span>
             </div>
           </motion.div>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }
