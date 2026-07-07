@@ -1,0 +1,10 @@
+export class WorkflowNotFoundError extends Error { constructor(msg: string) { super(msg); this.name = 'WorkflowNotFoundError'; } }
+export class WorkflowValidationError extends Error { constructor(msg: string) { super(msg); this.name = 'WorkflowValidationError'; } }
+export class InvalidTransitionError extends Error { constructor(msg: string) { super(msg); this.name = 'InvalidTransitionError'; } }
+export class SLAViolationError extends Error { constructor(msg: string) { super(msg); this.name = 'SLAViolationError'; } }
+export class TaskAssignmentError extends Error { constructor(msg: string) { super(msg); this.name = 'TaskAssignmentError'; } }
+export class DecisionEvaluationError extends Error { constructor(msg: string) { super(msg); this.name = 'DecisionEvaluationError'; } }
+export class CircularWorkflowError extends Error { constructor(msg: string) { super(msg); this.name = 'CircularWorkflowError'; } }
+export class WorkflowExecutionError extends Error { constructor(msg: string) { super(msg); this.name = 'WorkflowExecutionError'; } }
+export class EscalationError extends Error { constructor(msg: string) { super(msg); this.name = 'EscalationError'; } }
+export class WorkflowConfigurationError extends Error { constructor(msg: string) { super(msg); this.name = 'WorkflowConfigurationError'; } }

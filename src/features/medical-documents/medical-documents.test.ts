@@ -85,7 +85,7 @@ describe('Medical Document Management Module Tests', () => {
     it('should validate nesting depth limits', async () => {
       const getDocMock = vi.mocked(getDoc);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       getDocMock.mockImplementation(async (docRef: any) => {
         const mockRef = docRef as unknown as MockDocRef;
         const id = mockRef.segments ? mockRef.segments[0] : '';

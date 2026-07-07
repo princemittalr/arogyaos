@@ -1,0 +1,88 @@
+export const WORKFLOW_TYPES = {
+  CLINICAL: 'CLINICAL',
+  ADMINISTRATIVE: 'ADMINISTRATIVE',
+  FINANCIAL: 'FINANCIAL',
+  OPERATIONAL: 'OPERATIONAL',
+  COMPLIANCE: 'COMPLIANCE'
+} as const;
+
+export const WORKFLOW_STATES = {
+  DRAFT: 'DRAFT',
+  ACTIVE: 'ACTIVE',
+  DEPRECATED: 'DEPRECATED',
+  ARCHIVED: 'ARCHIVED'
+} as const;
+
+export const EXECUTION_STATUS = {
+  PENDING: 'PENDING',
+  RUNNING: 'RUNNING',
+  PAUSED: 'PAUSED',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED'
+} as const;
+
+export const TASK_TYPES = {
+  HUMAN: 'HUMAN',
+  AUTOMATED: 'AUTOMATED',
+  APPROVAL: 'APPROVAL',
+  REVIEW: 'REVIEW'
+} as const;
+
+export const TASK_STATUS = {
+  TODO: 'TODO',
+  IN_PROGRESS: 'IN_PROGRESS',
+  WAITING: 'WAITING',
+  DONE: 'DONE',
+  REJECTED: 'REJECTED',
+  ESCALATED: 'ESCALATED'
+} as const;
+
+export const ESCALATION_LEVELS = {
+  LEVEL_1: 'LEVEL_1',
+  LEVEL_2: 'LEVEL_2',
+  LEVEL_3: 'LEVEL_3'
+} as const;
+
+export const PRIORITY_LEVELS = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL'
+} as const;
+
+export const TRIGGER_TYPES = {
+  EVENT: 'EVENT',
+  SCHEDULE: 'SCHEDULE',
+  MANUAL: 'MANUAL'
+} as const;
+
+export const DECISION_TYPES = {
+  TABLE: 'TABLE',
+  TREE: 'TREE',
+  EXPRESSION: 'EXPRESSION'
+} as const;
+
+export const SLA_STATUS = {
+  ON_TRACK: 'ON_TRACK',
+  AT_RISK: 'AT_RISK',
+  BREACHED: 'BREACHED'
+} as const;
+
+export const RETRY_MODES = {
+  LINEAR: 'LINEAR',
+  EXPONENTIAL: 'EXPONENTIAL',
+  IMMEDIATE: 'IMMEDIATE'
+} as const;
+
+export const TIMEOUT_MODES = {
+  ABORT: 'ABORT',
+  ESCALATE: 'ESCALATE',
+  COMPENSATE: 'COMPENSATE'
+} as const;
+
+export const ARCHIVE_MODES = {
+  SOFT: 'SOFT',
+  HARD: 'HARD',
+  GLACIER: 'GLACIER'
+} as const;

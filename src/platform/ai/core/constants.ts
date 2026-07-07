@@ -1,0 +1,11 @@
+export const AI_PROVIDERS = ['GOOGLE', 'OPENAI', 'ANTHROPIC', 'OLLAMA', 'CUSTOM'] as const;
+export const MODEL_CATEGORIES = ['LLM', 'EMBEDDING', 'IMAGE_GEN', 'AUDIO_GEN', 'CLASSIFICATION'] as const;
+export const PROMPT_TYPES = ['SYSTEM', 'USER', 'FEW_SHOT', 'CHAIN_OF_THOUGHT', 'JSON_SCHEMA'] as const;
+export const AGENT_TYPES = ['CLINICAL', 'ADMINISTRATIVE', 'ANALYTICAL', 'ROUTING', 'RESEARCH'] as const;
+export const AUTOMATION_TYPES = ['WORKFLOW', 'DATA_SYNC', 'ALERTING', 'MAINTENANCE'] as const;
+export const DECISION_TYPES = ['ROUTING', 'TRIAGE', 'DOSAGE', 'DIAGNOSIS', 'POLICY'] as const;
+export const PREDICTION_TYPES = ['RISK', 'DEMAND', 'OUTCOME', 'COST'] as const;
+export const APPROVAL_STATES = ['PENDING', 'APPROVED', 'REJECTED', 'BYPASSED'] as const;
+export const GOVERNANCE_LEVELS = ['STRICT', 'MODERATE', 'FLEXIBLE'] as const;
+export const SAFETY_LEVELS = ['MAXIMUM', 'HIGH', 'BALANCED', 'MINIMAL'] as const;
+export const COST_CATEGORIES = ['COMPUTE', 'TOKEN', 'STORAGE', 'BANDWIDTH'] as const;

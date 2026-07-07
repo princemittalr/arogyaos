@@ -1,2 +1,0 @@
-// AI hooks
-export {};

@@ -1,0 +1,15 @@
+export const SECURITY_LEVELS = ['LOW', 'MODERATE', 'HIGH', 'CRITICAL'] as const;
+export const PERMISSION_LEVELS = ['READ', 'WRITE', 'DELETE', 'ADMIN', 'EXECUTE'] as const;
+export const CONSENT_STATUSES = ['GRANTED', 'REVOKED', 'EXPIRED', 'PENDING'] as const;
+export const PRIVACY_CATEGORIES = ['PHI', 'PII', 'FINANCIAL', 'PUBLIC'] as const;
+export const CLASSIFICATION_LEVELS = ['UNCLASSIFIED', 'CONFIDENTIAL', 'SECRET', 'TOP_SECRET'] as const;
+export const ENCRYPTION_ALGORITHMS = ['AES_256_GCM', 'RSA_4096', 'CHACHA20_POLY1305', 'ECC_P384'] as const;
+export const COMPLIANCE_FRAMEWORKS = ['HIPAA', 'GDPR', 'SOC2', 'ISO27001', 'HITRUST'] as const;
+export const RISK_LEVELS = ['NEGLIGIBLE', 'MINOR', 'SIGNIFICANT', 'SEVERE'] as const;
+export const THREAT_CATEGORIES = ['MALWARE', 'PHISHING', 'INSIDER', 'DDOS', 'EXFILTRATION'] as const;
+export const INCIDENT_SEVERITIES = ['TIER_1', 'TIER_2', 'TIER_3', 'TIER_4'] as const;
+export const RETENTION_POLICIES = ['EPHEMERAL', 'SHORT_TERM', 'LONG_TERM', 'INDEFINITE'] as const;
+export const VULNERABILITY_SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const;
+export const INCIDENT_STATUSES = ['OPEN', 'INVESTIGATING', 'RESOLVED', 'CLOSED'] as const;
+export const KEY_STATUSES = ['ACTIVE', 'ROTATED', 'COMPROMISED'] as const;
+export const COMPLIANCE_STATUSES = ['PASSED', 'FAILED', 'CONDITIONAL'] as const;

@@ -116,7 +116,7 @@ describe('Radiology & Medical Imaging Unit Tests', () => {
         scheduledEvents.push(payload);
       });
 
-      const studyUid = await RadiologyService.scheduleStudy(mockStudy);
+      const studyUid = await RadiologyService.scheduleStudy(mockStudy as any);
 
       expect(studyUid).toBe('1.2.840.113619.2.222');
       expect(scheduledEvents).toHaveLength(1);

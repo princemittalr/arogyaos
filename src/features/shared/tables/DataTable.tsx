@@ -8,7 +8,7 @@ import { icons } from '@/design-system/icons';
 interface Column<T> {
   key: string;
   header: string;
-  render?: (value: any, row: T) => React.ReactNode; // eslint-disable-line @typescript-eslint/no-explicit-any
+  render?: (value: any, row: T) => React.ReactNode;  
   sortable?: boolean;
 }
 
@@ -25,7 +25,7 @@ interface DataTableProps<T> {
   className?: string;
 }
 
-export function DataTable<T extends Record<string, any>>({ // eslint-disable-line @typescript-eslint/no-explicit-any
+export function DataTable<T extends Record<string, any>>({  
   columns,
   data,
   loading,

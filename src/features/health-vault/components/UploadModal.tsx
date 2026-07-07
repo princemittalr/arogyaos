@@ -129,7 +129,7 @@ export function UploadModal({ isOpen, onClose, patientId, onUploadSuccess }: Upl
       }
 
       // 2. Ingest medical record (payload is shaped by the concrete repository)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const recordId = await vaultService.ingestRecord(recordType as string, recordPayload as any, {
         ownerId: patientId,
         createdBy: patientId,
