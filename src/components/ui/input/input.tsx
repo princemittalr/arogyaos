@@ -51,7 +51,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const id = providedId || internalId;
     const [isFocused, setIsFocused] = useState(false);
 
-    // Controlled or uncontrolled detection for floating label
     const isFilled =
       (value !== undefined && value !== '' && value !== null) ||
       (defaultValue !== undefined && defaultValue !== '' && defaultValue !== null) ||
@@ -69,42 +68,46 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       onBlur?.(e);
     };
 
-    const stateClasses = cn(
-      "relative flex items-center w-full transition-all duration-300 rounded-2xl border bg-white/50 dark:bg-slate-900/50 backdrop-blur-md overflow-hidden group shadow-sm",
-      {
-        "border-slate-200 dark:border-slate-800": !error && !success && !warning && !isFocused,
-        "border-blue-500 ring-2 ring-blue-500/20 dark:ring-blue-400/20": isFocused && !error && !warning,
-        "border-red-500 ring-2 ring-red-500/20 bg-red-50/50 dark:bg-red-900/10": error,
-        "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/50 dark:bg-amber-900/10": warning,
-        "border-emerald-500 ring-2 ring-emerald-500/20": success,
-        "opacity-50 cursor-not-allowed bg-slate-50 dark:bg-slate-900": disabled,
-      },
-      className // Absorb layout/margin classes from the previous implementation
-    );
-
     return (
       <div className="w-full flex flex-col gap-1.5">
-        <div className={stateClasses}>
+        <div
+          className={cn(
+            "group relative flex items-center w-full rounded-lg border bg-white dark:bg-slate-900 transition-shadow duration-200 overflow-hidden shadow-sm",
+            {
+              "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700": !error && !success && !warning && !isFocused && !disabled,
+              "border-blue-500 ring-4 ring-blue-500/15 dark:ring-blue-400/15": isFocused && !error && !warning,
+              "border-red-500 ring-4 ring-red-500/15 dark:ring-red-500/15": error,
+              "border-amber-500 ring-4 ring-amber-500/15 dark:ring-amber-500/15": warning,
+              "border-emerald-500 ring-4 ring-emerald-500/15 dark:ring-emerald-500/15": success,
+              "opacity-60 cursor-not-allowed bg-slate-50 dark:bg-slate-900/50": disabled,
+            },
+            className
+          )}
+        >
           {/* Prefix Icon */}
           {prefixIcon && (
-            <div className="pl-3.5 pr-1 flex items-center justify-center text-slate-400 group-focus-within:text-blue-500 transition-colors">
+            <div className="pl-3 pr-2 flex items-center justify-center text-slate-400 group-focus-within:text-blue-500 transition-colors">
               {prefixIcon}
             </div>
           )}
 
-          {/* Floating Label Container */}
-          <div className="relative flex-1 flex flex-col justify-center px-3.5 py-1 min-h-[46px]">
+          {/* Input Area */}
+          <div className="relative flex-1 flex flex-col justify-center min-h-[44px]">
             {floatingLabel && (
               <motion.label
                 htmlFor={id}
                 initial={false}
                 animate={{
-                  y: isFloating ? -12 : 0,
+                  y: isFloating ? -10 : 0,
                   scale: isFloating ? 0.75 : 1,
-                  color: error ? '#ef4444' : isFocused ? '#3b82f6' : '#94a3b8'
+                  color: error ? '#ef4444' : isFocused ? '#3b82f6' : '#64748b'
                 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute left-3.5 origin-left pointer-events-none whitespace-nowrap font-medium z-10"
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className={cn(
+                  "absolute origin-top-left pointer-events-none whitespace-nowrap z-10 font-medium",
+                  !prefixIcon ? "start-3" : "start-0"
+                )}
+                style={{ top: '50%', marginTop: '-10px' }}
               >
                 {floatingLabel}
               </motion.label>
@@ -123,21 +126,23 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               readOnly={readOnly}
               placeholder={floatingLabel && !isFocused ? '' : placeholder}
               className={cn(
-                "w-full bg-transparent outline-none border-none text-sm font-medium text-slate-900 dark:text-slate-50 placeholder:text-slate-400 dark:placeholder:text-slate-500 z-20 pt-3 pb-1",
-                !floatingLabel && "py-2"
+                "w-full bg-transparent outline-none border-none text-sm text-slate-900 dark:text-slate-50 placeholder:text-slate-400 dark:placeholder:text-slate-500 z-20",
+                "focus:ring-0 [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] dark:[&:-webkit-autofill]:shadow-[0_0_0_1000px_#0f172a_inset] [&:-webkit-autofill]:text-fill-slate-900 dark:[&:-webkit-autofill]:text-fill-slate-50",
+                floatingLabel ? "pt-5 pb-1" : "py-2.5",
+                !prefixIcon && "ps-3"
               )}
               {...props}
             />
           </div>
 
           {/* Suffix Elements */}
-          <div className="pr-3 pl-1 flex items-center justify-center gap-2">
+          <div className="pr-3 pl-2 flex items-center justify-center gap-1.5">
             {loading && <icons.Loader2 className="w-4 h-4 text-blue-500 animate-spin" />}
-            {!loading && onClear && isFilled && (
+            {!loading && onClear && isFilled && !disabled && (
               <button
                 type="button"
                 onClick={onClear}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full p-0.5"
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-full"
               >
                 <icons.X className="w-3.5 h-3.5" />
               </button>
@@ -150,37 +155,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {error && !loading && <icons.AlertCircle className="w-4 h-4 text-red-500" />}
             {success && !loading && <icons.CheckCircle2 className="w-4 h-4 text-emerald-500" />}
           </div>
-
-          {/* Animated Highlight Line */}
-          {isFocused && (
-            <motion.div
-              layoutId={`input-glow-${id}`}
-              className="absolute -bottom-px left-0 right-0 h-[2px] bg-gradient-to-r from-blue-500/0 via-blue-500 to-blue-500/0 dark:via-blue-400 z-30"
-              initial={{ opacity: 0, scaleX: 0.5 }}
-              animate={{ opacity: 1, scaleX: 1 }}
-              exit={{ opacity: 0, scaleX: 0.5 }}
-              transition={{ duration: 0.3 }}
-            />
-          )}
         </div>
 
         {/* Helper & Error Text */}
         <AnimatePresence mode="wait">
           {(errorText || helperText) && (
             <motion.div
-              initial={{ opacity: 0, y: -4, height: 0 }}
+              initial={{ opacity: 0, y: -2, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, y: -4, height: 0 }}
+              exit={{ opacity: 0, y: -2, height: 0 }}
               className="px-1"
             >
               {errorText ? (
-                <p className="text-[11px] font-semibold text-red-500 flex items-center gap-1.5">
-                  {errorText}
-                </p>
+                <p className="text-xs font-medium text-red-500">{errorText}</p>
               ) : (
-                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                  {helperText}
-                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{helperText}</p>
               )}
             </motion.div>
           )}
@@ -226,7 +215,7 @@ export const SearchInput = forwardRef<HTMLInputElement, InputProps>((props, ref)
 SearchInput.displayName = 'SearchInput';
 
 export const Textarea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: boolean; success?: boolean; floatingLabel?: string; errorText?: string; helperText?: string }>(
-  ({ className, error, success, floatingLabel, errorText, helperText, value, defaultValue, onFocus, onBlur, ...props }, ref) => {
+  ({ className, error, success, floatingLabel, errorText, helperText, value, defaultValue, onFocus, onBlur, disabled, ...props }, ref) => {
     const internalId = useId();
     const id = props.id || internalId;
     const [isFocused, setIsFocused] = useState(false);
@@ -240,27 +229,28 @@ export const Textarea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttrib
     return (
       <div className="w-full flex flex-col gap-1.5">
         <div className={cn(
-          "relative w-full transition-all duration-300 rounded-2xl border bg-white/50 dark:bg-slate-900/50 backdrop-blur-md overflow-hidden shadow-sm",
+          "relative w-full rounded-lg border bg-white dark:bg-slate-900 transition-shadow duration-200 overflow-hidden shadow-sm",
           {
-            "border-slate-200 dark:border-slate-800": !error && !success && !isFocused,
-            "border-blue-500 ring-2 ring-blue-500/20": isFocused && !error,
-            "border-red-500 ring-2 ring-red-500/20 bg-red-50/50": error,
-            "border-emerald-500 ring-2 ring-emerald-500/20": success,
+            "border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700": !error && !success && !isFocused && !disabled,
+            "border-blue-500 ring-4 ring-blue-500/15 dark:ring-blue-400/15": isFocused && !error,
+            "border-red-500 ring-4 ring-red-500/15 dark:ring-red-500/15": error,
+            "border-emerald-500 ring-4 ring-emerald-500/15 dark:ring-emerald-500/15": success,
+            "opacity-60 cursor-not-allowed bg-slate-50 dark:bg-slate-900/50": disabled,
           },
           className
         )}>
-          <div className="relative px-3.5 py-2 min-h-[80px]">
+          <div className="relative px-3 py-2 min-h-[80px]">
             {floatingLabel && (
               <motion.label
                 htmlFor={id}
                 initial={false}
                 animate={{
-                  y: isFloating ? -4 : 4,
-                  scale: isFloating ? 0.85 : 1,
-                  color: error ? '#ef4444' : isFocused ? '#3b82f6' : '#94a3b8'
+                  y: isFloating ? -2 : 12,
+                  scale: isFloating ? 0.75 : 1,
+                  color: error ? '#ef4444' : isFocused ? '#3b82f6' : '#64748b'
                 }}
-                transition={{ duration: 0.2 }}
-                className="absolute left-3.5 origin-top-left pointer-events-none font-medium z-10"
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="absolute start-3 origin-top-left pointer-events-none font-medium z-10"
               >
                 {floatingLabel}
               </motion.label>
@@ -272,27 +262,30 @@ export const Textarea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttrib
               defaultValue={defaultValue}
               onFocus={(e) => { setIsFocused(true); onFocus?.(e); }}
               onBlur={(e) => { setIsFocused(false); onBlur?.(e); }}
+              disabled={disabled}
               className={cn(
-                "w-full bg-transparent outline-none border-none text-sm font-medium text-slate-900 dark:text-slate-50 placeholder:text-slate-400 resize-y min-h-[60px] z-20",
+                "w-full bg-transparent outline-none border-none text-sm text-slate-900 dark:text-slate-50 placeholder:text-slate-400 resize-y min-h-[60px] z-20",
+                "focus:ring-0 [&:-webkit-autofill]:shadow-[0_0_0_1000px_white_inset] dark:[&:-webkit-autofill]:shadow-[0_0_0_1000px_#0f172a_inset]",
                 floatingLabel && "pt-6"
               )}
               {...props}
             />
           </div>
         </div>
+        
         {/* Helper & Error Text */}
         <AnimatePresence mode="wait">
           {(errorText || helperText) && (
             <motion.div
-              initial={{ opacity: 0, y: -4, height: 0 }}
+              initial={{ opacity: 0, y: -2, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, y: -4, height: 0 }}
+              exit={{ opacity: 0, y: -2, height: 0 }}
               className="px-1"
             >
               {errorText ? (
-                <p className="text-[11px] font-semibold text-red-500">{errorText}</p>
+                <p className="text-xs font-medium text-red-500">{errorText}</p>
               ) : (
-                <p className="text-[11px] font-medium text-slate-500">{helperText}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{helperText}</p>
               )}
             </motion.div>
           )}
