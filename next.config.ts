@@ -39,6 +39,7 @@ const ContentSecurityPolicy = [
   .trim();
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['firebase-admin'],
   // ─── Performance & Output ──────────────────────────────────────────────────
   compress: true,
   poweredByHeader: false,
