@@ -109,6 +109,7 @@ export class AppointmentOfflineService {
   ): Promise<void> {
     const queue = this.readQueue();
     if (queue.length === 0) return;
+    if (!executor) return; // Prevent clearing the queue if no executor is provided
 
     const remaining: AppointmentQueuedOperation[] = [];
 
