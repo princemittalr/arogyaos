@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { icons } from '@/design-system/icons';
 import { useLanguage } from '@/providers/LanguageProvider';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
 
 export default function LoginPage() {
   const { currentLanguage, setLanguage, t } = useLanguage();
@@ -57,7 +58,8 @@ export default function LoginPage() {
       </div>
 
       {/* Top Right Language Switcher */}
-      <div className="absolute top-6 right-6 z-10">
+      <div className="absolute top-6 right-6 z-10 flex items-center gap-3">
+        <ThemeToggle />
         <select
           value={currentLanguage.code}
           onChange={(e) => setLanguage(e.target.value)}

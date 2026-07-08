@@ -13,6 +13,7 @@ import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { cn } from '@/utils/cn';
 import { UserRole } from '@/config/roles';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
 
 interface Notification {
   id: string;
@@ -133,6 +134,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
     return (
       <Link
         href={item.href}
+        prefetch={true}
         onClick={onClick}
         className={cn(
           'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150',
@@ -374,13 +376,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
             </div>
 
             {/* Theme toggle */}
-            <button
-              onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-              aria-label={t("common.toggle_theme", "Toggle Theme")}
-              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-              
-              {!mounted ? <div className="h-4.5 w-4.5" /> : resolvedTheme === 'dark' ? <icons.Sun className="h-4.5 w-4.5 text-amber-400" aria-hidden="true" /> : <icons.Moon className="h-4.5 w-4.5 text-slate-500" aria-hidden="true" />}
-            </button>
+            <ThemeToggle />
 
             {/* Profile */}
             <div className="relative ml-1" ref={profileRef}>
@@ -439,18 +435,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
         {/* Page content */}
         <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
-              className="h-full"
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          {children}
         </main>
       </div>
 

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { icons } from '@/design-system/icons';
 import { componentStyles } from '@/design-system/components';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
 
 export default function Home() {
   const { t } = useLanguage();
@@ -90,6 +91,7 @@ export default function Home() {
         </nav>
 
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           <Link
             href="/login"
             className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors hidden sm:block"
