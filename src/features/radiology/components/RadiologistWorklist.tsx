@@ -6,6 +6,8 @@ import { RadiologyStudy } from '../types';
 import { IMAGING_TEMPLATES } from '../core/constants';
 import { Activity, Play, FileEdit, Database, Send, AlertTriangle, Eye } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { Input, Textarea } from '@/components/ui/input';
+
 
 interface RadiologistWorklistProps {
   hospitalId: string;
@@ -279,7 +281,7 @@ export function RadiologistWorklist({ hospitalId }: RadiologistWorklistProps) {
             <form onSubmit={handleCompleteScanSubmit} className="p-5 space-y-4 text-xs">
               <div className="space-y-1">
                 <label className="font-bold text-slate-650">Series Description</label>
-                <input
+                <Input
                   type="text"
                   value={seriesDescription}
                   onChange={(e) => setSeriesDescription(e.target.value)}
@@ -290,7 +292,7 @@ export function RadiologistWorklist({ hospitalId }: RadiologistWorklistProps) {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <label className="font-bold text-slate-650">Instances / Slices count</label>
-                  <input
+                  <Input
                     type="number"
                     value={instancesCount}
                     onChange={(e) => setInstancesCount(parseInt(e.target.value) || 0)}
@@ -299,7 +301,7 @@ export function RadiologistWorklist({ hospitalId }: RadiologistWorklistProps) {
                 </div>
                 <div className="space-y-1">
                   <label className="font-bold text-slate-650">Scanner Manufacturer</label>
-                  <input
+                  <Input
                     type="text"
                     value={manufacturer}
                     onChange={(e) => setManufacturer(e.target.value)}
@@ -310,7 +312,7 @@ export function RadiologistWorklist({ hospitalId }: RadiologistWorklistProps) {
 
               <div className="space-y-1">
                 <label className="font-bold text-slate-650">Accession Number</label>
-                <input
+                <Input
                   type="text"
                   value={accessionNumber}
                   onChange={(e) => setAccessionNumber(e.target.value)}
@@ -371,7 +373,7 @@ export function RadiologistWorklist({ hospitalId }: RadiologistWorklistProps) {
             <form onSubmit={handleReportSubmit} className="p-5 space-y-4.5 text-xs">
               <div className="space-y-1">
                 <label className="font-bold text-slate-650">Clinical Findings Notes</label>
-                <textarea
+                <Textarea
                   rows={4}
                   value={findings}
                   onChange={(e) => setFindings(e.target.value)}
@@ -383,7 +385,7 @@ export function RadiologistWorklist({ hospitalId }: RadiologistWorklistProps) {
 
               <div className="space-y-1">
                 <label className="font-bold text-slate-650">Diagnostic Impression Summary</label>
-                <input
+                <Input
                   type="text"
                   value={impression}
                   onChange={(e) => setImpression(e.target.value)}
@@ -404,7 +406,7 @@ export function RadiologistWorklist({ hospitalId }: RadiologistWorklistProps) {
                     Triggers global critical alert bus notifications for the referring physician.
                   </p>
                 </div>
-                <input
+                <Input
                   type="checkbox"
                   checked={isCritical}
                   onChange={(e) => setIsCritical(e.target.checked)}

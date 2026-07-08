@@ -10,6 +10,8 @@ import { cn } from '@/utils/cn';
 import { icons } from '@/design-system/icons';
 import { toast } from '@/components/ui/toast';
 import { motion } from 'framer-motion';
+import { Input } from '@/components/ui/input';
+
 
 export default function CitizenSettingsPage() {
   const { t, currentLanguage, setLanguage } = useLanguage();
@@ -113,7 +115,7 @@ export default function CitizenSettingsPage() {
           </div>
 
           <label className="relative inline-flex items-center cursor-pointer select-none">
-            <input type="checkbox" defaultChecked className="sr-only peer" />
+            <Input type="checkbox" defaultChecked className="sr-only peer" />
             <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
           </label>
         </div>
@@ -126,7 +128,7 @@ export default function CitizenSettingsPage() {
           </div>
 
           <label className="relative inline-flex items-center cursor-pointer select-none">
-            <input type="checkbox" className="sr-only peer" />
+            <Input type="checkbox" className="sr-only peer" />
             <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-blue-600"></div>
           </label>
         </div>

@@ -13,6 +13,8 @@ import { PageHeader, LoadingState } from '@/features/shared';
 import { Search, FileText, CheckCircle2, Layers } from 'lucide-react';
 import { toast } from '@/components/ui/toast';
 import { PrescriptionDocument } from '@/firebase/types';
+import { Input } from '@/components/ui/input';
+
 
 interface SelectedPrescription extends PrescriptionDocument {
   patientName: string;
@@ -128,7 +130,7 @@ export default function PharmacyDispensingPage() {const { t } = useLanguage();
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <input
+                <Input
                   type="text"
                   placeholder={t("pharmacy.enter_prescription_id_eg_pres__or_lookup_index")}
                   value={searchRxId}

@@ -13,6 +13,8 @@ import {
 import { PageHeader, LoadingState } from '@/features/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Trash2, Edit2, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
 
 const inventorySchema = zod.object({
   inventoryId: zod.string().min(2, 'Inventory ID is required'),
@@ -144,7 +146,7 @@ export default function InventoryPage() {const { t } = useLanguage();
         <div className="flex flex-col sm:flex-row w-full sm:w-auto items-center gap-3">
           <div className="relative w-full sm:max-w-xs">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-            <input
+            <Input
               type="text"
               placeholder={t("hospital.search_by_medicine_supplier")}
               value={searchTerm}
@@ -255,12 +257,12 @@ export default function InventoryPage() {const { t } = useLanguage();
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
-                <input type="hidden" {...register('inventoryId')} />
-                <input type="hidden" {...register('medicineId')} />
+                <Input type="hidden" {...register('inventoryId')} />
+                <Input type="hidden" {...register('medicineId')} />
 
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.medicine_name")}</label>
-                  <input
+                  <Input
                   type="text"
                   {...register('medicineName')}
                   className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -284,7 +286,7 @@ export default function InventoryPage() {const { t } = useLanguage();
 
                   <div>
                     <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.supplier_name")}</label>
-                    <input
+                    <Input
                     type="text"
                     {...register('supplier')}
                     className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -296,7 +298,7 @@ export default function InventoryPage() {const { t } = useLanguage();
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.current_stock_qty")}</label>
-                    <input
+                    <Input
                     type="number"
                     {...register('quantity', { valueAsNumber: true })}
                     className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -305,7 +307,7 @@ export default function InventoryPage() {const { t } = useLanguage();
 
                   <div>
                     <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.minimum_alert_threshold")}</label>
-                    <input
+                    <Input
                     type="number"
                     {...register('minimumStock', { valueAsNumber: true })}
                     className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -315,7 +317,7 @@ export default function InventoryPage() {const { t } = useLanguage();
 
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.expiry_date")}</label>
-                  <input
+                  <Input
                   type="date"
                   {...register('expiryDate')}
                   className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />

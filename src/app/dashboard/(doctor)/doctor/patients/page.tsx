@@ -6,6 +6,8 @@ import { useDoctorPatients } from '@/features/doctor/hooks/useDoctor';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { Search, Eye, User } from 'lucide-react';
 import Link from 'next/link';
+import { Input } from '@/components/ui/input';
+
 
 export default function PatientsDirectoryPage() {const { t } = useLanguage();
   const { user } = useAuth();
@@ -37,7 +39,7 @@ export default function PatientsDirectoryPage() {const { t } = useLanguage();
       <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input
+          <Input
             type="text"
             placeholder={t("doctor.search_patients_by_name_or_email")}
             value={searchTerm}

@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { PageHeader } from '@/features/shared';
 import { Search, ShieldAlert } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
 
 const medicineCatalog = [
 { id: 'med_para', name: 'Paracetamol 650mg', category: 'Analgesics', strength: '650mg', desc: 'Used for fever reduction and mild-to-moderate pain management.', warnings: 'Do not exceed 4g/day to avoid hepatic injury.' },
@@ -38,7 +40,7 @@ export default function MedicinesCatalogPage() {const { t } = useLanguage();
       <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input
+          <Input
             type="text"
             placeholder={t("pharmacy.search_catalog_by_name_or_description")}
             value={searchTerm}

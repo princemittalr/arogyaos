@@ -5,6 +5,8 @@ import { useHospitalPatients } from '@/features/hospital/hooks/useHospital';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { motion } from 'framer-motion';
 import { Search, Heart, User } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
 
 export default function PatientsDirectoryPage() {const { t } = useLanguage();
   const hospitalId = 'hosp_city_gen';
@@ -34,7 +36,7 @@ export default function PatientsDirectoryPage() {const { t } = useLanguage();
       <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-          <input
+          <Input
             type="text"
             placeholder={t("hospital.search_patients")}
             value={searchTerm}

@@ -15,6 +15,8 @@ import { InventoryItem } from '@/features/pharmacy/services/pharmacy.service';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { Search, Plus, Trash2, Edit2, X, AlertCircle } from 'lucide-react';
 import { toast } from '@/components/ui/toast';
+import { Input } from '@/components/ui/input';
+
 
 const inventorySchema = zod.object({
   medicineName: zod.string().min(3, 'Medicine name must be at least 3 letters'),
@@ -155,7 +157,7 @@ export default function PharmacyInventoryPage() {const { t } = useLanguage();
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-450 uppercase block">{t("pharmacy.medicine_name")}</label>
-              <input
+              <Input
               type="text"
               {...register('medicineName')}
               placeholder={t("pharmacy.paracetamol_650mg")}
@@ -180,7 +182,7 @@ export default function PharmacyInventoryPage() {const { t } = useLanguage();
 
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-450 uppercase block">{t("pharmacy.batch_number")}</label>
-              <input
+              <Input
               type="text"
               {...register('batchNumber')}
               placeholder={t("pharmacy.prc_998")}
@@ -193,7 +195,7 @@ export default function PharmacyInventoryPage() {const { t } = useLanguage();
           <div className="grid gap-4 md:grid-cols-4">
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-450 uppercase block">{t("pharmacy.initial_stock_qty")}</label>
-              <input
+              <Input
               type="number"
               {...register('quantity', { valueAsNumber: true })}
               className="w-full rounded-xl border border-slate-200 bg-transparent px-3 py-2 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none" />
@@ -203,7 +205,7 @@ export default function PharmacyInventoryPage() {const { t } = useLanguage();
 
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-450 uppercase block">{t("pharmacy.min_alert_limit")}</label>
-              <input
+              <Input
               type="number"
               {...register('minimumStock', { valueAsNumber: true })}
               className="w-full rounded-xl border border-slate-200 bg-transparent px-3 py-2 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none" />
@@ -213,7 +215,7 @@ export default function PharmacyInventoryPage() {const { t } = useLanguage();
 
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-450 uppercase block">{t("pharmacy.expiry_date")}</label>
-              <input
+              <Input
               type="date"
               {...register('expiryDate')}
               className="w-full rounded-xl border border-slate-200 bg-transparent px-3 py-2 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none" />
@@ -223,7 +225,7 @@ export default function PharmacyInventoryPage() {const { t } = useLanguage();
 
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-450 uppercase block">{t("pharmacy.supplier")}</label>
-              <input
+              <Input
               type="text"
               {...register('supplier')}
               placeholder={t("pharmacy.astra_biotech")}
@@ -249,7 +251,7 @@ export default function PharmacyInventoryPage() {const { t } = useLanguage();
       <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input
+          <Input
             type="text"
             placeholder={t("pharmacy.search_stock_by_formula_name_or_batch")}
             value={searchTerm}

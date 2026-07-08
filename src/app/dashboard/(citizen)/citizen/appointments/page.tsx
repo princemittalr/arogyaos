@@ -12,6 +12,8 @@ import { componentStyles } from '@/design-system/components';
 import { cn } from '@/utils/cn';
 import { icons } from '@/design-system/icons';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Input } from '@/components/ui/input';
+
 
 export default function CitizenAppointmentsPage() {const { t } = useLanguage();
   const { user } = useAuth();
@@ -203,7 +205,7 @@ export default function CitizenAppointmentsPage() {const { t } = useLanguage();
               <form onSubmit={handleRescheduleSubmit} className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-slate-500">{t("citizen.pick_new_date")}</label>
-                  <input
+                  <Input
                   type="date"
                   min={new Date().toISOString().split('T')[0]}
                   value={rescheduleDate}

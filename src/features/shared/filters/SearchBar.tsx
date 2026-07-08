@@ -5,6 +5,8 @@ import { cn } from '@/utils/cn';
 import { icons } from '@/design-system/icons';
 import { componentStyles } from '@/design-system/components';
 import { useLanguage } from '@/providers/LanguageProvider';
+import { Input } from '@/components/ui/input';
+
 
 interface SearchBarProps {
   value: string;
@@ -21,7 +23,7 @@ export function SearchBar({ value, onChange, placeholder = 'Search data director
   return (
     <div className={cn('relative w-full max-w-sm', className)}>
       <SearchIcon className="absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-500" aria-hidden="true" />
-      <input
+      <Input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}

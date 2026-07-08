@@ -3,6 +3,8 @@ import { FileText, FolderPlus, Tag as TagIcon, Eye, Download } from 'lucide-reac
 import { TimelineIndexEntry } from '@/features/health-vault/types';
 import { Tag } from '../types';
 import { cn } from '@/utils/cn';
+import { Input } from '@/components/ui/input';
+
 
 interface DocumentRowProps {
   record: TimelineIndexEntry;
@@ -49,7 +51,7 @@ export const DocumentRow: React.FC<DocumentRowProps> = ({
     >
       {/* Checkbox */}
       <td className="py-4 pl-4 w-12 align-middle">
-        <input
+        <Input
           type="checkbox"
           checked={isSelected}
           onChange={onToggleSelect}

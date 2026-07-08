@@ -11,6 +11,8 @@ import { icons } from '@/design-system/icons';
 import { motion } from 'framer-motion';
 import { useScheduleVisit, useEmergencyReferral } from '@/features/community-health/hooks';
 import { toast } from '@/components/ui/toast';
+import { Input } from '@/components/ui/input';
+
 
 export default function AshaWorkerDashboard() {
   const { t } = useLanguage();
@@ -132,7 +134,7 @@ export default function AshaWorkerDashboard() {
             <h3 className="text-lg font-bold">Schedule Household Visit</h3>
             <div>
               <label className="text-xs font-bold text-slate-500 uppercase">Household ID</label>
-              <input 
+              <Input 
                 type="text"
                 value={householdId}
                 onChange={(e) => setHouseholdId(e.target.value)}

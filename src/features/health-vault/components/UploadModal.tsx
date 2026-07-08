@@ -7,6 +7,8 @@ import { UploadService } from '../services/UploadService';
 import { VaultSource } from '../core/constants';
 import { cn } from '@/utils/cn';
 import { toast } from '@/components/ui/toast';
+import { Input } from '@/components/ui/input';
+
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -234,7 +236,7 @@ export function UploadModal({ isOpen, onClose, patientId, onUploadSuccess }: Upl
               <label htmlFor="record-title" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
                 Record Title
               </label>
-              <input
+              <Input
                 id="record-title"
                 type="text"
                 value={title}
@@ -252,7 +254,7 @@ export function UploadModal({ isOpen, onClose, patientId, onUploadSuccess }: Upl
               <label htmlFor="record-doctor" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
                 Prescribing Doctor
               </label>
-              <input
+              <Input
                 id="record-doctor"
                 type="text"
                 value={doctorName}
@@ -266,7 +268,7 @@ export function UploadModal({ isOpen, onClose, patientId, onUploadSuccess }: Upl
               <label htmlFor="record-hospital" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
                 Hospital / Clinic
               </label>
-              <input
+              <Input
                 id="record-hospital"
                 type="text"
                 value={hospitalName}
@@ -283,7 +285,7 @@ export function UploadModal({ isOpen, onClose, patientId, onUploadSuccess }: Upl
             <label htmlFor="record-date" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">
               Date of Encounter
             </label>
-            <input
+            <Input
               id="record-date"
               type="date"
               value={encounterDate}
@@ -305,7 +307,7 @@ export function UploadModal({ isOpen, onClose, patientId, onUploadSuccess }: Upl
                 : 'border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-500'
             )}
           >
-            <input
+            <Input
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}

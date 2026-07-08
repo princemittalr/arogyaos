@@ -13,6 +13,8 @@ import {
 import { PageHeader, LoadingState } from '@/features/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Trash2, Edit2, X, BadgeCheck } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
 
 const staffSchema = zod.object({
   staffId: zod.string().min(2, 'Staff ID must be at least 2 characters'),
@@ -119,7 +121,7 @@ export default function HospitalStaffPage() {const { t } = useLanguage();
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-          <input
+          <Input
             type="text"
             placeholder={t("hospital.search_staff_by_name_or_role")}
             value={searchTerm}
@@ -166,7 +168,7 @@ export default function HospitalStaffPage() {const { t } = useLanguage();
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.staff_id")}</label>
-                  <input
+                  <Input
                   type="text"
                   disabled={!!editingStaff}
                   {...register('staffId')}
@@ -177,7 +179,7 @@ export default function HospitalStaffPage() {const { t } = useLanguage();
 
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.full_name")}</label>
-                  <input
+                  <Input
                   type="text"
                   {...register('fullName')}
                   className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -187,7 +189,7 @@ export default function HospitalStaffPage() {const { t } = useLanguage();
 
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.email_address")}</label>
-                  <input
+                  <Input
                   type="email"
                   {...register('email')}
                   className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />

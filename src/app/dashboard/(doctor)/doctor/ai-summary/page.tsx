@@ -16,6 +16,8 @@ import {
   Copy } from
 'lucide-react';
 import { toast } from '@/components/ui/toast';
+import { Textarea } from '@/components/ui/input';
+
 
 const SAMPLE_NOTES = `Patient: Male, 34 years. C/O fever since 3 days, dry cough, mild sore throat. No breathlessness. O/E: Temp 101.2F, BP 110/70, SpO2 98%. Throat hyperemic. Chest clear.`;
 
@@ -71,7 +73,7 @@ export default function DoctorAISummaryPage() {const { t } = useLanguage();
               </button>
             </div>
 
-            <textarea
+            <Textarea
               value={clinicalNotes}
               onChange={(e) => setClinicalNotes(e.target.value)}
               placeholder={t("doctor.enter_clinical_notes_symptoms_vitals_observations")}

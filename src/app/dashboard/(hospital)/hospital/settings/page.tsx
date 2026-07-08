@@ -11,6 +11,8 @@ import {
 import { PageHeader, LoadingState } from '@/features/shared';
 import { Save, ShieldAlert, Landmark } from 'lucide-react';
 import { toast } from '@/components/ui/toast';
+import { Input } from '@/components/ui/input';
+
 
 const settingsSchema = zod.object({
   hospitalName: zod.string().min(2, 'Name must be at least 2 characters'),
@@ -83,7 +85,7 @@ export default function HospitalSettingsPage() {const { t } = useLanguage();
 
           <div>
             <label className="block text-slate-700 dark:text-slate-350 mb-1">{t("hospital.hospital_name")}</label>
-            <input
+            <Input
               type="text"
               {...register('hospitalName')}
               className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -93,7 +95,7 @@ export default function HospitalSettingsPage() {const { t } = useLanguage();
 
           <div>
             <label className="block text-slate-700 dark:text-slate-350 mb-1">{t("hospital.street_address")}</label>
-            <input
+            <Input
               type="text"
               {...register('address')}
               className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -104,7 +106,7 @@ export default function HospitalSettingsPage() {const { t } = useLanguage();
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-slate-700 dark:text-slate-350 mb-1">{t("hospital.phone_number")}</label>
-              <input
+              <Input
                 type="text"
                 {...register('phone')}
                 className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -114,7 +116,7 @@ export default function HospitalSettingsPage() {const { t } = useLanguage();
 
             <div>
               <label className="block text-slate-700 dark:text-slate-350 mb-1">{t("hospital.admin_email_address")}</label>
-              <input
+              <Input
                 type="email"
                 {...register('email')}
                 className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -134,7 +136,7 @@ export default function HospitalSettingsPage() {const { t } = useLanguage();
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-slate-700 dark:text-slate-350 mb-1">{t("hospital.icu_alarm_threshold")}</label>
-              <input
+              <Input
                 type="number"
                 {...register('emergencyThreshold', { valueAsNumber: true })}
                 className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -144,7 +146,7 @@ export default function HospitalSettingsPage() {const { t } = useLanguage();
 
             <div>
               <label className="block text-slate-700 dark:text-slate-350 mb-1">{t("hospital.general_ward_alarm_threshold")}</label>
-              <input
+              <Input
                 type="number"
                 {...register('generalThreshold', { valueAsNumber: true })}
                 className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />

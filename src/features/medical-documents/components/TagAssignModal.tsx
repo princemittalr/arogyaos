@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Plus, Check } from 'lucide-react';
 import { Tag } from '../types';
+import { Input } from '@/components/ui/input';
+
 
 interface TagAssignModalProps {
   isOpen: boolean;
@@ -213,7 +215,7 @@ export const TagAssignModal: React.FC<TagAssignModalProps> = ({
                   <label htmlFor="new-tag-name" className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                     New Tag Name
                   </label>
-                  <input
+                  <Input
                     id="new-tag-name"
                     type="text"
                     value={newTagName}

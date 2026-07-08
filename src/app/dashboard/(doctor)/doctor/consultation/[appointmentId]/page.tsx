@@ -21,6 +21,8 @@ import {
   ArrowLeft } from
 'lucide-react';
 import Link from 'next/link';
+import { Input, Textarea } from '@/components/ui/input';
+
 
 interface ConsultationPageProps {
   params: Promise<{appointmentId: string;}>;
@@ -209,7 +211,7 @@ export default function ConsultationPage({ params }: ConsultationPageProps) {con
             {/* Symptoms */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-500">{t("doctor.chief_symptoms")}</label>
-              <textarea
+              <Textarea
                 {...register('symptoms')}
                 rows={3}
                 placeholder={t("doctor.describe_current_medical_complaints")}
@@ -223,7 +225,7 @@ export default function ConsultationPage({ params }: ConsultationPageProps) {con
             {/* Diagnosis */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-500">{t("doctor.clinical_diagnosis")}</label>
-              <textarea
+              <Textarea
                 {...register('diagnosis')}
                 rows={2}
                 placeholder={t("doctor.identify_suspected_illness_or_pathology")}
@@ -237,7 +239,7 @@ export default function ConsultationPage({ params }: ConsultationPageProps) {con
             {/* Clinical Notes */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-500">{t("doctor.clinical_action_notes")}</label>
-              <textarea
+              <Textarea
                 {...register('clinicalNotes')}
                 rows={3}
                 placeholder={t("doctor.lifestyle_recommendations_warning_flags_or_dosage_rationale")}
@@ -283,7 +285,7 @@ export default function ConsultationPage({ params }: ConsultationPageProps) {con
 
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-slate-400">{t("doctor.dosage_pattern")}</label>
-                  <input
+                  <Input
                   type="text"
                   {...register(`medicines.${idx}.dosage` as const)}
                   placeholder="1-0-1"
@@ -293,7 +295,7 @@ export default function ConsultationPage({ params }: ConsultationPageProps) {con
 
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-slate-400">{t("doctor.duration_days")}</label>
-                  <input
+                  <Input
                   type="number"
                   {...register(`medicines.${idx}.duration` as const, { valueAsNumber: true })}
                   className="w-full rounded-lg border border-slate-200 bg-transparent px-2.5 py-1.5 text-[10px] font-bold text-slate-700 dark:border-slate-800 dark:text-slate-350 focus:outline-none" />
@@ -366,7 +368,7 @@ export default function ConsultationPage({ params }: ConsultationPageProps) {con
             <div className="space-y-2.5">
               {['Electrocardiogram (ECG)', 'Complete Blood Count (CBC)', 'Lipid Profile', 'Thyroid Profile (T3 T4 TSH)'].map((test) =>
               <label key={test} className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  <input
+                  <Input
                   type="checkbox"
                   value={test}
                   {...register('labTests')}
@@ -383,7 +385,7 @@ export default function ConsultationPage({ params }: ConsultationPageProps) {con
             <h4 className="font-extrabold text-xs text-slate-900 dark:text-slate-50 uppercase tracking-wider">{t("doctor.follow_up_scheduling")}</h4>
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-400 block uppercase">{t("doctor.re_visit_date")}</label>
-              <input
+              <Input
                 type="date"
                 min={new Date().toISOString().split('T')[0]}
                 {...register('followUpDate')}

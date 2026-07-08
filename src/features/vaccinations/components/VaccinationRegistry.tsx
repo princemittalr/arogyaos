@@ -15,6 +15,8 @@ import { useUpcomingVaccines } from '../hooks/useUpcomingVaccines';
 import { useVaccinationCertificates } from '../hooks/useVaccinationCertificates';
 import { useVaccinationTimeline } from '../hooks/useVaccinationTimeline';
 import { useBoosterTracker } from '../hooks/useBoosterTracker';
+import { Input } from '@/components/ui/input';
+
 
 interface VaccinationRegistryProps {
   patientId: string;
@@ -167,7 +169,7 @@ export function VaccinationRegistry({ patientId, patientName }: VaccinationRegis
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-              <input
+              <Input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

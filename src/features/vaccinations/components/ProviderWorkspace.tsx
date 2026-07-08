@@ -8,6 +8,8 @@ import { VACCINE_DEFINITIONS, VACCINE_CATEGORIES } from '../core/constants';
 import { VaccineDetailDrawer } from './VaccineDetailDrawer';
 import { useVaccinations } from '../hooks/useVaccinations';
 import { useUpcomingVaccines } from '../hooks/useUpcomingVaccines';
+import { Input, Textarea } from '@/components/ui/input';
+
 
 interface ProviderWorkspaceProps {
   hospitalId: string;
@@ -139,7 +141,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
       <div className="flex gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-          <input
+          <Input
             type="text"
             value={searchPatientId}
             onChange={(e) => setSearchPatientId(e.target.value)}
@@ -213,7 +215,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">Patient ID *</label>
-                <input
+                <Input
                   type="text"
                   value={form.patientId}
                   onChange={(e) => setForm({ ...form, patientId: e.target.value })}
@@ -224,7 +226,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">Patient Name *</label>
-                <input
+                <Input
                   type="text"
                   value={form.patientName}
                   onChange={(e) => setForm({ ...form, patientName: e.target.value })}
@@ -239,7 +241,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">Vaccine Name *</label>
-                <input
+                <Input
                   type="text"
                   value={form.vaccineName}
                   onChange={(e) => setForm({ ...form, vaccineName: e.target.value })}
@@ -249,7 +251,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">Disease Targeted *</label>
-                <input
+                <Input
                   type="text"
                   value={form.diseaseTargeted}
                   onChange={(e) => setForm({ ...form, diseaseTargeted: e.target.value })}
@@ -275,7 +277,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">Dose Number *</label>
-                <input
+                <Input
                   type="number"
                   min={1}
                   value={form.doseNumber}
@@ -286,7 +288,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">Total Doses *</label>
-                <input
+                <Input
                   type="number"
                   min={1}
                   value={form.totalDoses}
@@ -301,7 +303,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">Batch Number</label>
-                <input
+                <Input
                   type="text"
                   value={form.batchNumber}
                   onChange={(e) => setForm({ ...form, batchNumber: e.target.value })}
@@ -311,7 +313,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">Lot Number</label>
-                <input
+                <Input
                   type="text"
                   value={form.lotNumber}
                   onChange={(e) => setForm({ ...form, lotNumber: e.target.value })}
@@ -321,7 +323,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">Manufacturer</label>
-                <input
+                <Input
                   type="text"
                   value={form.manufacturer}
                   onChange={(e) => setForm({ ...form, manufacturer: e.target.value })}
@@ -335,7 +337,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">Administered By (Provider)</label>
-                <input
+                <Input
                   type="text"
                   value={form.administeredBy}
                   onChange={(e) => setForm({ ...form, administeredBy: e.target.value })}
@@ -345,7 +347,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">Next Dose Due (Days from Today)</label>
-                <input
+                <Input
                   type="number"
                   min={1}
                   value={form.nextDueDays}
@@ -359,7 +361,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
             {/* Clinical Notes */}
             <div className="space-y-1">
               <label className="text-xs font-semibold text-slate-500">Clinical Notes (Optional)</label>
-              <textarea
+              <Textarea
                 value={form.notes}
                 onChange={(e) => setForm({ ...form, notes: e.target.value })}
                 rows={2}
@@ -415,7 +417,7 @@ export function ProviderWorkspace({ hospitalName }: ProviderWorkspaceProps) {
                       <>
                         {verifyingId === vac.vaccinationId ? (
                           <div className="flex items-center gap-2">
-                            <input
+                            <Input
                               type="text"
                               value={verifierName}
                               onChange={(e) => setVerifierName(e.target.value)}

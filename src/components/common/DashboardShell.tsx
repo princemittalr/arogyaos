@@ -14,6 +14,8 @@ import { toast } from '@/components/ui/toast';
 import { cn } from '@/utils/cn';
 import { UserRole } from '@/config/roles';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
+import { Input } from '@/components/ui/input';
+
 
 interface Notification {
   id: string;
@@ -457,7 +459,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
             
               <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-100 dark:border-slate-800">
                 <icons.Search className="h-4 w-4 text-slate-400 flex-shrink-0" />
-                <input
+                <Input
                 autoFocus
                 type="text"
                 placeholder={t('common.search_placeholder', 'Search or jump to...')}

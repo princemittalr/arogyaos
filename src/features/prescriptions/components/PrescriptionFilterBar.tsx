@@ -4,6 +4,8 @@ import React from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { PRESCRIPTION_STATUSES } from '../core/constants';
 import { PrescriptionStatus } from '../types';
+import { Input } from '@/components/ui/input';
+
 
 interface PrescriptionFilterBarProps {
   searchQuery: string;
@@ -33,7 +35,7 @@ export function PrescriptionFilterBar({
         <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
           <Search className="h-4.5 w-4.5" />
         </span>
-        <input
+        <Input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

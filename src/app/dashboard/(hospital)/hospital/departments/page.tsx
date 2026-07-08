@@ -12,6 +12,8 @@ import {
 import { PageHeader, LoadingState } from '@/features/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Building, Plus, Trash2, Search, Edit2, X } from 'lucide-react';
+import { Input, Textarea } from '@/components/ui/input';
+
 
 const deptSchema = zod.object({
   departmentId: zod.string().min(2, 'Department ID must be at least 2 characters'),
@@ -108,7 +110,7 @@ export default function DepartmentsPage() {const { t } = useLanguage();
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-          <input
+          <Input
             type="text"
             placeholder={t("hospital.search_branches")}
             value={searchTerm}
@@ -154,7 +156,7 @@ export default function DepartmentsPage() {const { t } = useLanguage();
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.branch_id")}</label>
-                  <input
+                  <Input
                   type="text"
                   disabled={!!editingDept}
                   {...register('departmentId')}
@@ -165,7 +167,7 @@ export default function DepartmentsPage() {const { t } = useLanguage();
 
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.department_name")}</label>
-                  <input
+                  <Input
                   type="text"
                   {...register('departmentName')}
                   className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -175,7 +177,7 @@ export default function DepartmentsPage() {const { t } = useLanguage();
 
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.brief_description")}</label>
-                  <textarea
+                  <Textarea
                   rows={3}
                   {...register('description')}
                   className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -186,7 +188,7 @@ export default function DepartmentsPage() {const { t } = useLanguage();
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.doctor_quota")}</label>
-                    <input
+                    <Input
                     type="number"
                     {...register('doctorCount', { valueAsNumber: true })}
                     className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -194,7 +196,7 @@ export default function DepartmentsPage() {const { t } = useLanguage();
                   </div>
                   <div>
                     <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.patient_capacity")}</label>
-                    <input
+                    <Input
                     type="number"
                     {...register('patientCount', { valueAsNumber: true })}
                     className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />

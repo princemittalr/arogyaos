@@ -12,6 +12,8 @@ import {
 import { PageHeader, LoadingState } from '@/features/shared';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Edit2, X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
 
 const testSchema = zod.object({
   testId: zod.string().min(2, 'Test ID must be at least 2 characters'),
@@ -208,7 +210,7 @@ export default function LaboratoryOverviewPage() {const { t } = useLanguage();
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 text-xs">
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.test_code")}</label>
-                  <input
+                  <Input
                   type="text"
                   disabled={!!editingTest}
                   {...register('testId')}
@@ -218,7 +220,7 @@ export default function LaboratoryOverviewPage() {const { t } = useLanguage();
 
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.test_name")}</label>
-                  <input
+                  <Input
                   type="text"
                   {...register('testName')}
                   className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -242,7 +244,7 @@ export default function LaboratoryOverviewPage() {const { t } = useLanguage();
 
                   <div>
                     <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.pricing")}</label>
-                    <input
+                    <Input
                     type="number"
                     {...register('cost', { valueAsNumber: true })}
                     className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />

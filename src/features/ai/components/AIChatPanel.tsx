@@ -1,6 +1,8 @@
 import { useLanguage } from "@/providers/LanguageProvider";import React, { useState } from 'react';
 import { Send, Sparkles, MessageCircle, AlertTriangle, Info, CheckCircle, ShieldAlert } from 'lucide-react';
 import { toast } from '@/components/ui/toast';
+import { Input } from '@/components/ui/input';
+
 
 interface Message {
   role: 'user' | 'assistant';
@@ -167,7 +169,7 @@ export function AIChatPanel() {const { t } = useLanguage();
 
       {/* Input row */}
       <form onSubmit={handleSend} className="p-3 border-t border-slate-150 dark:border-slate-850 bg-slate-50 dark:bg-slate-950 flex gap-2">
-        <input
+        <Input
           type="text"
           placeholder={t("common.ask_about_capacities_shortages_or_summaries")}
           value={inputValue}

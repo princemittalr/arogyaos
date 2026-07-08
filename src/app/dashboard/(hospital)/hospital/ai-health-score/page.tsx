@@ -5,6 +5,8 @@ import { PageHeader } from '@/features/shared';
 import { useHealthScore } from '@/features/ai/hooks/useAI';
 import type { HealthScoreInput } from '@/features/ai/services/healthScore.service';
 import { Sparkles, ShieldCheck, ShieldAlert, ShieldX, Activity, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
 
 const defaultInput: HealthScoreInput = {
   bedOccupancyPercent: 78,
@@ -89,7 +91,7 @@ export default function HospitalAIHealthScorePage() {const { t } = useLanguage()
                   <span className="font-semibold text-slate-500">{label}</span>
                   <span className="font-extrabold text-slate-900 dark:text-slate-50">{input[key]}</span>
                 </div>
-                <input
+                <Input
                 type="range"
                 min={min}
                 max={max}

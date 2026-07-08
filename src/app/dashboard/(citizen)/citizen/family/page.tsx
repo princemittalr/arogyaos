@@ -16,6 +16,8 @@ import { cn } from '@/utils/cn';
 import { icons } from '@/design-system/icons';
 import { motion } from 'framer-motion';
 import { Plus, Trash2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
 
 const memberSchema = zod.object({
   fullName: zod.string().min(2, 'Name must be at least 2 characters.'),
@@ -105,7 +107,7 @@ export default function CitizenFamilyPage() {const { t } = useLanguage();
               {/* Full Name */}
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">{t("citizen.full_name")}</label>
-                <input
+                <Input
                 type="text"
                 placeholder={t("citizen.eg_rahul_sharma")}
                 {...register('fullName')}
@@ -134,7 +136,7 @@ export default function CitizenFamilyPage() {const { t } = useLanguage();
               {/* Age */}
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-500">{t("citizen.age")}</label>
-                <input
+                <Input
                 type="number"
                 {...register('age', { valueAsNumber: true })}
                 className={cn(componentStyles.input.base, errors.age ? 'border-red-500' : '')} />

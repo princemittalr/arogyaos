@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { X, RefreshCw, ShieldCheck } from 'lucide-react';
 import { useRefillTracker } from '../hooks/useRefillTracker';
 import { PrescriptionRecord } from '../types';
+import { Textarea } from '@/components/ui/input';
+
 
 interface RefillRequestModalProps {
   prescription: PrescriptionRecord;
@@ -112,7 +114,7 @@ export function RefillRequestModal({
             <label className="text-xs font-extrabold text-slate-500 uppercase tracking-wider">
               Notes to Pharmacist (Optional)
             </label>
-            <textarea
+            <Textarea
               rows={3}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}

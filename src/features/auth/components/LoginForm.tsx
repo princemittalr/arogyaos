@@ -12,6 +12,8 @@ import { useAuthActions } from '../hooks/useAuthActions';
 import { icons } from '@/design-system/icons';
 import { componentStyles } from '@/design-system/components';
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
 
 export function LoginForm() {
   const { t } = useLanguage();
@@ -94,7 +96,7 @@ export function LoginForm() {
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
                 <Mail className="h-4.5 w-4.5 text-slate-450 dark:text-slate-500" />
               </div>
-              <input
+              <Input
                 id="email"
                 type="email"
                 disabled={isLoading}
@@ -126,7 +128,7 @@ export function LoginForm() {
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
                 <Lock className="h-4.5 w-4.5 text-slate-450 dark:text-slate-500" />
               </div>
-              <input
+              <Input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 disabled={isLoading}

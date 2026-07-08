@@ -4,6 +4,8 @@ import React from 'react';
 import { PageHeader } from '@/features/shared';
 import { Bell, Volume2 } from 'lucide-react';
 import { toast } from '@/components/ui/toast';
+import { Input } from '@/components/ui/input';
+
 
 export default function DoctorSettingsPage() {const { t } = useLanguage();
   const handleSavePreferences = (e: React.FormEvent) => {
@@ -26,11 +28,11 @@ export default function DoctorSettingsPage() {const { t } = useLanguage();
           </h3>
           <div className="space-y-3">
             <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
-              <input type="checkbox" defaultChecked className="rounded border-slate-200 text-blue-600 focus:ring-blue-500" />
+              <Input type="checkbox" defaultChecked className="rounded border-slate-200 text-blue-600 focus:ring-blue-500" />
               <span>{t("doctor.auto_fill_clinical_notes_from_audio_recordings")}</span>
             </label>
             <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
-              <input type="checkbox" defaultChecked className="rounded border-slate-200 text-blue-600 focus:ring-blue-500" />
+              <Input type="checkbox" defaultChecked className="rounded border-slate-200 text-blue-600 focus:ring-blue-500" />
               <span>{t("doctor.enable_gemini_prescribing_alerts_for_drug_allergy_interactions")}</span>
             </label>
           </div>
@@ -43,11 +45,11 @@ export default function DoctorSettingsPage() {const { t } = useLanguage();
           </h3>
           <div className="space-y-3">
             <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
-              <input type="checkbox" defaultChecked className="rounded border-slate-200 text-blue-600 focus:ring-blue-500" />
+              <Input type="checkbox" defaultChecked className="rounded border-slate-200 text-blue-600 focus:ring-blue-500" />
               <span>{t("doctor.notify_when_critical_patient_checked_in")}</span>
             </label>
             <label className="flex items-center gap-2.5 text-xs font-semibold text-slate-700 dark:text-slate-300">
-              <input type="checkbox" className="rounded border-slate-200 text-blue-600 focus:ring-blue-500" />
+              <Input type="checkbox" className="rounded border-slate-200 text-blue-600 focus:ring-blue-500" />
               <span>{t("doctor.daily_summary_email_of_tomorrows_appointments_queue")}</span>
             </label>
           </div>

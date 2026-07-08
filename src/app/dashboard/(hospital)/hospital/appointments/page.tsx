@@ -14,6 +14,8 @@ import { PageHeader, LoadingState } from '@/features/shared';
 import { AppointmentDocument } from '@/firebase/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Edit, CheckCircle, XCircle, Search, X } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+
 
 const rescheduleSchema = zod.object({
   appointmentId: zod.string(),
@@ -122,7 +124,7 @@ export default function HospitalAppointmentsPage() {const { t } = useLanguage();
       <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-2xl border border-slate-200 dark:bg-slate-900 dark:border-slate-800">
         <div className="relative w-full sm:max-w-xs">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-          <input
+          <Input
             type="text"
             placeholder={t("hospital.search_by_doctor_name_or_token")}
             value={searchTerm}
@@ -229,11 +231,11 @@ export default function HospitalAppointmentsPage() {const { t } = useLanguage();
               </div>
 
               <form onSubmit={handleSubmit(handleRescheduleSubmit)} className="space-y-4 text-xs">
-                <input type="hidden" {...register('appointmentId')} />
+                <Input type="hidden" {...register('appointmentId')} />
 
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.new_date")}</label>
-                  <input
+                  <Input
                   type="date"
                   {...register('appointmentDate')}
                   className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />
@@ -243,7 +245,7 @@ export default function HospitalAppointmentsPage() {const { t } = useLanguage();
 
                 <div>
                   <label className="block font-bold text-slate-700 dark:text-slate-350 mb-1">{t("hospital.new_time")}</label>
-                  <input
+                  <Input
                   type="time"
                   {...register('appointmentTime')}
                   className="w-full border border-slate-200 bg-transparent rounded-xl px-3.5 py-2.5 text-slate-800 dark:border-slate-800 dark:text-slate-100" />

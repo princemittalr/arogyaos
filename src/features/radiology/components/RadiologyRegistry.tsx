@@ -5,6 +5,8 @@ import { RadiologyStudy } from '../types';
 import { StudyDetailDrawer } from './StudyDetailDrawer';
 import { Search, AlertCircle, FileText, ChevronRight, Grid, Calendar, Database } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { Input } from '@/components/ui/input';
+
 
 interface RadiologyRegistryProps {
   studies: RadiologyStudy[];
@@ -111,7 +113,7 @@ export function RadiologyRegistry({
             {/* Search Input */}
             <div className="relative w-full md:max-w-xs">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
+              <Input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -187,7 +189,7 @@ export function RadiologyRegistry({
                             handleToggleComparison(study.studyInstanceUid);
                           }}
                         >
-                          <input
+                          <Input
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => {}}

@@ -9,6 +9,8 @@ import { useDoctorProfile, useUpdateDoctorProfileMutation } from '@/features/doc
 import { PageHeader, LoadingState } from '@/features/shared';
 import { Save } from 'lucide-react';
 import { toast } from '@/components/ui/toast';
+import { Input } from '@/components/ui/input';
+
 
 const profileSchema = zod.object({
   fullName: zod.string().min(3, 'Full name is required'),
@@ -97,7 +99,7 @@ export default function DoctorProfilePage() {const { t } = useLanguage();
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-400 block uppercase">{t("doctor.full_name")}</label>
-                <input
+                <Input
                   type="text"
                   {...register('fullName')}
                   className="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none" />
@@ -109,7 +111,7 @@ export default function DoctorProfilePage() {const { t } = useLanguage();
 
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-400 block uppercase">{t("doctor.specialization")}</label>
-                <input
+                <Input
                   type="text"
                   {...register('specialization')}
                   className="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none" />
@@ -123,7 +125,7 @@ export default function DoctorProfilePage() {const { t } = useLanguage();
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-400 block uppercase">{t("doctor.qualifications")}</label>
-                <input
+                <Input
                   type="text"
                   {...register('qualification')}
                   placeholder={t("doctor.mbbs_md")}
@@ -136,7 +138,7 @@ export default function DoctorProfilePage() {const { t } = useLanguage();
 
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-400 block uppercase">{t("doctor.consultation_fee")}</label>
-                <input
+                <Input
                   type="number"
                   {...register('consultationFee', { valueAsNumber: true })}
                   className="w-full rounded-xl border border-slate-200 bg-transparent px-3.5 py-2.5 text-xs text-slate-800 dark:border-slate-800 dark:text-slate-100 focus:outline-none" />

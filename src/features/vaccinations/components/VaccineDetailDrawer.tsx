@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { X, Calendar, ShieldAlert, AlertCircle, Clock } from 'lucide-react';
 import { Vaccination } from '../types';
+import { Input, Textarea } from '@/components/ui/input';
+
 
 interface VaccineDetailDrawerProps {
   vaccination: Vaccination;
@@ -207,7 +209,7 @@ export function VaccineDetailDrawer({
 
                     <div className="space-y-1">
                       <label className="text-xs text-slate-400 font-medium">Describe Symptoms</label>
-                      <textarea
+                      <Textarea
                         value={symptoms}
                         onChange={(e) => setSymptoms(e.target.value)}
                         placeholder="e.g. High fever, swelling at injection site, rash"
@@ -232,7 +234,7 @@ export function VaccineDetailDrawer({
                       </div>
                       <div className="space-y-1">
                         <label className="text-xs text-slate-400 font-medium">Reporter Name</label>
-                        <input
+                        <Input
                           type="text"
                           value={reporterName}
                           onChange={(e) => setReporterName(e.target.value)}
@@ -245,7 +247,7 @@ export function VaccineDetailDrawer({
 
                     <div className="space-y-1">
                       <label className="text-xs text-slate-400 font-medium">Medical Intervention / Action Taken (Optional)</label>
-                      <input
+                      <Input
                         type="text"
                         value={actionTaken}
                         onChange={(e) => setActionTaken(e.target.value)}

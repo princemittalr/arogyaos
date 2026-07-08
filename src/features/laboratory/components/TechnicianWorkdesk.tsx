@@ -13,6 +13,8 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { Input } from '@/components/ui/input';
+
 
 interface TechnicianWorkdeskProps {
   hospitalId: string;
@@ -289,7 +291,7 @@ export function TechnicianWorkdesk({ hospitalId }: TechnicianWorkdeskProps) {
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                         Parameter
                       </label>
-                      <input
+                      <Input
                         type="text"
                         value={obs.parameter}
                         onChange={(e) => {
@@ -307,7 +309,7 @@ export function TechnicianWorkdesk({ hospitalId }: TechnicianWorkdeskProps) {
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                         Observed Value
                       </label>
-                      <input
+                      <Input
                         type="text"
                         value={obs.value}
                         onChange={(e) => handleValueChange(index, e.target.value)}
@@ -321,7 +323,7 @@ export function TechnicianWorkdesk({ hospitalId }: TechnicianWorkdeskProps) {
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                         Unit
                       </label>
-                      <input
+                      <Input
                         type="text"
                         value={obs.unit}
                         onChange={(e) => {
@@ -339,7 +341,7 @@ export function TechnicianWorkdesk({ hospitalId }: TechnicianWorkdeskProps) {
                       <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
                         Reference Range
                       </label>
-                      <input
+                      <Input
                         type="text"
                         value={obs.referenceRange}
                         onChange={(e) => {

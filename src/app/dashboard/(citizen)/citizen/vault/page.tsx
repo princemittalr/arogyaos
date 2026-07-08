@@ -11,6 +11,8 @@ import { VaultOfflineBanner } from '@/features/health-vault/components/VaultOffl
 import { cn } from '@/utils/cn';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Input } from '@/components/ui/input';
+
 
 // Date grouper utility
 function getDateGroup(encounterDate: unknown): string {
@@ -212,7 +214,7 @@ export default function HealthVaultPage() {
             {/* Search Bar */}
             <div className="relative w-full sm:max-w-md">
               <icons.Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
+              <Input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -289,7 +291,7 @@ export default function HealthVaultPage() {
                   {/* Doctor Provider Name */}
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Doctor Provider</label>
-                    <input
+                    <Input
                       type="text"
                       value={filters.doctorName || ''}
                       onChange={(e) => setFilters((prev) => ({ ...prev, doctorName: e.target.value || undefined }))}
@@ -301,7 +303,7 @@ export default function HealthVaultPage() {
                   {/* Hospital Facility Name */}
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Clinical Facility</label>
-                    <input
+                    <Input
                       type="text"
                       value={filters.hospitalName || ''}
                       onChange={(e) => setFilters((prev) => ({ ...prev, hospitalName: e.target.value || undefined }))}
@@ -313,7 +315,7 @@ export default function HealthVaultPage() {
                   {/* Date range filters */}
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">From Date</label>
-                    <input
+                    <Input
                       type="date"
                       value={filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : ''}
                       onChange={(e) =>
@@ -327,7 +329,7 @@ export default function HealthVaultPage() {
                   </div>
                   <div>
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">To Date</label>
-                    <input
+                    <Input
                       type="date"
                       value={filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : ''}
                       onChange={(e) =>

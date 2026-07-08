@@ -11,6 +11,8 @@ import { componentStyles } from '@/design-system/components';
 import { cn } from '@/utils/cn';
 import { icons } from '@/design-system/icons';
 import { motion } from 'framer-motion';
+import { Input } from '@/components/ui/input';
+
 
 // Form validation schema
 const profileSchema = zod.object({
@@ -131,7 +133,7 @@ export default function CitizenProfilePage() {const { t } = useLanguage();
               {/* Full Name */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500">{t("citizen.full_name")}</label>
-                <input
+                <Input
                   type="text"
                   {...register('fullName')}
                   className={cn(
@@ -147,7 +149,7 @@ export default function CitizenProfilePage() {const { t } = useLanguage();
               {/* Age */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-slate-500">{t("citizen.age")}</label>
-                <input
+                <Input
                   type="number"
                   {...register('age', { valueAsNumber: true })}
                   className={cn(
@@ -207,7 +209,7 @@ export default function CitizenProfilePage() {const { t } = useLanguage();
               {/* Allergies */}
               <div className="space-y-1.5 md:col-span-2">
                 <label className="text-xs font-semibold text-slate-500">{t("citizen.allergies_comma_separated")}</label>
-                <input
+                <Input
                   type="text"
                   placeholder={t("citizen.eg_penicillin_pollen_peanuts")}
                   {...register('allergies')}
@@ -224,7 +226,7 @@ export default function CitizenProfilePage() {const { t } = useLanguage();
               {/* Emergency Contact */}
               <div className="space-y-1.5 md:col-span-2">
                 <label className="text-xs font-semibold text-slate-500">{t("citizen.emergency_contact_phone")}</label>
-                <input
+                <Input
                   type="tel"
                   {...register('emergencyContact')}
                   className={cn(
