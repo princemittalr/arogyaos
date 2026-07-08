@@ -1,4 +1,5 @@
 'use client';
+import { normalizePrescription } from '@/features/prescriptions/utils/normalizePrescription';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { db } from '@/firebase/client';
@@ -23,7 +24,8 @@ export function usePrescriptions(patientId: string) {
         where('ownerId', '==', patientId)
       );
       const snap = await getDocs(q);
-      const records = snap.docs.map((d) => d.data() as PrescriptionRecord);
+      
+      const records = snap.docs.map((d) => normalizePrescription(d) as PrescriptionRecord);
       
       const getMs = (dateVal: unknown) => {
         if (!dateVal) return 0;

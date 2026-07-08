@@ -89,7 +89,7 @@ export const appointmentSchema = z.object({
 
 // 7. Prescription Schema
 export const prescriptionSchema = z.object({
-  prescriptionId: z.string().min(1, 'Prescription ID is required'),
+  recordId: z.string().min(1, 'Prescription ID is required'),
   appointmentId: z.string().min(1, 'Appointment ID is required'),
   doctorId: z.string().min(1, 'Doctor ID is required'),
   patientId: z.string().min(1, 'Patient ID is required'),

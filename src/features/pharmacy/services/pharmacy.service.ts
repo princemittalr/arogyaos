@@ -1,3 +1,4 @@
+import { normalizePrescription } from '@/features/prescriptions/utils/normalizePrescription';
 import {
   doc,
   getDoc,
@@ -32,7 +33,7 @@ export interface InventoryItem {
 
 export interface DispensationLog {
   dispenseId: string;
-  prescriptionId: string;
+  recordId: string;
   patientId: string;
   patientName: string;
   hospitalId: string;
@@ -48,7 +49,8 @@ export interface DispensationLog {
 export class PharmacyService {
   static async getAllPrescriptions(): Promise<PrescriptionDocument[]> {
     const snap = await getDocs(collection(db, 'prescriptions'));
-    return snap.docs.map((d) => d.data() as PrescriptionDocument);
+    
+    return snap.docs.map((d) => normalizePrescription(d) as unknown as PrescriptionDocument);
   }
 
   static async getInventory(hospitalId: string): Promise<InventoryItem[]> {
@@ -106,7 +108,7 @@ export class PharmacyService {
   }
 
   static async dispenseMedicine(
-    prescriptionId: string,
+    recordId: string,
     patientId: string,
     patientName: string,
     hospitalId: string,
@@ -164,7 +166,7 @@ export class PharmacyService {
 
       const log: DispensationLog = {
         dispenseId,
-        prescriptionId,
+        recordId,
         patientId,
         patientName,
         hospitalId,
@@ -245,7 +247,7 @@ export class PharmacyService {
       const logs = [
         {
           dispenseId: `disp_seeded_1`,
-          prescriptionId: 'pres_seeded_101',
+          recordId: 'pres_seeded_101',
           patientId: 'pat_rohan_arav',
           patientName: 'Rohan Sharma',
           medicines: [
@@ -257,7 +259,7 @@ export class PharmacyService {
         },
         {
           dispenseId: `disp_seeded_2`,
-          prescriptionId: 'pres_seeded_102',
+          recordId: 'pres_seeded_102',
           patientId: 'pat_priya_arav',
           patientName: 'Priya Patel',
           medicines: [

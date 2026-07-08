@@ -1,3 +1,4 @@
+import { normalizePrescription } from '@/features/prescriptions/utils/normalizePrescription';
 import {
   doc,
   getDoc,
@@ -290,10 +291,10 @@ export class DoctorService {
     }
 
     // 1. Create prescription document
-    const prescriptionId = `presc_${Date.now()}`;
-    const prescRef = doc(db, 'prescriptions', prescriptionId);
+    const recordId = `presc_${Date.now()}`;
+    const prescRef = doc(db, 'prescriptions', recordId);
     const prescription: PrescriptionDocument = {
-      prescriptionId,
+      recordId,
       appointmentId,
       doctorId: data.doctorId,
       patientId: data.patientId,
@@ -361,7 +362,8 @@ export class DoctorService {
   static async getPrescriptions(doctorId: string): Promise<PrescriptionDocument[]> {
     const q = query(collection(db, 'prescriptions'), where('doctorId', '==', doctorId));
     const snap = await getDocs(q);
-    return snap.docs.map((d) => d.data() as PrescriptionDocument);
+    
+    return snap.docs.map((d) => normalizePrescription(d) as unknown as PrescriptionDocument);
   }
 
   static async getLabOrders(doctorId: string): Promise<LabOrderDocument[]> {

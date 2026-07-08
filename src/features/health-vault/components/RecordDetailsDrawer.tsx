@@ -321,7 +321,7 @@ export function RecordDetailsDrawer({
                           {((currentData as PrescriptionRecord).medicines || []).map((med, idx) => (
                             <tr key={idx} className="hover:bg-slate-50/50">
                               <td className="p-2.5 font-medium text-slate-900 dark:text-slate-100">{med.name}</td>
-                              <td className="p-2.5 text-slate-600">{med.dosage}</td>
+                              <td className="p-2.5 text-slate-600">{typeof med.dosage === 'string' ? med.dosage : (med.dosage as any)?.pattern}</td>
                               <td className="p-2.5 text-slate-600">{med.frequency}</td>
                               <td className="p-2.5 text-slate-600">{med.durationDays}</td>
                             </tr>

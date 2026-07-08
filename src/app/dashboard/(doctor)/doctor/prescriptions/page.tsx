@@ -68,7 +68,7 @@ export default function DoctorPrescriptionsPage() {const { t } = useLanguage();
           const dateStr = typeof rx.createdAt === 'string' ? rx.createdAt.split('T')[0] : 'Today';
 
           return (
-            <div key={rx.prescriptionId} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between gap-4">
+            <div key={rx.recordId} className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 flex flex-col justify-between gap-4">
                 <div className="space-y-3.5">
                   <div className="flex justify-between items-start">
                     <div>
@@ -85,7 +85,7 @@ export default function DoctorPrescriptionsPage() {const { t } = useLanguage();
                     {rx.medicines.map((med, idx) =>
                   <div key={idx} className="flex justify-between">
                         <span>{med.name}</span>
-                        <span>{med.dosage} ({med.duration}{t("doctor.days")}</span>
+                        <span>{typeof med.dosage === 'string' ? med.dosage : (med.dosage as any)?.pattern} ({med.duration} {t("doctor.days")})</span>
                       </div>
                   )}
                   </div>
@@ -102,13 +102,13 @@ export default function DoctorPrescriptionsPage() {const { t } = useLanguage();
 
                 <div className="flex justify-end gap-2 border-t border-slate-100 dark:border-slate-850 pt-3">
                   <button
-                  onClick={() => handlePrint(rx.prescriptionId)}
+                  onClick={() => handlePrint(rx.recordId)}
                   className="rounded-lg border border-slate-200 hover:bg-slate-50 dark:border-slate-850 dark:hover:bg-slate-800 px-3 py-1.5 text-[10px] font-bold text-slate-650 dark:text-slate-350 flex items-center gap-1">
                   
                     <Printer className="h-3 w-3" />{t("doctor.print")}
                 </button>
                   <button
-                  onClick={() => handleDownload(rx.prescriptionId)}
+                  onClick={() => handleDownload(rx.recordId)}
                   className="rounded-lg border border-slate-200 hover:bg-slate-50 dark:border-slate-850 dark:hover:bg-slate-800 px-3 py-1.5 text-[10px] font-bold text-slate-650 dark:text-slate-350 flex items-center gap-1">
                   
                     <Download className="h-3 w-3" />{t("doctor.download")}

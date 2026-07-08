@@ -45,7 +45,7 @@ export default function PharmacyDispensingPage() {const { t } = useLanguage();
     }
 
     const rx = prescriptions?.find(
-      (r) => r.prescriptionId.toLowerCase() === searchRxId.trim().toLowerCase()
+      (r) => r.recordId.toLowerCase() === searchRxId.trim().toLowerCase()
     );
 
     if (rx) {
@@ -94,7 +94,7 @@ export default function PharmacyDispensingPage() {const { t } = useLanguage();
 
     try {
       await dispenseMutation.mutateAsync({
-        prescriptionId: selectedRx.prescriptionId,
+        recordId: selectedRx.recordId,
         patientId: selectedRx.patientId,
         patientName: selectedRx.patientName,
         hospitalId,
@@ -151,7 +151,7 @@ export default function PharmacyDispensingPage() {const { t } = useLanguage();
               <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-850 pb-4">
                 <div>
                   <h4 className="font-bold text-sm text-slate-900 dark:text-slate-50">{selectedRx.patientName}</h4>
-                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{t("pharmacy.docket_id")}{selectedRx.prescriptionId}</p>
+                  <p className="text-[10px] text-slate-400 font-semibold mt-0.5">{t("pharmacy.docket_id")}{selectedRx.recordId}</p>
                 </div>
                 <span className="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">{t("pharmacy.diagnosis")}
                 {selectedRx.diagnosis}
@@ -176,7 +176,7 @@ export default function PharmacyDispensingPage() {const { t } = useLanguage();
                     <div key={idx} className="py-3.5 flex justify-between items-center text-xs">
                         <div className="space-y-0.5">
                           <p className="font-bold text-slate-800 dark:text-slate-100">{m.name}</p>
-                          <p className="text-[10px] text-slate-400 font-semibold">{t("pharmacy.dosage")}{m.dosage}{t("pharmacy.duration")}{m.duration}{t("pharmacy.days")}</p>
+                          <p className="text-[10px] text-slate-400 font-semibold">{t("pharmacy.dosage")}{typeof m.dosage === 'string' ? m.dosage : (m.dosage as any)?.pattern}{t("pharmacy.duration")}{m.duration}{t("pharmacy.days")}</p>
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-slate-850 dark:text-slate-200">{t("pharmacy.required")}{qtyNeeded}{t("pharmacy.units")}</p>
@@ -223,7 +223,7 @@ export default function PharmacyDispensingPage() {const { t } = useLanguage();
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="text-slate-900 dark:text-slate-50">{log.patientName}</p>
-                      <p className="text-[10px] text-slate-400">{t("pharmacy.rx")}{log.prescriptionId}</p>
+                      <p className="text-[10px] text-slate-400">{t("pharmacy.rx")}{log.recordId}</p>
                     </div>
                     <span className="text-[9px] text-slate-400">
                       {log.dispensedAt.split('T')[0]}

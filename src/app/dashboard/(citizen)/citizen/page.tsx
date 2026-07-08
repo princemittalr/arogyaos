@@ -218,7 +218,7 @@ export default function CitizenDashboardPage() {const { t } = useLanguage();
                 <div className="flex flex-wrap gap-1.5">
                   {latestRx.medicines.slice(0, 4).map((m, i) =>
                 <span key={i} className="rounded-md bg-blue-50 dark:bg-blue-950/30 px-2 py-1 text-[11px] font-semibold text-blue-700 dark:text-blue-300">
-                      {m.name} · {m.dosage}
+                      {m.name} · {typeof m.dosage === 'string' ? m.dosage : (m.dosage as any)?.pattern}
                     </span>
                 )}
                   {latestRx.medicines.length > 4 &&

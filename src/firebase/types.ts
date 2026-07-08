@@ -74,7 +74,7 @@ export interface AppointmentDocument {
 }
 
 export interface PrescriptionDocument {
-  prescriptionId: string;
+  recordId: string;
   appointmentId: string;
   doctorId: string;
   patientId: string;

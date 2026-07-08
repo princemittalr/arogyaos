@@ -1,3 +1,4 @@
+import { normalizePrescription } from '@/features/prescriptions/utils/normalizePrescription';
 import {
   doc,
   getDoc,
@@ -433,7 +434,7 @@ export class CitizenService {
     if (snap.empty) {
       // Seed a prescription
       const samplePrescription: PrescriptionDocument = {
-        prescriptionId: 'pres_sample_123',
+        recordId: 'pres_sample_123',
         appointmentId: 'appt_sample',
         doctorId: 'doc_1',
         patientId,
@@ -448,11 +449,12 @@ export class CitizenService {
 
       validateDoc(prescriptionSchema, samplePrescription);
 
-      await setDoc(doc(db, 'prescriptions', samplePrescription.prescriptionId), samplePrescription);
+      await setDoc(doc(db, 'prescriptions', samplePrescription.recordId), samplePrescription);
       return [samplePrescription];
     }
 
-    return snap.docs.map((d) => d.data() as PrescriptionDocument);
+    
+    return snap.docs.map((d) => normalizePrescription(d) as unknown as PrescriptionDocument);
   }
 
   // 7. LAB REPORTS CRUD & SEED

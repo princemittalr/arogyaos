@@ -193,7 +193,7 @@ export default function DoctorAISummaryPage() {const { t } = useLanguage();
                 <div key={i} className="py-3 flex justify-between items-center font-bold text-slate-800 dark:text-slate-200">
                         <div>
                           <p className="text-slate-900 dark:text-slate-50">{rx.medicineName}</p>
-                          <p className="text-[9px] text-slate-400 font-semibold">{rx.dosage}</p>
+                          <p className="text-[9px] text-slate-400 font-semibold">{typeof rx.dosage === 'string' ? rx.dosage : (rx.dosage as any)?.pattern}</p>
                         </div>
                         <span className="text-[9px] text-slate-500 bg-slate-50 dark:bg-slate-950 px-2 py-0.5 rounded">
                           {rx.duration}

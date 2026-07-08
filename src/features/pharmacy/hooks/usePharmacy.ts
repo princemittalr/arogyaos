@@ -88,14 +88,14 @@ export function useDispenseMedicineMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({
-      prescriptionId,
+      recordId,
       patientId,
       patientName,
       hospitalId,
       dispensedBy,
       medicines,
     }: {
-      prescriptionId: string;
+      recordId: string;
       patientId: string;
       patientName: string;
       hospitalId: string;
@@ -103,7 +103,7 @@ export function useDispenseMedicineMutation() {
       medicines: Array<{ medicineId: string; quantity: number }>;
     }) => {
       return PharmacyService.dispenseMedicine(
-        prescriptionId,
+        recordId,
         patientId,
         patientName,
         hospitalId,
