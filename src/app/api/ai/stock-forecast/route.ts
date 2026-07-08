@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { StockForecastService } from '@/features/ai/services/stockForecast.service';
 import { guardAiRoute } from '@/lib/ai-guard';
@@ -6,7 +7,7 @@ import { guardAiRoute } from '@/lib/ai-guard';
 const ALLOWED_ROLES = ['pharmacist', 'hospital_admin', 'district_admin', 'super_admin'] as const;
 
 export async function POST(req: NextRequest) {
-  const guardResult = await guardAiRoute(req, [...ALLOWED_ROLES]);
+  const guardResult = await guardAiRoute(req, [...ALLOWED_ROLES], z.any());
   if (guardResult instanceof NextResponse) return guardResult;
 
   const [, body] = guardResult;

@@ -11,6 +11,7 @@ import {
   serverTimestamp,
   writeBatch,
 } from 'firebase/firestore';
+import { ulid } from '@/features/health-vault/utils/ulid';
 import { db } from '@/firebase/client';
 import {
   DoctorProfileDocument,
@@ -291,7 +292,7 @@ export class DoctorService {
     }
 
     // 1. Create prescription document
-    const recordId = `presc_${Date.now()}`;
+    const recordId = `presc_${ulid()}`;
     const prescRef = doc(db, 'prescriptions', recordId);
     const prescription: PrescriptionDocument = {
       recordId,
@@ -310,7 +311,7 @@ export class DoctorService {
 
     // 2. Create lab orders if needed
     if (data.labTests && data.labTests.length > 0) {
-      const orderId = `lab_${Date.now()}`;
+      const orderId = `lab_${ulid()}`;
       const orderRef = doc(db, 'lab_orders', orderId);
       const patientUserSnap = await getDoc(doc(db, 'users', data.patientId));
       const patientName = patientUserSnap.exists() ? patientUserSnap.data().fullName : 'Patient';
@@ -330,7 +331,7 @@ export class DoctorService {
 
     // 3. Create follow-up reminder if date provided
     if (data.followUpDate) {
-      const followUpId = `fup_${Date.now()}`;
+      const followUpId = `fup_${ulid()}`;
       const fupRef = doc(db, 'follow_ups', followUpId);
       const patientUserSnap = await getDoc(doc(db, 'users', data.patientId));
       const patientName = patientUserSnap.exists() ? patientUserSnap.data().fullName : 'Patient';

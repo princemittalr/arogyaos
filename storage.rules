@@ -46,7 +46,7 @@ service firebase.storage {
     // ── Lab reports ───────────────────────────────────────────────────────
     // labs/{hospitalId}/reports/{reportId}
     match /labs/{hospitalId}/reports/{reportId} {
-      allow read: if isClinicalStaff() || isSuperAdmin();
+      allow read: if isClinicalStaff() || hasRole('lab_technician') || isSuperAdmin();
       allow write: if (hasRole('lab_technician') || hasRole('hospital_admin'))
         && request.resource.size < 20 * 1024 * 1024  // 20 MB max
         && request.resource.contentType.matches('application/pdf|image/(jpeg|png|webp)');
@@ -66,8 +66,8 @@ service firebase.storage {
     // ── Health Vault Secure Buckets ──────────────────────────────────────────
     // path: health-vault/buckets/{ownerId}/{year}/{month}/{fileId}
     match /health-vault/buckets/{ownerId}/{year}/{month}/{fileId} {
-      allow read: if isOwnerByUid(ownerId) || isClinicalStaff() || isSuperAdmin();
-      allow write: if (isOwnerByUid(ownerId) || isClinicalStaff() || isSuperAdmin())
+      allow read: if isOwnerByUid(ownerId) || isClinicalStaff() || hasRole('lab_technician') || hasRole('pharmacist') || isSuperAdmin();
+      allow write: if (isOwnerByUid(ownerId) || isClinicalStaff() || hasRole('lab_technician') || hasRole('pharmacist') || isSuperAdmin())
         && request.resource.size < 50 * 1024 * 1024  // 50 MB max limit
         && request.resource.contentType.matches('application/pdf|image/(jpeg|png|webp)|text/plain');
       allow delete: if false; // Immutability constraint: no manual deletions of active reports

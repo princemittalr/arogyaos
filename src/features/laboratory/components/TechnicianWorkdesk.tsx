@@ -10,8 +10,7 @@ import {
   CheckCircle, 
   Plus, 
   Trash, 
-  AlertTriangle,
-  Loader2
+  AlertTriangle
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 
@@ -136,9 +135,16 @@ export function TechnicianWorkdesk({ hospitalId }: TechnicianWorkdeskProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-3">
-        <Loader2 className="h-8 w-8 text-blue-600 animate-spin" />
-        <p className="text-sm text-slate-500 font-semibold">Loading laboratory orders queue...</p>
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="h-24 skeleton rounded-2xl" />
+          <div className="h-24 skeleton rounded-2xl" />
+          <div className="h-24 skeleton rounded-2xl" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1 h-[400px] skeleton rounded-2xl" />
+          <div className="lg:col-span-2 h-[400px] skeleton rounded-2xl" />
+        </div>
       </div>
     );
   }

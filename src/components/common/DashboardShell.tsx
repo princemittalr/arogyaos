@@ -438,8 +438,19 @@ export function DashboardShell({ children }: DashboardShellProps) {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-6 max-w-7xl w-full mx-auto">
-          {children}
+        <main className="flex-1 p-6 md:p-8 max-w-7xl w-full mx-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+              className="h-full"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 

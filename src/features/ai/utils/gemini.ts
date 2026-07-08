@@ -151,14 +151,9 @@ export async function executeAiPipeline<TInput, TOutput>(
 
   const apiKey = process.env.GEMINI_API_KEY;
 
-  // 1. Check if Gemini API key is missing -> Immediate Demo Mode
+  // 1. Check if Gemini API key is missing -> Throw Error
   if (!apiKey) {
-    const latency = Date.now() - startTime;
-    console.log(`[AI-OBSERVABILITY] RequestId: ${requestId} | Endpoint: ${endpointName} | Mode: DEMO | Latency: ${latency}ms | Reason: API key not configured.`);
-    return {
-      data: mockFallback(input),
-      mode: 'demo',
-    };
+    throw new Error('AI_KEY_MISSING');
   }
 
   try {
@@ -184,13 +179,9 @@ export async function executeAiPipeline<TInput, TOutput>(
     const errorObject = err instanceof Error ? err : new Error(String(err));
     const errorString = errorObject.message || String(err);
 
-    // 5. Fallback Mode Activation
-    console.error(`[AI-OBSERVABILITY] RequestId: ${requestId} | Endpoint: ${endpointName} | Mode: FALLBACK | Latency: ${latency}ms | Error: ${errorString}`);
-
-    return {
-      data: mockFallback(input),
-      mode: 'fallback',
-    };
+    // 5. Throw Error to trigger 503 Unavailable
+    console.error(`[AI-OBSERVABILITY] RequestId: ${requestId} | Endpoint: ${endpointName} | Mode: FALLBACK_DISABLED | Latency: ${latency}ms | Error: ${errorString}`);
+    throw err;
   }
 }
 

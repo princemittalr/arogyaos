@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { HealthScoreService } from '@/features/ai/services/healthScore.service';
 import { guardAiRoute } from '@/lib/ai-guard';
@@ -6,7 +7,7 @@ import { guardAiRoute } from '@/lib/ai-guard';
 const ALLOWED_ROLES = ['hospital_admin', 'nurse', 'doctor', 'district_admin', 'super_admin'] as const;
 
 export async function POST(req: NextRequest) {
-  const guardResult = await guardAiRoute(req, [...ALLOWED_ROLES]);
+  const guardResult = await guardAiRoute(req, [...ALLOWED_ROLES], z.any());
   if (guardResult instanceof NextResponse) return guardResult;
 
   const [, body] = guardResult;

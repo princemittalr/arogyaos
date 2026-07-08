@@ -2,61 +2,15 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { APP_CONFIG } from './config/constants';
 import { getHomeRouteForRole } from './config/permissions';
-import { UserRole, isValidRole } from './config/roles';
+import { UserRole } from './config/roles';
 
 // ─── NOTE ON MIDDLEWARE SECURITY ──────────────────────────────────────────────
 // Next.js Edge Middleware cannot run Firebase Admin SDK (Node.js runtime only).
-// Therefore the middleware performs a lightweight "pre-filter" check:
-//   • Presence of the session cookie (unauthenticated → redirect to login)
-//   • Role-based path enforcement uses the custom claim embedded in the
-//     HttpOnly session cookie, which is a Firebase-signed JWT issued by our
-//     server-side /api/auth/session endpoint.
-//
-// The session cookie value is a Firebase session cookie (not a plain ID token).
-// It contains a cryptographically signed payload. We decode (not verify) the
-// payload here ONLY to extract the role for routing purposes. The actual
-// cryptographic verification with revocation checking happens in every API
-// route via verifySessionCookie() in src/lib/auth-server.ts.
-//
-// This is the industry-standard pattern for Next.js + Firebase when the Edge
-// runtime cannot run the Node.js Admin SDK. The session cookie itself cannot
-// be forged without Firebase's private key, so role extraction from the
-// decoded payload is safe for routing decisions. Privileged actions in API
-// routes are always re-verified server-side with adminAuth.verifySessionCookie().
+// Therefore, the middleware calls a centralized verifier API route
+// (/api/auth/verify) to validate the session cookie cryptographically.
 // ──────────────────────────────────────────────────────────────────────────────
 
-interface SessionClaims {
-  uid?: string;  // present in Firebase ID tokens
-  sub?: string;  // present in Firebase session cookies (same value as uid)
-  role?: string;
-  exp?: number;
-}
-
-function decodeSessionCookieClaims(cookie: string): SessionClaims | null {
-  try {
-    const parts = cookie.split('.');
-    if (parts.length !== 3) return null;
-
-    const payload = parts[1];
-    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch {
-    return null;
-  }
-}
-
-/** Returns the subject UID from either `uid` or `sub` (Firebase session cookies use `sub`). */
-function getSubjectId(claims: SessionClaims): string | undefined {
-  return claims.uid || claims.sub;
-}
-
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Retrieve the server-issued HttpOnly session cookie
@@ -70,26 +24,22 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    const claims = decodeSessionCookieClaims(sessionCookie);
-    const subjectId = claims ? getSubjectId(claims) : undefined;
+    // Call centralized verifier
+    const verifyUrl = new URL('/api/auth/verify', request.url);
+    const verifyResponse = await fetch(verifyUrl.toString(), {
+      headers: {
+        cookie: request.headers.get('cookie') || '',
+      },
+    });
 
-    // Check expiry and basic structural validity.
-    // Use sub || uid — Firebase session cookies carry the UID in `sub`.
-    if (!claims || !subjectId || (claims.exp && claims.exp * 1000 < Date.now())) {
+    if (!verifyResponse.ok) {
       const response = NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete(APP_CONFIG.sessionCookieName);
       return response;
     }
 
-    // Validate role before using it — reject tokens with unrecognised roles.
-    // Do NOT delete the cookie here: it may be a valid session created just before
-    // role claims were propagated. Redirect to login so the client can re-establish.
-    const rawRole = claims.role;
-    if (!rawRole || !isValidRole(rawRole)) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    const role = rawRole as UserRole;
+    const session = await verifyResponse.json();
+    const role = session.role as UserRole;
 
     // Redirect /dashboard root to role-specific home
     if (pathname === '/dashboard') {
@@ -125,17 +75,18 @@ export function middleware(request: NextRequest) {
 
   // 2. Redirect already-authenticated users away from auth pages
   if (sessionCookie && (pathname === '/login' || pathname === '/register')) {
-    const claims = decodeSessionCookieClaims(sessionCookie);
-    const subjectId = claims ? getSubjectId(claims) : undefined;
-    if (claims && subjectId && (!claims.exp || claims.exp * 1000 > Date.now())) {
-      const rawRole = claims.role;
-      if (rawRole && isValidRole(rawRole)) {
-        return NextResponse.redirect(
-          new URL(getHomeRouteForRole(rawRole as UserRole), request.url)
-        );
-      }
-      // If role claim is absent but session is valid, let them through to login
-      // so the client can re-establish the session with a fresh token
+    const verifyUrl = new URL('/api/auth/verify', request.url);
+    const verifyResponse = await fetch(verifyUrl.toString(), {
+      headers: {
+        cookie: request.headers.get('cookie') || '',
+      },
+    });
+
+    if (verifyResponse.ok) {
+      const session = await verifyResponse.json();
+      return NextResponse.redirect(
+        new URL(getHomeRouteForRole(session.role as UserRole), request.url)
+      );
     }
   }
 
