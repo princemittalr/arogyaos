@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PharmacyService, InventoryItem, DispensationLog } from '../services/pharmacy.service';
 import { PrescriptionDocument } from '@/firebase/types';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export function usePharmacyPrescriptions() {
   return useQuery<PrescriptionDocument[]>({

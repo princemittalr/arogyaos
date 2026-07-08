@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DistrictService } from '../services/district.service';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export function useDistrictProfile(districtId: string) {
   return useQuery({

@@ -11,7 +11,7 @@ import {
 import { useDoctorPatients } from '@/features/doctor/hooks/useDoctor';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { Search, FileText, CheckCircle2, Layers } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 import { PrescriptionDocument } from '@/firebase/types';
 
 interface SelectedPrescription extends PrescriptionDocument {

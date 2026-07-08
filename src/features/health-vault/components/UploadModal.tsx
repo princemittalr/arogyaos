@@ -6,7 +6,7 @@ import { HealthVaultService } from '../services/HealthVaultService';
 import { UploadService } from '../services/UploadService';
 import { VaultSource } from '../core/constants';
 import { cn } from '@/utils/cn';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 interface UploadModalProps {
   isOpen: boolean;

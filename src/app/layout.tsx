@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/providers';
-import { Toaster } from 'sonner';
+import { Toaster } from '@/components/ui/toast';
 
 const inter = Inter({
   variable: '--font-sans',
@@ -66,12 +66,7 @@ export default function RootLayout({
           <div id="main-content">
             {children}
           </div>
-          <Toaster
-            position="top-right"
-            richColors
-            expand={false}
-            duration={4000}
-          />
+          <Toaster />
         </Providers>
       </body>
     </html>

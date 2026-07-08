@@ -5,7 +5,7 @@ import { db } from '@/firebase/client';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { Vaccination, AdverseEvent } from '../types';
 import { VaccinationService } from '../services/VaccinationService';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export function useVaccinations(patientId: string) {
   const queryClient = useQueryClient();

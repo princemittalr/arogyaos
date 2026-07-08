@@ -13,7 +13,7 @@ import {
   Activity, AlertTriangle, Building, Building2, Heart, Users, MapPin, Sparkles,
   Info, ArrowLeftRight, Pill, Bed, UserCheck, CheckCircle2 } from
 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 import { DistrictFacility } from '@/features/district/services/district.service';
 import { motion } from 'framer-motion';
 import { cn } from '@/utils/cn';

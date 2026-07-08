@@ -5,7 +5,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { usePharmacyInventory, useUpdateInventoryItemMutation } from '@/features/pharmacy/hooks/usePharmacy';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { Calendar, AlertTriangle, CheckCircle, Flame } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export default function ExpiryMonitoringPage() {const { t } = useLanguage();
   const { user } = useAuth();

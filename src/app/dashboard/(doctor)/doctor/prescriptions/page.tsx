@@ -5,7 +5,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useDoctorPrescriptions, useDoctorPatients } from '@/features/doctor/hooks/useDoctor';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { FileText, Search, Printer, Download } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export default function DoctorPrescriptionsPage() {const { t } = useLanguage();
   const { user } = useAuth();

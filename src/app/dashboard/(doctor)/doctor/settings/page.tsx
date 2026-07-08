@@ -3,7 +3,7 @@
 import React from 'react';
 import { PageHeader } from '@/features/shared';
 import { Bell, Volume2 } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export default function DoctorSettingsPage() {const { t } = useLanguage();
   const handleSavePreferences = (e: React.FormEvent) => {

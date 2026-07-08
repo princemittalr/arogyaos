@@ -1,6 +1,6 @@
 import { useLanguage } from "@/providers/LanguageProvider";import React, { useState } from 'react';
 import { Send, Sparkles, MessageCircle, AlertTriangle, Info, CheckCircle, ShieldAlert } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 interface Message {
   role: 'user' | 'assistant';

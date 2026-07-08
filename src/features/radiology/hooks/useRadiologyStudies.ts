@@ -3,7 +3,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { HealthVaultService } from '@/features/health-vault/services/HealthVaultService';
 import { RadiologyStudy, RadiologyReport } from '../types';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 const vaultService = new HealthVaultService();
 

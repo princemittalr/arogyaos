@@ -12,7 +12,7 @@ import { passwordSchema } from '@/utils/validators';
 import { authHelpers } from '@/firebase';
 import { icons } from '@/design-system/icons';
 import { componentStyles } from '@/design-system/components';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 import { Lock, Eye, EyeOff, AlertCircle, AlertTriangle } from 'lucide-react';
 
 const resetPasswordSchema = z.object({

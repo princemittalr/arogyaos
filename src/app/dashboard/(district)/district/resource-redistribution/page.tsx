@@ -5,7 +5,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useDistrictProposals, useResolveProposalMutation } from '@/features/district/hooks/useDistrict';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { ArrowRightLeft, Check, X, ShieldCheck } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export default function DistrictRedistributionPage() {const { t } = useLanguage();
   const { user } = useAuth();

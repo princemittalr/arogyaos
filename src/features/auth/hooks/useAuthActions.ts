@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 import { AuthService } from '../services/auth.service';
 import { UserRole } from '@/config/roles';
 import { getHomeRouteForRole } from '@/config/permissions';

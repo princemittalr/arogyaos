@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 import { CitizenService, CombinedPatientProfile } from '../services/citizen.service';
 
 export function useCitizenProfile(uid: string) {

@@ -10,7 +10,7 @@ import { useAuthActions } from '@/features/auth/hooks/useAuthActions';
 import { getNavigationForRole } from '@/config/navigation';
 import { icons } from '@/design-system/icons';
 import { useTheme } from 'next-themes';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 import { cn } from '@/utils/cn';
 import { UserRole } from '@/config/roles';
 import { ThemeToggle } from '@/components/common/ThemeToggle';

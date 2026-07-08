@@ -14,7 +14,7 @@ import {
 import { InventoryItem } from '@/features/pharmacy/services/pharmacy.service';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { Search, Plus, Trash2, Edit2, X, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 const inventorySchema = zod.object({
   medicineName: zod.string().min(3, 'Medicine name must be at least 3 letters'),

@@ -8,7 +8,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useDoctorProfile, useUpdateDoctorProfileMutation } from '@/features/doctor/hooks/useDoctor';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { Save } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 const profileSchema = zod.object({
   fullName: zod.string().min(3, 'Full name is required'),

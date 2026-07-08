@@ -5,7 +5,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { useDistrictFacilities } from '@/features/district/hooks/useDistrict';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { Download, TrendingUp, Award, CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export default function DistrictReportsPage() {const { t } = useLanguage();
   const { user } = useAuth();

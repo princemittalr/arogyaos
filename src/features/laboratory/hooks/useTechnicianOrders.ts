@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { LabService } from '../services/lab.service';
 import { LabObservation } from '../types';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export function useTechnicianOrders(hospitalId: string) {
   const queryClient = useQueryClient();

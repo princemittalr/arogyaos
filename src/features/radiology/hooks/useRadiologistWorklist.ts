@@ -3,7 +3,7 @@ import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/firebase/client';
 import { RadiologyService } from '../services/RadiologyService';
 import { RadiologyStudy, ImagingSeries, DicomMetadataSummary, KeyImageSlice } from '../types';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export function useRadiologistWorklist(hospitalId: string) {
   const queryClient = useQueryClient();

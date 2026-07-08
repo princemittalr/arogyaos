@@ -8,7 +8,7 @@ import { useTheme } from 'next-themes';
 import { componentStyles } from '@/design-system/components';
 import { cn } from '@/utils/cn';
 import { icons } from '@/design-system/icons';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 import { motion } from 'framer-motion';
 
 export default function CitizenSettingsPage() {

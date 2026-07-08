@@ -10,7 +10,7 @@ import {
 '@/features/hospital/hooks/useHospital';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { Save, ShieldAlert, Landmark } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 const settingsSchema = zod.object({
   hospitalName: zod.string().min(2, 'Name must be at least 2 characters'),

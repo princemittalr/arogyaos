@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { PrescriptionService } from '../services/PrescriptionService';
 import { RefillTransaction } from '../types';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 const rxService = new PrescriptionService();
 

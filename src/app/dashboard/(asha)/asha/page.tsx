@@ -10,7 +10,7 @@ import { componentStyles } from '@/design-system/components';
 import { icons } from '@/design-system/icons';
 import { motion } from 'framer-motion';
 import { useScheduleVisit, useEmergencyReferral } from '@/features/community-health/hooks';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export default function AshaWorkerDashboard() {
   const { t } = useLanguage();

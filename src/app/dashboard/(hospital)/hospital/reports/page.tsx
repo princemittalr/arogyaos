@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { PageHeader } from '@/features/shared';
 import { FileText, Download, TrendingUp, BarChart2, Clipboard } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export default function ReportsPage() {const { t } = useLanguage();
   const [reportType, setReportType] = useState<'daily' | 'weekly' | 'monthly'>('weekly');

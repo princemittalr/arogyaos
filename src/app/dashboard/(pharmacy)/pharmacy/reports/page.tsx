@@ -5,7 +5,7 @@ import { useAuth } from '@/providers/AuthProvider';
 import { usePharmacyInventory } from '@/features/pharmacy/hooks/usePharmacy';
 import { PageHeader, LoadingState } from '@/features/shared';
 import { FileText, Download, TrendingUp, AlertTriangle } from 'lucide-react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 export default function PharmacyReportsPage() {const { t } = useLanguage();
   const { user } = useAuth();

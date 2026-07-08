@@ -6,7 +6,7 @@ import { HealthVaultService } from '../services/HealthVaultService';
 import { StorageService } from '../services/StorageService';
 import { cn } from '@/utils/cn';
 import { format } from 'date-fns';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 
 import {
   BaseVaultRecord,

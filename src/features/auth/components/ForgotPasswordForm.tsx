@@ -11,7 +11,7 @@ import { emailSchema } from '@/utils/validators';
 import { authHelpers } from '@/firebase';
 import { icons } from '@/design-system/icons';
 import { componentStyles } from '@/design-system/components';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/toast';
 import { Mail, AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
 const forgotPasswordSchema = z.object({
