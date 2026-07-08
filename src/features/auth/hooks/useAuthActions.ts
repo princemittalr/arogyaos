@@ -54,21 +54,6 @@ export function useAuthActions() {
     },
   });
 
-  const googleLoginMutation = useMutation({
-    mutationFn: () => AuthService.loginWithGoogle(),
-    onSuccess: (userDoc) => {
-      toast.success(`Signed in as ${userDoc.fullName}`);
-      queryClient.invalidateQueries({ queryKey: ['auth_user'] });
-      
-      const targetHome = getHomeRouteForRole(userDoc.role);
-      router.push(targetHome);
-    },
-    onError: (error: unknown) => {
-      const err = error as Error;
-      toast.error(err.message || 'Google sign in failed');
-    },
-  });
-
   const logoutMutation = useMutation({
     mutationFn: () => AuthService.logout(),
     onSuccess: () => {
@@ -91,8 +76,6 @@ export function useAuthActions() {
     isLoggingIn: loginMutation.isPending,
     register: registerMutation.mutateAsync,
     isRegistering: registerMutation.isPending,
-    loginWithGoogle: googleLoginMutation.mutateAsync,
-    isGoogleLoggingIn: googleLoginMutation.isPending,
     logout: logoutMutation.mutateAsync,
     isLoggingOut: logoutMutation.isPending,
   };

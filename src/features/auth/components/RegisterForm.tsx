@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 
 export function RegisterForm() {
   const { t } = useLanguage();
-  const { register: registerUser, loginWithGoogle, isRegistering, isGoogleLoggingIn } = useAuthActions();
+  const { register: registerUser, isRegistering } = useAuthActions();
   
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -51,14 +51,8 @@ export function RegisterForm() {
     }
   };
 
-  const GoogleIcon = () => (
-    <svg className="mr-2.5 h-4.5 w-4.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">
-      <path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 123 24.5 166.3 64.9l-67.5 64.9C258.5 52.6 94.3 116.6 94.3 256c0 86.5 69.1 156.6 153.7 156.6 98.2 0 135-70.4 140.8-106.9H248v-85.3h236.1c2.3 12.7 3.9 24.9 3.9 41.4z"></path>
-    </svg>
-  );
-
   const Spinner = icons.Loader2;
-  const isLoading = isRegistering || isGoogleLoggingIn;
+  const isLoading = isRegistering;
 
   // Stagger animation config
   const formVariants = {
@@ -252,30 +246,6 @@ export function RegisterForm() {
           </motion.button>
         </form>
 
-        <motion.div variants={fieldVariants} className="relative my-5">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-slate-200 dark:border-slate-800/80" />
-          </div>
-          <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-wider">
-            <span className="bg-white/80 px-3 text-slate-400 dark:bg-slate-900/80 rounded-full">{t("auth.or_register_with")}</span>
-          </div>
-        </motion.div>
-
-        {/* Google OAuth Button */}
-        <motion.button
-          variants={fieldVariants}
-          type="button"
-          disabled={isLoading}
-          onClick={() => loginWithGoogle()}
-          className={`${componentStyles.button.base} ${componentStyles.button.outline} w-full py-3.5 hover:bg-slate-50 dark:hover:bg-slate-850 active:scale-[0.99] font-semibold text-slate-700 dark:text-slate-350`}
-        >
-          {isGoogleLoggingIn ? (
-            <Spinner className="h-5 w-5 animate-spin mr-2" />
-          ) : (
-            <GoogleIcon />
-          )}
-          {t("auth.google_workplace")}
-        </motion.button>
       </motion.div>
 
       <div className="text-center text-sm text-slate-500 dark:text-slate-400">

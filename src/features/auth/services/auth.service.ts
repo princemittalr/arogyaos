@@ -1,8 +1,6 @@
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInWithPopup,
-  GoogleAuthProvider,
   updateProfile,
   signOut as fbSignOut,
 } from 'firebase/auth';
@@ -186,62 +184,5 @@ export class AuthService {
     return userDoc;
   }
 
-  static async loginWithGoogle(): Promise<UserDocument> {
-    const provider = new GoogleAuthProvider();
-    const userCredential = await signInWithPopup(auth, provider);
-    const { uid, email, displayName } = userCredential.user;
-
-    if (!email) throw new Error('Google account is missing an email address.');
-
-    const userDocRef = doc(db, 'users', uid);
-    const snap = await getDoc(userDocRef);
-
-    if (snap.exists()) {
-      const data = snap.data();
-      if (data.status === 'inactive') {
-        await fbSignOut(auth);
-        throw new Error('This account has been deactivated.');
-      }
-
-      const role = data.role as UserRole;
-      const idTokenResult = await userCredential.user.getIdTokenResult();
-      if (idTokenResult.claims.role !== role) {
-        const token = await userCredential.user.getIdToken();
-        await syncCustomClaims(token, role);
-        await userCredential.user.getIdToken(true);
-      }
-
-      const finalToken = await userCredential.user.getIdToken();
-      await createServerSession(finalToken);
-
-      return { uid, email: data.email, fullName: data.fullName, role, status: data.status, createdAt: data.createdAt };
-    }
-
-    // New Google sign-up
-    const fullName = displayName || 'Google User';
-    const role: UserRole = 'citizen';
-
-    // Validate User Document
-    const userDoc: UserDocument = { uid, email, fullName, role, status: 'active', createdAt: serverTimestamp() };
-    validateDoc(userDocSchema, { ...userDoc, createdAt: new Date() });
-
-    // Validate Patient Profile
-    const initialProfile = getInitialProfileData(role, uid, fullName);
-    validateDoc(patientProfileSchema, initialProfile);
-
-    const batch = writeBatch(db);
-    batch.set(userDocRef, userDoc);
-    batch.set(doc(db, 'patient_profiles', uid), initialProfile);
-    await batch.commit();
-
-    const token = await userCredential.user.getIdToken();
-    await syncCustomClaims(token, role);
-    await userCredential.user.getIdToken(true);
-
-    const finalToken = await userCredential.user.getIdToken();
-    await createServerSession(finalToken);
-
-    return userDoc;
-  }
 }
 export default AuthService;
