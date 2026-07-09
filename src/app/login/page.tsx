@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -76,7 +76,9 @@ export default function LoginPage() {
       </div>
 
       <div className="relative z-10 w-full">
-        <LoginForm />
+        <Suspense fallback={<div className="flex justify-center p-8"><span className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></span></div>}>
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   );

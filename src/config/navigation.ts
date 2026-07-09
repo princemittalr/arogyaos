@@ -47,8 +47,14 @@ export const ROLE_NAVIGATION: Record<UserRole, NavItem[]> = {
     { title: 'Profile', href: '/dashboard/hospital/settings', icon: 'Settings' },
   ],
   nurse: [
-    { title: 'Overview', href: ROUTES.DASHBOARD.HOSPITAL.HOME, icon: 'LayoutDashboard' },
-    { title: 'Bed Allocations', href: ROUTES.DASHBOARD.HOSPITAL.BEDS, icon: 'Bed' },
+    { title: 'Dashboard', href: '/dashboard/nurse', icon: 'LayoutDashboard' },
+    { title: 'Assigned Patients', href: '/dashboard/nurse/patients', icon: 'Users' },
+    { title: 'Ward Dashboard', href: '/dashboard/nurse/ward', icon: 'Building' },
+    { title: 'Bed Assignments', href: '/dashboard/nurse/beds', icon: 'Bed' },
+    { title: 'Vital Signs', href: '/dashboard/nurse/vitals', icon: 'Activity' },
+    { title: 'Medications', href: '/dashboard/nurse/medications', icon: 'Pill' },
+    { title: 'Care Notes', href: '/dashboard/nurse/notes', icon: 'FileText' },
+    { title: 'Emergency', href: '/dashboard/nurse/emergency', icon: 'AlertTriangle' },
   ],
   pharmacist: [
     { title: 'Dashboard', href: ROUTES.DASHBOARD.PHARMACY.HOME, icon: 'LayoutDashboard' },
@@ -76,6 +82,12 @@ export const ROLE_NAVIGATION: Record<UserRole, NavItem[]> = {
     { title: 'Redistribution', href: ROUTES.DASHBOARD.DISTRICT.REDISTRIBUTION, icon: 'ArrowLeftRight' },
     { title: 'AI Center', href: '/dashboard/district/ai', icon: 'Bot' },
     { title: 'Reports', href: '/dashboard/district/reports', icon: 'BarChart2' },
+  ],
+  state_admin: [
+    { title: 'Dashboard', href: ROUTES.DASHBOARD.STATE.HOME, icon: 'LayoutDashboard' },
+  ],
+  asha_worker: [
+    { title: 'Dashboard', href: ROUTES.DASHBOARD.ASHA.HOME, icon: 'Home' },
   ],
   super_admin: [
     { title: 'Dashboard', href: ROUTES.DASHBOARD.HOME, icon: 'Shield' },

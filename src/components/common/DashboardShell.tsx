@@ -31,9 +31,11 @@ interface DashboardShellProps {
 
 const ROLE_COLORS: Record<UserRole, string> = {
   citizen: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 dark:text-emerald-400',
+  asha_worker: 'text-rose-600 bg-rose-50 dark:bg-rose-950/30 dark:text-rose-400',
   doctor: 'text-blue-600 bg-blue-50 dark:bg-blue-950/30 dark:text-blue-400',
   hospital_admin: 'text-purple-600 bg-purple-50 dark:bg-purple-950/30 dark:text-purple-400',
   district_admin: 'text-amber-600 bg-amber-50 dark:bg-amber-950/30 dark:text-amber-400',
+  state_admin: 'text-orange-600 bg-orange-50 dark:bg-orange-950/30 dark:text-orange-400',
   nurse: 'text-teal-600 bg-teal-50 dark:bg-teal-950/30 dark:text-teal-400',
   pharmacist: 'text-pink-600 bg-pink-50 dark:bg-pink-950/30 dark:text-pink-400',
   lab_technician: 'text-cyan-600 bg-cyan-50 dark:bg-cyan-950/30 dark:text-cyan-400',

@@ -12,20 +12,24 @@ import { useAuthActions } from '../hooks/useAuthActions';
 import { UserRole } from '@/config/roles';
 import { icons } from '@/design-system/icons';
 import { componentStyles } from '@/design-system/components';
-import { Mail, Lock, Eye, EyeOff, User, UserCheck, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, AlertCircle } from 'lucide-react';
+import { Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
+import { RoleSelector } from './RoleSelector';
+import { DemoLoginModal } from './DemoLoginModal';
 
 
 export function RegisterForm() {
   const { t } = useLanguage();
   const { register: registerUser, isRegistering } = useAuthActions();
-  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors }
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
@@ -79,6 +83,7 @@ export function RegisterForm() {
 
   return (
     <div className="w-full max-w-md mx-auto space-y-6">
+      <DemoLoginModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">{t("auth.create_account")}</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">{t("auth.register_to_join_the_arogyaos_healthcare_network")}</p>
@@ -143,33 +148,27 @@ export function RegisterForm() {
           </motion.div>
 
           {/* Role selection */}
-          <motion.div variants={fieldVariants} className="space-y-1.5">
+          <motion.div variants={fieldVariants} className="space-y-1.5 relative z-20">
             <label htmlFor="role" className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{t("auth.healthcare_role")}</label>
-            <div className="relative rounded-xl shadow-sm">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-                <UserCheck className="h-4.5 w-4.5 text-slate-455 dark:text-slate-500" />
-              </div>
-              <select
-                id="role"
-                disabled={isLoading}
-                className={`${componentStyles.input.base} pl-11 pr-10 appearance-none ${errors.role ? 'border-red-500 focus:ring-red-500/20 dark:border-red-900/50' : 'focus:border-blue-500 focus:ring-blue-500/20'}`}
-                {...register('role')}
-              >
-                <option value="citizen">{t("auth.citizen_patient")}</option>
-                <option value="doctor">{t("auth.doctor_consultant")}</option>
-                <option value="hospital_admin">{t("auth.hospital_administrator")}</option>
-                <option value="district_admin">{t("auth.district_health_officer")}</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5">
-                <icons.ChevronDown className="h-4 w-4 text-slate-400 dark:text-slate-500" />
-              </div>
-            </div>
+            <Controller
+              name="role"
+              control={control}
+              render={({ field }) => (
+                <RoleSelector
+                  value={field.value as UserRole}
+                  onChange={field.onChange}
+                  disabled={isLoading}
+                  error={!!errors.role}
+                />
+              )}
+            />
             {errors.role && (
               <p className="text-xs font-semibold text-red-650 dark:text-red-400 mt-1 flex items-center gap-1.5">
                 <AlertCircle className="h-3.5 w-3.5" />
                 <span>{errors.role.message}</span>
               </p>
             )}
+
           </motion.div>
 
           {/* Password */}
@@ -243,6 +242,16 @@ export function RegisterForm() {
           >
             {isRegistering ? <Spinner className="h-5 w-5 animate-spin mr-2" /> : null}
             {t("auth.register_profile")}
+          </motion.button>
+          
+          {/* Demo Button */}
+          <motion.button
+            variants={fieldVariants}
+            type="button"
+            onClick={() => setIsDemoModalOpen(true)}
+            className={`${componentStyles.button.base} ${componentStyles.button.outline} w-full py-3.5 mt-3`}
+          >
+            🚀 Try Demo
           </motion.button>
         </form>
 

@@ -4,12 +4,11 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/providers/AuthProvider';
 import { getHomeRouteForRole } from '@/config/permissions';
-import { icons } from '@/design-system/icons';
+import { LoadingState } from '@/features/shared';
 
 export default function DashboardRedirectPage() {const { t } = useLanguage();
   const router = useRouter();
   const { user, loading } = useAuth();
-  const Spinner = icons.Loader2;
 
   useEffect(() => {
     if (!loading) {
@@ -22,12 +21,5 @@ export default function DashboardRedirectPage() {const { t } = useLanguage();
     }
   }, [user, loading, router]);
 
-  return (
-    <div className="flex h-[60vh] flex-col items-center justify-center">
-      <Spinner className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400" />
-      <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">{t("common.verifying_security_access_credentials")}
-
-      </p>
-    </div>);
-
+  return <LoadingState variant="card" />;
 }

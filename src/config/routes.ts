@@ -14,11 +14,17 @@ export const ROUTES = {
       PRESCRIPTIONS: '/dashboard/citizen/prescriptions',
       FAMILY: '/dashboard/citizen/family',
     },
+    ASHA: {
+      HOME: '/dashboard/asha',
+    },
     DOCTOR: {
       HOME: '/dashboard/doctor',
       PATIENTS: '/dashboard/doctor/patients',
       CONSULTATION: (id: string) => `/dashboard/doctor/consultation/${id}`,
       CALENDAR: '/dashboard/doctor/calendar',
+    },
+    NURSE: {
+      HOME: '/dashboard/nurse',
     },
     HOSPITAL: {
       HOME: '/dashboard/hospital',
@@ -40,6 +46,12 @@ export const ROUTES = {
       HOME: '/dashboard/district',
       MONITORING: '/dashboard/district/monitoring',
       REDISTRIBUTION: '/dashboard/district/redistribution',
+    },
+    STATE: {
+      HOME: '/dashboard/state',
+    },
+    ADMIN: {
+      HOME: '/dashboard/admin',
     },
   },
 } as const;

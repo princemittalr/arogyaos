@@ -49,12 +49,15 @@ export async function middleware(request: NextRequest) {
     // Role-to-path mapping (single source of truth)
     const rolePaths: Record<string, string> = {
       citizen: '/dashboard/citizen',
+      asha_worker: '/dashboard/asha',
       doctor: '/dashboard/doctor',
       hospital_admin: '/dashboard/hospital',
-      nurse: '/dashboard/hospital',
+      nurse: '/dashboard/nurse',
       pharmacist: '/dashboard/pharmacy',
       lab_technician: '/dashboard/laboratory',
       district_admin: '/dashboard/district',
+      state_admin: '/dashboard/state',
+      super_admin: '/dashboard/admin',
     };
 
     // super_admin can access any dashboard route
