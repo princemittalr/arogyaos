@@ -18,6 +18,7 @@ import {
   AppointmentDocument,
   InventoryDocument,
 } from '@/firebase/types';
+import { isDemoUserId } from '@/config/demoAccounts';
 
 // Extended Interfaces
 export interface DepartmentDocument {
@@ -138,6 +139,7 @@ export class HospitalService {
     const snap = await getDocs(q);
 
     if (snap.empty) {
+      if (!(await isDemoUserId(hospitalId))) return [];
       // Seed default departments
       const seedDepts: DepartmentDocument[] = [
         {
@@ -226,6 +228,7 @@ export class HospitalService {
 
     // Default seed doctors if none exist in the database for this hospital
     if (doctorsList.length === 0) {
+      if (!(await isDemoUserId(hospitalId))) return [];
       const seedDocProfiles = [
         {
           uid: 'doc_1',
@@ -354,6 +357,7 @@ export class HospitalService {
     const snap = await getDocs(q);
 
     if (snap.empty) {
+      if (!(await isDemoUserId(hospitalId))) return [];
       const seedStaff: StaffDocument[] = [
         {
           staffId: `${hospitalId}_staff_1`,
@@ -443,6 +447,7 @@ export class HospitalService {
 
     // Seeding fallback patients if none found
     if (patientsList.length === 0) {
+      if (!(await isDemoUserId(hospitalId))) return [];
       const seedPatients: DetailedPatient[] = [
         {
           patientId: 'patient_seed_1',
@@ -525,6 +530,7 @@ export class HospitalService {
     const snap = await getDocs(q);
 
     if (snap.empty) {
+      if (!(await isDemoUserId(hospitalId))) return [];
       const seedInventory: HospitalInventoryDocument[] = [
         {
           inventoryId: `${hospitalId}_med_1`,
@@ -613,6 +619,7 @@ export class HospitalService {
     const snap = await getDocs(q);
 
     if (snap.empty) {
+      if (!(await isDemoUserId(hospitalId))) return [];
       const seedRooms: RoomDocument[] = [
         {
           roomId: `${hospitalId}_room_101`,
@@ -667,6 +674,7 @@ export class HospitalService {
     const snap = await getDocs(q);
 
     if (snap.empty) {
+      if (!(await isDemoUserId(hospitalId))) return [];
       const seedBeds: BedDocument[] = [
         {
           bedId: `${hospitalId}_bed_101A`,
@@ -742,6 +750,7 @@ export class HospitalService {
     const snap = await getDocs(q);
 
     if (snap.empty) {
+      if (!(await isDemoUserId(hospitalId))) return [];
       const seedTests: LabTestDocument[] = [
         {
           testId: `${hospitalId}_lab_cbc`,

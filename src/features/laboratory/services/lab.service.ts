@@ -1,4 +1,5 @@
 import { db } from '@/firebase/client';
+import { isDemoUserId } from '@/config/demoAccounts';
 import { 
   collection, 
   doc, 
@@ -30,6 +31,7 @@ export class LabService {
     
     // Seed default mock requests if database queue is empty
     if (snap.empty) {
+      if (!(await isDemoUserId(hospitalId))) return [];
       const sampleRequests: LabTestRequest[] = [
         {
           requestId: 'req_cbc_001',

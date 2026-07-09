@@ -1,4 +1,5 @@
 import { normalizePrescription } from '@/features/prescriptions/utils/normalizePrescription';
+import { isDemoUserId } from '@/config/demoAccounts';
 import {
   doc,
   getDoc,
@@ -385,6 +386,7 @@ export class DoctorService {
     const apptSnap = await getDocs(apptQ);
 
     if (apptSnap.empty) {
+      if (!(await isDemoUserId(doctorId))) return;
       const batch = writeBatch(db);
       const todayStr = new Date().toISOString().split('T')[0];
 

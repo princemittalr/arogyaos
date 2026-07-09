@@ -1,4 +1,5 @@
 import { normalizePrescription } from '@/features/prescriptions/utils/normalizePrescription';
+import { isDemoUserId } from '@/config/demoAccounts';
 import {
   doc,
   getDoc,
@@ -432,6 +433,7 @@ export class CitizenService {
     const snap = await getDocs(q);
 
     if (snap.empty) {
+      if (!(await isDemoUserId(patientId))) return [];
       // Seed a prescription
       const samplePrescription: PrescriptionDocument = {
         recordId: 'pres_sample_123',
@@ -463,6 +465,7 @@ export class CitizenService {
     const snap = await getDocs(q);
 
     if (snap.empty) {
+      if (!(await isDemoUserId(patientId))) return [];
       const sampleReports: LabReportDocument[] = [
         {
           id: 'report_1',
@@ -510,6 +513,7 @@ export class CitizenService {
     const snap = await getDocs(q);
 
     if (snap.empty) {
+      if (!(await isDemoUserId(userId))) return [];
       const sampleNotifications: NotificationDocument[] = [
         {
           id: 'notif_1',

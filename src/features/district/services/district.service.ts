@@ -1,4 +1,5 @@
 import { doc, getDoc, getDocs, collection, query, where, writeBatch, updateDoc } from 'firebase/firestore';
+import { isDemoUserId } from '@/config/demoAccounts';
 import { db } from '@/firebase/client';
 import { DistrictProfileDocument } from '@/firebase/types';
 import {
@@ -205,6 +206,7 @@ export class DistrictService {
     const checkQuery = query(collection(db, 'district_facilities'), where('districtId', '==', districtId));
     const checkSnap = await getDocs(checkQuery);
     if (!checkSnap.empty) return;
+    if (!(await isDemoUserId(districtId))) return;
 
     const batch = writeBatch(db);
 

@@ -1,4 +1,6 @@
 import { UserRole } from './roles';
+import { db } from '@/firebase/client';
+import { doc, getDoc } from 'firebase/firestore';
 
 export const DEMO_ACCOUNTS: Record<UserRole, { email: string; password: string }> = {
   citizen: {
@@ -42,3 +44,23 @@ export const DEMO_ACCOUNTS: Record<UserRole, { email: string; password: string }
     password: 'Demo@12345',
   },
 };
+
+export const DEMO_EMAILS = Object.values(DEMO_ACCOUNTS).map((acc) => acc.email);
+
+export function isDemoUser(email: string | null | undefined | { email?: string | null }): boolean {
+  if (!email) return false;
+  const emailStr = typeof email === 'string' ? email : email.email;
+  if (!emailStr) return false;
+  return DEMO_EMAILS.includes(emailStr);
+}
+
+export async function isDemoUserId(uid: string): Promise<boolean> {
+  if (!uid) return false;
+  try {
+    const userSnap = await getDoc(doc(db, 'users', uid));
+    if (!userSnap.exists()) return false;
+    return isDemoUser(userSnap.data().email);
+  } catch (error) {
+    return false;
+  }
+}
