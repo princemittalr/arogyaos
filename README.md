@@ -228,41 +228,43 @@ flowchart TD
 ---
 
 ## 📂 Project Structure
-src
-│
-├── app/
-│   ├── dashboard/
-│   ├── api/
-│   ├── login/
-│   ├── register/
-│   └── ...
-│
-├── components/
-│   ├── layout/
-│   ├── ui/
-│   ├── ai/
-│   ├── charts/
-│   └── forms/
-│
-├── features/
-│   ├── auth/
-│   ├── citizen/
-│   ├── doctor/
-│   ├── hospital/
-│   ├── pharmacy/
-│   ├── laboratory/
-│   ├── district/
-│   ├── ai/
-│   └── shared/
-│
-├── firebase/
-├── providers/
-├── config/
-├── hooks/
-├── services/
-├── types/
-├── utils/
-└── design-system/
+
+    src
+    │
+    ├── app/
+    │   ├── dashboard/
+    │   ├── api/
+    │   ├── login/
+    │   ├── register/
+    │   └── ...
+    │
+    ├── components/
+    │   ├── layout/
+    │   ├── ui/
+    │   ├── ai/
+    │   ├── charts/
+    │   └── forms/
+    │
+    ├── features/
+    │   ├── auth/
+    │   ├── citizen/
+    │   ├── doctor/
+    │   ├── hospital/
+    │   ├── pharmacy/
+    │   ├── laboratory/
+    │   ├── district/
+    │   ├── ai/
+    │   └── shared/
+    │
+    ├── firebase/
+    ├── providers/
+    ├── config/
+    ├── hooks/
+    ├── services/
+    ├── types/
+    ├── utils/
+    └── design-system/
+
 Other notable repository contents: `.github/` (CI workflows), `.vscode/`, `docs/`, `e2e/` (Playwright end-to-end tests), `public/` (static assets and screenshots), `firebase.json`, `firestore.rules`, `firestore.indexes.json`, `storage.rules`, `eslint.config.mjs`, `playwright.config.ts`, `vitest.config.ts`, `tsconfig.json`.
 
 ---
