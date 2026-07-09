@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { PageHeader } from '@/features/shared';
+import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/providers/LanguageProvider';
 import { useAuth } from '@/providers/AuthProvider';
 import { CommunityMetrics } from '@/features/community-health/components/CommunityMetrics';
@@ -16,6 +17,7 @@ import { Input } from '@/components/ui/input';
 
 export default function AshaWorkerDashboard() {
   const { t } = useLanguage();
+  const router = useRouter();
   const { user } = useAuth();
   const workerId = user?.uid || 'worker-1';
 
@@ -89,7 +91,7 @@ export default function AshaWorkerDashboard() {
           <div className={componentStyles.card.base}>
             <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-4">Quick Actions</h3>
             <div className="space-y-3">
-              <button className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+              <button onClick={() => router.push('/dashboard/asha/maternal')} className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <icons.Users className="h-5 w-5 text-indigo-500" />
                   Maternal Care
@@ -97,7 +99,7 @@ export default function AshaWorkerDashboard() {
                 <icons.ChevronRight className="h-4 w-4 text-slate-400" />
               </button>
               
-              <button className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+              <button onClick={() => router.push('/dashboard/asha/child-health')} className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <icons.Activity className="h-5 w-5 text-emerald-500" />
                   Child Health (Immunizations)
@@ -105,7 +107,7 @@ export default function AshaWorkerDashboard() {
                 <icons.ChevronRight className="h-4 w-4 text-slate-400" />
               </button>
 
-              <button className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+              <button onClick={() => router.push('/dashboard/asha/chronic')} className="w-full flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
                 <div className="flex items-center gap-3 text-sm font-semibold text-slate-700 dark:text-slate-300">
                   <icons.Pill className="h-5 w-5 text-amber-500" />
                   Chronic Disease Follow-up
@@ -114,7 +116,7 @@ export default function AshaWorkerDashboard() {
               </button>
               
               <button 
-                onClick={() => escalateEmergency.mutate({ memberId: 'N/A', reason: 'Emergency', facilityId: 'district_1' })}
+                onClick={() => router.push('/dashboard/asha/referrals?action=emergency')}
                 className="w-full flex items-center justify-between p-3 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 transition"
               >
                 <div className="flex items-center gap-3 text-sm font-semibold text-red-700 dark:text-red-400">

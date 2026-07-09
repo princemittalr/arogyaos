@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Visit } from '../types';
 import { CommunityHealthService } from '../services/CommunityHealthService';
+import { AshaMockService } from '../services/AshaMockData';
 
 // Note: In a real implementation, the service instance would be injected or exported from a di container.
 // We mock it here for the hook signature.
@@ -9,7 +10,17 @@ const mockService = {} as CommunityHealthService;
 export function useCommunityDashboard(workerId: string) {
   return useQuery({
     queryKey: ['community', 'dashboard', workerId],
-    queryFn: () => mockService.getDashboardOverview(workerId),
+    queryFn: async () => {
+      const families = await AshaMockService.getModuleData(workerId, 'families');
+      const visits = await AshaMockService.getModuleData(workerId, 'visits');
+      const pregnancies = await AshaMockService.getModuleData(workerId, 'pregnancy');
+      
+      return {
+        totalHouseholds: families.length,
+        upcomingVisits: visits.length,
+        highRiskPregnancies: pregnancies.length,
+      };
+    },
   });
 }
 

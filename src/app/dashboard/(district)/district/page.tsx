@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/providers/AuthProvider';
 import {
-  useDistrictFacilities,
   useDistrictRecommendations,
   useResolveRecommendationMutation,
   useDistrictAlerts } from
@@ -14,10 +13,16 @@ import {
   Info, ArrowLeftRight, Pill, Bed, UserCheck, CheckCircle2 } from
 'lucide-react';
 import { toast } from '@/components/ui/toast';
-import { DistrictFacility } from '@/features/district/services/district.service';
 import { motion } from 'framer-motion';
 import { cn } from '@/utils/cn';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { useDistrictMap } from '@/features/district/hooks/useDistrictMap';
+import { DistrictFacilityNode } from '@/features/district/services/DistrictMapData';
+
+const InteractiveFacilityMap = dynamic(() => import('@/features/district/components/InteractiveFacilityMap'), { ssr: false, loading: () => <div className="w-full h-[350px] bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl" /> });
+
+
 
 const MetricCard = ({
   label, value, icon: Icon, color = 'blue'
@@ -48,12 +53,12 @@ export default function DistrictDashboardPage() {const { t } = useLanguage();
   const { user } = useAuth();
   const districtId = user?.uid || 'dist_central_delhi';
 
-  const { data: facilities, isLoading: facLoading } = useDistrictFacilities(districtId);
+  const { data: facilities, isLoading: facLoading } = useDistrictMap(districtId);
   const { data: recommendations, isLoading: recLoading } = useDistrictRecommendations(districtId);
   const { data: alerts, isLoading: alertsLoading } = useDistrictAlerts(districtId);
   const resolveRecMutation = useResolveRecommendationMutation();
 
-  const [selectedFacility, setSelectedFacility] = useState<DistrictFacility | null>(null);
+  const [selectedFacility, setSelectedFacility] = useState<DistrictFacilityNode | null>(null);
 
   if (facLoading || recLoading || alertsLoading) return <LoadingState variant="card" />;
 
@@ -65,8 +70,8 @@ export default function DistrictDashboardPage() {const { t } = useLanguage();
   const totalPHCs = listFac.filter((f) => f.type === 'phc').length;
   const totalCHCs = listFac.filter((f) => f.type === 'chc').length;
   const totalDoctors = listFac.reduce((acc, f) => acc + f.doctorsPresent, 0);
-  const totalPatients = listFac.reduce((acc, f) => acc + f.patientsCount, 0);
-  const avgHealthScore = listFac.length ? Math.round(listFac.reduce((acc, f) => acc + f.healthScore, 0) / listFac.length) : 0;
+  const totalPatients = listFac.reduce((acc, f) => acc + f.bedsOccupied, 0);
+  const avgHealthScore = listFac.length ? Math.round(listFac.reduce((acc, f) => acc + (f.status === 'green' ? 95 : f.status === 'yellow' ? 70 : 40), 0) / listFac.length) : 0;
 
   const handleReviewRec = async (recId: string) => {
     try {
@@ -135,28 +140,8 @@ export default function DistrictDashboardPage() {const { t } = useLanguage();
               <MapPin className="h-4 w-4 text-blue-500" />{t("district.interactive_facility_map")}
             </h2>
           </div>
-          <div className="relative rounded-lg border border-slate-100 bg-slate-50 dark:border-slate-850 dark:bg-slate-950 h-[350px] overflow-hidden flex items-center justify-center">
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
-            <div className="relative w-full h-full">
-              {listFac.map((fac) => {
-                const topPercent = fac.type === 'hospital' ? '30%' : fac.type === 'phc' ? '65%' : '48%';
-                const leftPercent = fac.type === 'hospital' ? '40%' : fac.type === 'phc' ? '25%' : '75%';
-                const colorClass = fac.status === 'green' ? 'bg-emerald-500' : fac.status === 'yellow' ? 'bg-amber-500' : 'bg-red-500';
-                return (
-                  <button
-                    key={fac.facilityId}
-                    style={{ top: topPercent, left: leftPercent }}
-                    onClick={() => setSelectedFacility(fac)}
-                    className="absolute -translate-x-1/2 -translate-y-1/2 group z-10">
-                    
-                    <div className={cn(`h-4 w-4 rounded-full ${colorClass} border-2 border-white dark:border-slate-900 shadow-md transition-transform duration-200`, selectedFacility?.facilityId === fac.facilityId && 'scale-150 ring-2 ring-blue-500 ring-offset-2')} />
-                    <span className="absolute left-6 top-1/2 -translate-y-1/2 bg-slate-900/90 text-white font-semibold text-[10px] px-2 py-0.5 rounded shadow opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                      {fac.name}
-                    </span>
-                  </button>);
-
-              })}
-            </div>
+          <div className="relative rounded-lg border border-slate-100 bg-slate-50 dark:border-slate-850 dark:bg-slate-950 h-[350px] overflow-hidden">
+            <InteractiveFacilityMap facilities={listFac} onFacilityClick={setSelectedFacility} selectedFacility={selectedFacility} />
           </div>
         </div>
 
@@ -173,32 +158,48 @@ export default function DistrictDashboardPage() {const { t } = useLanguage();
               </div>
               <div className="grid grid-cols-2 gap-3 mb-4 text-center">
                 <div className="rounded-lg bg-slate-50 dark:bg-slate-800/50 p-2 border border-slate-100 dark:border-slate-800">
-                  <p className="text-[10px] font-semibold text-slate-500">{t("district.health_score")}</p>
-                  <p className="text-lg font-bold text-slate-900 dark:text-slate-100">{selectedFacility.healthScore}%</p>
+                  <p className="text-[10px] font-semibold text-slate-500">Bed Occupancy</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{selectedFacility.bedsOccupied}/{selectedFacility.bedsTotal}</p>
                 </div>
                 <div className="rounded-lg bg-slate-50 dark:bg-slate-800/50 p-2 border border-slate-100 dark:border-slate-800">
-                  <p className="text-[10px] font-semibold text-slate-500">{t("district.status")}</p>
-                  <div className="flex justify-center mt-2">
-                    <span className={cn('h-3 w-3 rounded-full', selectedFacility.status === 'green' ? 'bg-emerald-500' : selectedFacility.status === 'yellow' ? 'bg-amber-500' : 'bg-red-500')} />
-                  </div>
+                  <p className="text-[10px] font-semibold text-slate-500">Doctors</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{selectedFacility.doctorsPresent}/{selectedFacility.doctorsTotal}</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 dark:bg-slate-800/50 p-2 border border-slate-100 dark:border-slate-800">
+                  <p className="text-[10px] font-semibold text-slate-500">Nurses</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{selectedFacility.nursesPresent}/{selectedFacility.nursesTotal}</p>
+                </div>
+                <div className="rounded-lg bg-slate-50 dark:bg-slate-800/50 p-2 border border-slate-100 dark:border-slate-800">
+                  <p className="text-[10px] font-semibold text-slate-500">Critical Patients</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{selectedFacility.criticalPatients}</p>
                 </div>
               </div>
-              <div className="space-y-3">
-                <div>
-                  <div className="flex justify-between text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    <span>{t("district.beds")}{selectedFacility.bedsAvailable} / {selectedFacility.bedsTotal}</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div style={{ width: `${selectedFacility.bedsAvailable / selectedFacility.bedsTotal * 100}%` }} className="h-full bg-blue-500" />
-                  </div>
+              <div className="space-y-3 text-[11px]">
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Medicine Stock:</span>
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{selectedFacility.medicineStock}</span>
                 </div>
-                <div>
-                  <div className="flex justify-between text-[10px] font-semibold text-slate-600 dark:text-slate-400 mb-1">
-                    <span>{t("district.doctors")}{selectedFacility.doctorsPresent} / {selectedFacility.doctorsTotal}</span>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Pending Ambulances:</span>
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{selectedFacility.pendingAmbulances}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Last Updated:</span>
+                  <span className="font-semibold text-slate-900 dark:text-slate-100">{selectedFacility.lastUpdated}</span>
+                </div>
+                
+                {selectedFacility.openAlerts.length > 0 && (
+                  <div className="mt-2 bg-red-50 dark:bg-red-950/30 p-2 rounded border border-red-100 dark:border-red-900/50">
+                    <p className="font-semibold text-red-600 mb-1">Active Alerts</p>
+                    <ul className="list-disc list-inside text-red-500">
+                      {selectedFacility.openAlerts.map((alert, i) => <li key={i}>{alert}</li>)}
+                    </ul>
                   </div>
-                  <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                    <div style={{ width: `${selectedFacility.doctorsPresent / selectedFacility.doctorsTotal * 100}%` }} className="h-full bg-emerald-500" />
-                  </div>
+                )}
+                
+                <div className="mt-2 bg-blue-50 dark:bg-blue-950/30 p-2 rounded border border-blue-100 dark:border-blue-900/50">
+                  <p className="font-semibold text-blue-600 mb-1 flex items-center gap-1"><Sparkles className="h-3 w-3" /> AI Recommendation</p>
+                  <p className="text-blue-700 dark:text-blue-400">{selectedFacility.aiRecommendation}</p>
                 </div>
               </div>
             </div> :
@@ -218,7 +219,7 @@ export default function DistrictDashboardPage() {const { t } = useLanguage();
         { label: t("district.medicine_monitor"), desc: 'Track low stock & expiry', icon: Pill, href: '/dashboard/district/medicine-monitoring', color: 'text-indigo-600' },
         { label: t("district.bed_occupancy"), desc: 'Manage ward capacities', icon: Bed, href: '/dashboard/district/bed-monitoring', color: 'text-blue-600' },
         { label: t("district.doctor_attendance"), desc: 'View staff availability', icon: UserCheck, href: '/dashboard/district/doctor-attendance', color: 'text-emerald-600' },
-        { label: t("district.redistribution"), desc: 'Shift resources', icon: ArrowLeftRight, href: '/dashboard/district/resource-redistribution', color: 'text-amber-600' }].
+        { label: t("district.redistribution"), desc: 'Shift resources', icon: ArrowLeftRight, href: '/dashboard/district/redistribution', color: 'text-amber-600' }].
         map((item) =>
         <Link key={item.href} href={item.href} className="flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 transition text-center">
             <item.icon className={cn('h-6 w-6', item.color)} />

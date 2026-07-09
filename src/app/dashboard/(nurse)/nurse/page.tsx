@@ -10,19 +10,27 @@ import {
 import Link from 'next/link';
 import { cn } from '@/utils/cn';
 
+import { useNurseModuleData } from '@/features/hospital-operations/hooks/useNurseModuleData';
+import { LoadingState } from '@/features/shared';
+
 export default function NurseDashboardPage() {
   const { t } = useLanguage();
   const { user } = useAuth();
+  const workerId = user?.uid || 'worker-1';
   
   const today = new Date();
   const todayStr = today.toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' });
 
-  // Realistic mock data for UI
-  const assignedPatients = [
-    { id: '1', name: 'Rohan Sharma', room: '101A', status: 'Stable', lastVitals: '1h ago', nextMed: 'In 30m' },
-    { id: '2', name: 'Priya Patel', room: '102B', status: 'Critical', lastVitals: '10m ago', nextMed: 'Now' },
-    { id: '3', name: 'Amit Kumar', room: '105A', status: 'Discharging', lastVitals: '4h ago', nextMed: 'Completed' },
-  ];
+  const { data: patients, isLoading: isLoadingPatients } = useNurseModuleData(workerId, 'patients');
+  const { data: beds, isLoading: isLoadingBeds } = useNurseModuleData(workerId, 'beds');
+  const { data: medications, isLoading: isLoadingMeds } = useNurseModuleData(workerId, 'medications');
+  const { data: emergencies, isLoading: isLoadingEmerg } = useNurseModuleData(workerId, 'emergency');
+
+  const isLoading = isLoadingPatients || isLoadingBeds || isLoadingMeds || isLoadingEmerg;
+
+  if (isLoading) return <LoadingState variant="card" />;
+
+  const assignedPatients = (patients as any[]) || [];
 
   return (
     <motion.div
@@ -42,10 +50,10 @@ export default function NurseDashboardPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Assigned Patients', value: '12', sub: '3 Discharging today', icon: Users, color: 'blue', href: '/dashboard/nurse/patients' },
-          { label: 'Available Beds', value: '4', sub: 'Out of 24 total', icon: Bed, color: 'emerald', href: '/dashboard/nurse/beds' },
-          { label: 'Pending Meds', value: '8', sub: 'Due in next hour', icon: Pill, color: 'amber', href: '/dashboard/nurse/medications' },
-          { label: 'Emergency Alerts', value: '1', sub: 'Code blue protocol', icon: AlertTriangle, color: 'red', href: '/dashboard/nurse/emergency' }
+          { label: 'Assigned Patients', value: patients?.length || 0, sub: 'Assigned to your care', icon: Users, color: 'blue', href: '/dashboard/nurse/patients' },
+          { label: 'Available Beds', value: beds?.length || 0, sub: 'Ready for intake', icon: Bed, color: 'emerald', href: '/dashboard/nurse/beds' },
+          { label: 'Pending Meds', value: medications?.length || 0, sub: 'Requires administration', icon: Pill, color: 'amber', href: '/dashboard/nurse/medications' },
+          { label: 'Emergency Alerts', value: emergencies?.length || 0, sub: 'Active code protocols', icon: AlertTriangle, color: 'red', href: '/dashboard/nurse/emergency' }
         ].map((kpi, i) => {
           const colors: Record<string, string> = {
             blue: 'bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400',
@@ -110,15 +118,15 @@ export default function NurseDashboardPage() {
             <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-50 mb-4">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-3">
               {[
-                { label: 'Log Vitals', icon: Activity, color: 'text-blue-600' },
-                { label: 'Give Meds', icon: Pill, color: 'text-emerald-600' },
-                { label: 'Add Note', icon: FileText, color: 'text-purple-600' },
-                { label: 'Code Blue', icon: AlertTriangle, color: 'text-red-600' }
+                { label: 'Log Vitals', icon: Activity, color: 'text-blue-600', href: '/dashboard/nurse/vitals' },
+                { label: 'Give Meds', icon: Pill, color: 'text-emerald-600', href: '/dashboard/nurse/medications' },
+                { label: 'Add Note', icon: FileText, color: 'text-purple-600', href: '/dashboard/nurse/notes' },
+                { label: 'Code Blue', icon: AlertTriangle, color: 'text-red-600', href: '/dashboard/nurse/emergency' }
               ].map((item, i) => (
-                <button key={i} className="flex flex-col items-center gap-2 rounded-lg border border-slate-100 dark:border-slate-800 p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                <Link key={i} href={item.href} className="flex flex-col items-center gap-2 rounded-lg border border-slate-100 dark:border-slate-800 p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition">
                   <item.icon className={cn('h-5 w-5', item.color)} />
                   <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">{item.label}</span>
-                </button>
+                </Link>
               ))}
             </div>
           </div>

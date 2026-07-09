@@ -25,6 +25,13 @@ export const ROUTES = {
     },
     NURSE: {
       HOME: '/dashboard/nurse',
+      PATIENTS: '/dashboard/nurse/patients',
+      WARD: '/dashboard/nurse/ward',
+      BEDS: '/dashboard/nurse/beds',
+      VITALS: '/dashboard/nurse/vitals',
+      MEDICATIONS: '/dashboard/nurse/medications',
+      NOTES: '/dashboard/nurse/notes',
+      EMERGENCY: '/dashboard/nurse/emergency',
     },
     HOSPITAL: {
       HOME: '/dashboard/hospital',
@@ -39,12 +46,22 @@ export const ROUTES = {
     },
     LABORATORY: {
       HOME: '/dashboard/laboratory',
-      TESTS: '/dashboard/laboratory/tests',
+      ORDERS: '/dashboard/laboratory/orders',
+      SAMPLES: '/dashboard/laboratory/samples',
+      PROCESSING: '/dashboard/laboratory/processing',
+      RESULTS: '/dashboard/laboratory/results',
       REPORTS: '/dashboard/laboratory/reports',
+      QC: '/dashboard/laboratory/qc',
+      EQUIPMENT: '/dashboard/laboratory/equipment',
+      INVENTORY: '/dashboard/laboratory/inventory',
+      PATIENTS: '/dashboard/laboratory/patients',
+      ANALYTICS: '/dashboard/laboratory/analytics',
+      SYNC: '/dashboard/laboratory/sync',
+      PROFILE: '/dashboard/laboratory/profile',
+      SETTINGS: '/dashboard/laboratory/settings',
     },
     DISTRICT: {
       HOME: '/dashboard/district',
-      MONITORING: '/dashboard/district/monitoring',
       REDISTRIBUTION: '/dashboard/district/redistribution',
     },
     STATE: {

@@ -65,6 +65,12 @@ import {
   Printer,
   QrCode,
   Zap,
+  Syringe,
+  BookOpen,
+  HeartPulse,
+  Baby,
+  ArrowRightCircle,
+  RefreshCcw,
 } from 'lucide-react';
 
 export const icons = {
@@ -96,6 +102,12 @@ export const icons = {
   MapPinned,
   UserCheck,
   UserCircle,
+  Syringe,
+  BookOpen,
+  HeartPulse,
+  Baby,
+  ArrowRightCircle,
+  RefreshCcw,
 
   // Global / Actions
   Bell,

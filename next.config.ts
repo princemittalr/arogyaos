@@ -13,7 +13,7 @@ const ContentSecurityPolicy = [
   // Fonts
   "font-src 'self' https://fonts.gstatic.com",
   // Images: self, data URIs, Google OAuth avatars, Firebase Storage
-  "img-src 'self' data: blob: https://lh3.googleusercontent.com https://firebasestorage.googleapis.com",
+  "img-src 'self' data: blob: https://lh3.googleusercontent.com https://firebasestorage.googleapis.com https://*.tile.openstreetmap.org https://cdnjs.cloudflare.com",
   // Manifest: self (required for PWA Web App Manifest)
   "manifest-src 'self'",
   // Connections: API, Firebase, Gemini
